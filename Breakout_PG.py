@@ -33,7 +33,7 @@ def prepro(state):
 def discountRewards(rewards):
     discounted_r = np.zeros_like(rewards)
     running_add = 0
-    for t in reversed(xrange(0, len(rewards))):
+    for t in reversed(range(0, len(rewards))):
         running_add = running_add * gamma + rewards[t]
         discounted_r[t] = running_add
     return discounted_r
@@ -203,7 +203,7 @@ while True:
                                                      agent.v_n_state: epi_n_state, agent.conv_drop: 0.4, agent.fc_drop: 0.5})
             
             epi_advantage = epi_reward - agent.sess.run(agent.value, feed_dict={agent.v_state: epi_state})
-            print epi_advantage
+            
             agent.sess.run(agent.train, feed_dict={agent.state: epi_state, agent.act: epi_action, 
                                                    agent.adv: epi_reward, agent.conv_drop: 0.4, agent.fc_drop: 0.5}) 
         reward_sum, step = 0,0

@@ -1,2 +1,2 @@
-model_checkpoint_path: "cartpole.ckpt"
-all_model_checkpoint_paths: "cartpole.ckpt"
+model_checkpoint_path: "acrobot.ckpt"
+all_model_checkpoint_paths: "acrobot.ckpt"
