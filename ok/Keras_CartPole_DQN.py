@@ -7,8 +7,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 
-episodes = 500
-
+episodes = 4000
 
 class DQNAgent:
     def __init__(self):
@@ -34,7 +33,7 @@ class DQNAgent:
     def act(self, state):
         act_values = self.model.predict(state)
         if np.random.uniform() <= self.epsilon:
-            return np.random.choice([0,1])  # 0 or 1
+            return np.random.choice([0, 1])  # 0 or 1
         return np.argmax(act_values[0])  # returns action
 
     def replay(self, batch_size):
@@ -44,7 +43,8 @@ class DQNAgent:
             state_old, action, reward, state = self.memory[i]
             target = reward
             if i != len(self.memory) - 1:
-                target = reward + self.gamma * np.amax(self.model.predict(state)[0])
+                target = reward + self.gamma * \
+                         np.amax(self.model.predict(state)[0])
             target_f = self.model.predict(state_old)
             target_f[0][action] = target
             self.model.fit(state_old, target_f, nb_epoch=1, verbose=0)
@@ -68,16 +68,14 @@ if __name__ == "__main__":
             env.render()
             action = agent.act(state)
             state_old = state
-            state, reward, done, info = env.step(action)
+            state, reward, done, _ = env.step(action)
             state = np.reshape(state, [1, 4])
             agent.remember(state_old, action, reward, state)
             if done:
-                print("episode: {}, time: {}".format(e, time_t))
+                print("episode: {}/{}, score: {}".format(e, episodes, time_t))
                 break
         if e % 10 == 0:
             agent.save("./save/cp-v0.keras")
         if e % 500 == 0:
             agent.save("./save/cp_backup"+str(e)+"-v0.keras")
-        agent.replay(500)
-
-    env.monitor.close()
+        agent.replay(128)
