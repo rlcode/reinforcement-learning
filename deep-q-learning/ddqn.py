@@ -62,9 +62,10 @@ class DQNAgent:
             if done:
                 target[action] = reward
             else:
-                a = self.model.predict(next_state)[0]
+                a = np.argmax(self.model.predict(next_state)[0])
                 t = self.target_model.predict(next_state)[0]
-                target[action] = reward + self.gamma * t[np.argmax(a)]
+                target[action] = reward + self.gamma * t[a]
+            X[i], Y[i] = state, target
         self.model.fit(X, Y, nb_epoch=1, verbose=0)
         if self.epsilon > self.e_min:
             self.epsilon *= self.e_decay
@@ -90,14 +91,13 @@ if __name__ == "__main__":
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            reward = -100 if done else reward
             agent.remember(state, action, reward, next_state, done)
             state = next_state
             if done or time == 999:
                 print("episode: {}/{}, score: {}, e: {:.2}"
                         .format(e, EPISODES, time, agent.epsilon))
                 break
-        if e % 10 == 0:
+        if e % 200 == 0:
             agent.update_target_model()
         agent.replay(32)
         # if e % 10 == 0:
