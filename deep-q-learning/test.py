@@ -183,6 +183,7 @@ if __name__ == "__main__":
         loss = 0
         # rewards only given at end of game
         while reward == 0:
+            # game.render()
             prev_state = game.state
             action = agent.choose_action()
             game.move(action)
