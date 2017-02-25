@@ -35,6 +35,7 @@ class DQNAgent:
 
         model.compile(loss='mse',
                       optimizer=RMSprop(lr=self.learning_rate))
+
         self.model = model
 
     def remember(self, state, action, reward, next_state):
@@ -68,14 +69,14 @@ class DQNAgent:
 
 if __name__ == "__main__":
 
-    game = Snake()
-    env = PLE(game, display_screen= True, state_preprocessor=process_state)
+    game = Snake(width=256, height=256)
+    env = PLE(game, display_screen= True, fps = 10,  state_preprocessor=process_state)
     agent = DQNAgent(env)
     #agent.load('./save/catcher.h5')
-
+    env.init()
 
     for e in range(EPISODE):
-        env.init()
+        env.reset_game()
         score = 0
         state = game.getGameState()
 
