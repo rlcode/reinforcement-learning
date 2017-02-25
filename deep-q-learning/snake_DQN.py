@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 break
 
             if e % 100 == 0:
-                agent.save("./save/catcher.h5")
+                agent.save("./save/snake.h5")
 
             agent.replay(16)
 
