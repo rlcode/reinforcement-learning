@@ -31,8 +31,8 @@ class DQNAgent:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(64, input_dim=self.state_size, activation='tanh'))
-        model.add(Dense(128, activation='tanh', init='uniform'))
+        model.add(Dense(64, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(64, activation='relu', init='uniform'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss=self._huber_loss,
                       optimizer=RMSprop(lr=self.learning_rate))
@@ -97,8 +97,8 @@ if __name__ == "__main__":
                 print("episode: {}/{}, score: {}, e: {:.2}"
                         .format(e, EPISODES, time, agent.epsilon))
                 break
-        if e % 200 == 0:
+        if e % 100 == 0:
             agent.update_target_model()
-        agent.replay(32)
+        agent.replay(64)
         # if e % 10 == 0:
             # agent.save("./save/cartpole.h5")
