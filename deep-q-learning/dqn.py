@@ -14,19 +14,19 @@ class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=100000)
         self.gamma = 0.9    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.e_decay = .997
+        self.e_decay = .99
         self.e_min = 0.05
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.01
         self.model = self._build_model()
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(64, input_dim=self.state_size, activation='tanh'))
-        model.add(Dense(128, activation='tanh', init='uniform'))
+        model.add(Dense(20, input_dim=self.state_size, activation='tanh'))
+        model.add(Dense(20, activation='tanh', init='uniform'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss='mse',
                       optimizer=RMSprop(lr=self.learning_rate))
@@ -76,9 +76,10 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, [1, state_size])
         for time in range(1000):
-            # env.render()
+            env.render()
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
+            reward = reward if not done else -10
             next_state = np.reshape(next_state, [1, state_size])
             agent.remember(state, action, reward, next_state, done)
             state = next_state
@@ -89,3 +90,4 @@ if __name__ == "__main__":
         agent.replay(32)
         # if e % 10 == 0:
             # agent.save("./save/cartpole.h5")
+
