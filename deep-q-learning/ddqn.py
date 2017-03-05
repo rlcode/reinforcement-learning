@@ -15,24 +15,25 @@ class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=100000)
         self.gamma = 0.9    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.e_decay = .996
+        self.e_decay = .99
         self.e_min = 0.05
         self.learning_rate = 0.0001
         self.model = self._build_model()
         self.target_model = self._build_model()
 
-    def _huber_loss(self, target, prediction):    # sqrt(1+a^2)-1
+    def _huber_loss(self, target, prediction):
+        # sqrt(1+error^2)-1
         error = prediction - target
         return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(64, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(64, activation='relu', init='uniform'))
+        model.add(Dense(20, input_dim=self.state_size, activation='tanh'))
+        model.add(Dense(20, activation='tanh', init='uniform'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss=self._huber_loss,
                       optimizer=RMSprop(lr=self.learning_rate))
@@ -97,8 +98,8 @@ if __name__ == "__main__":
                 print("episode: {}/{}, score: {}, e: {:.2}"
                         .format(e, EPISODES, time, agent.epsilon))
                 break
-        if e % 100 == 0:
+        if e % 30 == 0:
             agent.update_target_model()
-        agent.replay(64)
+        agent.replay(32)
         # if e % 10 == 0:
             # agent.save("./save/cartpole.h5")
