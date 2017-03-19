@@ -107,7 +107,7 @@ class WaterWorld(PyGameWrapper):
             self.CREEP_RADII[creep_type],
             pos,
             self.rng.choice([-1, 1], 2),
-            self.rng.rand() * self.CREEP_SPEED,
+            0.2 * self.CREEP_SPEED,
             self.CREEP_REWARD[creep_type],
             self.CREEP_TYPES[creep_type],
             self.width,
