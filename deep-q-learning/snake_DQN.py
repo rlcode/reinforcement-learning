@@ -1,3 +1,4 @@
+import os
 import copy
 import numpy as np
 import pygame
@@ -9,6 +10,9 @@ from ple import PLE
 from ple.games.snake import Snake
 from pygame.constants import K_a, K_s, K_w, K_d
 
+os.putenv('SDL_VIDEODRIVER', 'fbcon')
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+pygame.display.init()
 
 EPISODE = 10000
 
@@ -72,7 +76,7 @@ if __name__ == "__main__":
     game = Snake(width=256, height=256)
     env = PLE(game, display_screen= True, fps = 10,  state_preprocessor=process_state)
     agent = DQNAgent(env)
-    #agent.load('./save/catcher.h5')
+    agent.load('./save/snake.h5')
     env.init()
 
     for e in range(EPISODE):

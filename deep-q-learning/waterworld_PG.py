@@ -1,9 +1,17 @@
+import os
 from waterworld import WaterWorld
 from ple import PLE
 from pygame.constants import K_w, K_a, K_s, K_d
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
+matplotlib.use("Agg")
+
+os.putenv('SDL_VIDEODRIVER', 'fbcon')
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+
 
 tf.set_random_seed(0)
 
@@ -61,8 +69,8 @@ Q = tf.placeholder(tf.float32, [None, ])
 v_loss = tf.reduce_sum(tf.square(v_out - Q))
 v_train = tf.train.RMSPropOptimizer(0.0001).minimize(v_loss)
 
-good_prob = tf.reduce_sum(tf.mul(out, act), reduction_indices=[1])
-eligibility = tf.log(good_prob) * tf.sub(Q, v_out)
+good_prob = tf.reduce_sum(tf.multiply(out, act), reduction_indices=[1])
+eligibility = tf.log(good_prob) * tf.subtract(Q, v_out)
 loss = -tf.reduce_sum(eligibility)
 train = tf.train.AdamOptimizer(0.0001).minimize(loss)
 
@@ -156,7 +164,7 @@ while True:
             plt.plot(time, scores, 'b-')
             plt.subplot(212)
             plt.plot(time, probs, 'b-')
-            plt.savefig("waterworld_PG.png")
+            plt.savefig("./save/waterworld_PG.png")
 
 
             # print (step_loss)

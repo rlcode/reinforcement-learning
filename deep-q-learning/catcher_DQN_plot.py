@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
+import os
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+matplotlib.use("Agg")
+import pylab
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
@@ -9,6 +13,8 @@ from ple import PLE
 from ple.games.catcher import Catcher
 from pygame.constants import K_a, K_d
 
+os.putenv('SDL_VIDEODRIVER', 'fbcon')
+os.environ["SDL_VIDEODRIVER"] = "dummy"
 EPISODES = 100000
 np.random.seed(0)
 
@@ -80,12 +86,12 @@ if __name__ == "__main__":
     game = Catcher(width=320, height=320)
     env = PLE(game, display_screen=True, state_preprocessor=process_state)
     agent = DQNAgent(env)
-    #agent.load("./save/catcher.h5")
+    agent.load("./save/catcher.h5")
 
     #초기화
-    plt.title("reward")
-    plt.xlabel("episodes")
-    plt.ylabel("rewards")
+    #pylab.title("reward")
+    #pylab.xlabel("episodes")
+    #pylab.ylabel("rewards")
     env.init()
     scores, time = [], []
     for e in range(EPISODES):
@@ -118,8 +124,8 @@ if __name__ == "__main__":
                 scores.append(score)
                 time.append(e+1)
                 if e % 10 == 0:
-                    plt.plot(time, scores, 'b-')
-                    plt.savefig("./save/catcher_dqn.png")
+                   pylab.plot(time, scores, 'b')
+                   pylab.savefig("./save/catcher_dqn.png")
                 break
 
             if e % 100 == 0:
