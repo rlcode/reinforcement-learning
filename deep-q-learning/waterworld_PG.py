@@ -167,10 +167,10 @@ while True:
             plt.savefig("./save/waterworld_PG.png")
 
 
-            # print (step_loss)
+            print (step_loss)
             if epi % 100 == 0:
                 pass
-                #saver.save(sess, "tmp/catcher/catcher")
+                saver.save(sess, "./save/waterworld_PG")
 
 
         rewards, act_prob = [], []
