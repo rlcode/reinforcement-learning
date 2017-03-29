@@ -1,5 +1,6 @@
 import os
 import copy
+import operator
 import numpy as np
 import pygame
 from collections import deque
@@ -84,7 +85,7 @@ if __name__ == "__main__":
         score = 0
         state = game.getGameState()
 
-        import operator
+
         state = sorted(state.items(), key=operator.itemgetter(0))
         for i in range(len(state)):
             state[i] = state[i][1]
