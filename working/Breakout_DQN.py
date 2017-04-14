@@ -7,10 +7,13 @@ from keras.layers.convolutional import Convolution2D
 
 
 class DQNAgent:
-    def __init__(self, state_size, action_size):
+    def __init__(self):
         self.render = "True"
-        self.state_size = state_size
-        self.action_size = action_size
+        width, height, length = 84, 84, 4
+        self.state_size = width * height * length
+        self.action_size = 3  # Left, Right, Stay
+        self.discount_factor = 0.99
+        self.learning_rate = 0.00025
         pass
 
     def build_model(self):
@@ -38,14 +41,11 @@ def pre_processing():
 if __name__ == "__main__":
     env = gym.make('BreakoutDeterministic-v3')
     state = env.reset()
-    state_size = 84 * 84
-    action_size = env.action_space.n
-    agent = DQNAgent(state_size, action_size)
+    agent = DQNAgent()
     while True:
-        if agent.render == "True":
-            env.render()
+        env.render()
         action = env.action_space.sample()
         state, reward, done, info = env.step(action)
-        print(reward, done, info)
+        print("action: ", action, "  reward: ", reward)
         if done:
             env.reset()
