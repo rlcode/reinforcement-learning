@@ -43,11 +43,9 @@ if __name__ == "__main__":
     state = env.reset()
     agent = DQNAgent()
     while True:
-        if agent.render == "True":
-            env.render()
-        # action = env.action_space.sample()
-        action = 2
+        env.render()
+        action = env.action_space.sample()
         state, reward, done, info = env.step(action)
-        print(info)
+        print("action: ", action, "  reward: ", reward)
         if done:
             env.reset()
