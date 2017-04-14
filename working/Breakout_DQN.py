@@ -11,7 +11,7 @@ class DQNAgent:
         self.render = "True"
         width, height, length = 84, 84, 4
         self.state_size = width * height * length
-        self.action_size = 3 # Left, Right, Stay
+        self.action_size = 3  # Left, Right, Stay
         self.discount_factor = 0.99
         self.learning_rate = 0.00025
         pass
@@ -45,8 +45,9 @@ if __name__ == "__main__":
     while True:
         if agent.render == "True":
             env.render()
-        action = env.action_space.sample()
+        # action = env.action_space.sample()
+        action = 2
         state, reward, done, info = env.step(action)
-        print(reward, done, info)
+        print(info)
         if done:
             env.reset()
