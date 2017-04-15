@@ -1,4 +1,6 @@
-# Reinforcement Learning Examples (WIP)
+<p align="center"><img width="80%" src="/images/Reinforcement-Learning.png" /></p>
+
+--------------------------------------------------------------------------------
 
 > RLCode팀이 직접 만든 강화학습 예제들을 모아놓은 Repo 입니다.
 >
