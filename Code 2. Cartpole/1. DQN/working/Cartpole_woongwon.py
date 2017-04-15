@@ -44,6 +44,6 @@ if __name__ == "__main__":
         env.render()
         action = env.action_space.sample()
         state, reward, done, info = env.step(action)
-        print("action: ", action, "  reward: ", reward)
+        print("state:", state, "  action:", action, "  reward:", reward)
         if done:
             env.reset()
