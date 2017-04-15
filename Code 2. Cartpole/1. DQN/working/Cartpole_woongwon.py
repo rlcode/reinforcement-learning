@@ -16,7 +16,12 @@ class DQNAgent:
 
     def build_model(self):
         model = Sequential()
-
+        model.add(Dense(16, input_dim=self.state_size, activation='tanh'))
+        model.add(Dense(16, activation='tanh', init='uniform'))
+        model.add(Dense(self.action_size, activation='linear'))
+        model.compile(loss='mse',
+                      optimizer=RMSprop(lr=self.learning_rate))
+        return model
 
     def get_action(self):
         pass
