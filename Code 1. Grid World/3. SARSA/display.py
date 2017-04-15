@@ -15,7 +15,7 @@ class GraphicDisplay(tk.Tk):
         super(GraphicDisplay, self).__init__()
         self.action_space = ['u', 'd', 'l', 'r']
         self.n_actions = len(self.action_space)
-        self.title('3. 살사(SARSA)')
+        self.title('3. SARSA')
         self.geometry('{0}x{1}'.format(MAZE_H * UNIT, MAZE_H * UNIT))
         self.buildGraphic()
 
