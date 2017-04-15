@@ -3,34 +3,37 @@ import numpy as np
 import random
 from collections import deque
 from keras.models import Sequential
-from keras.optimizers import RMSprop
+from keras.optimizers import Adam
 from keras.layers import Dense
+import pylab
 
 EPISODES = 5000
 
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        self.render = "True"
+        self.render = "False"
 
         self.state_size = state_size
         self.action_size = action_size
 
-        self.discount_factor = 0.9
+        self.discount_factor = 0.99
         self.learning_rate = 0.01
-        self.epsilon = 1
-        self.epsilon_decay = 0.99
+        self.epsilon = 1.0
+        self.epsilon_decay = 0.999
         self.epsilon_min = 0.05
 
         self.model = self.build_model()
-        self.memory = deque(maxlen=500000)
+        self.memory = deque(maxlen=50000)
+        self.batch_size = 10
+        self.train_start = 12000
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(16, input_dim=self.state_size, activation='tanh'))
-        model.add(Dense(16, activation='tanh', kernel_initializer='uniform'))
-        model.add(Dense(self.action_size, activation='linear'))
-        model.compile(loss='mse', optimizer=RMSprop(lr=self.learning_rate))
+        model.add(Dense(16, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
+        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
     def get_action(self, state):
@@ -42,9 +45,32 @@ class DQNAgent:
 
     def replay_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+        # print(len(self.memory))
 
     def train_replay(self):
-        pass
+        if len(self.memory) < self.train_start:
+            return
+        batch_size = min(self.batch_size, len(self.memory))
+        mini_batch = random.sample(self.memory, batch_size)
+
+        update_input = np.zeros((batch_size, self.state_size))
+        update_target = np.zeros((batch_size, self.action_size))
+
+        for i in range(batch_size):
+            state, action, reward, next_state, done = mini_batch[i]
+            target = self.model.predict(state)[0]
+
+            if done:
+                target[action] = reward
+            else:
+                target[action] = reward + self.discount_factor * \
+                                          np.amax(self.model.predict(next_state)[0])
+            update_input[i] = state
+            update_target[i] = target
+
+        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
     def load_model(self):
         pass
@@ -54,24 +80,44 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make('CartPole-v0')
+    env = gym.make('CartPole-v1')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
 
+    global_step = 0
+    scores, episodes = [], []
+
     for e in range(EPISODES):
         done = False
-        count = 0
+        score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
 
         while not done:
-            env.render()
-            count += 1
+            if agent.render == "True":
+                env.render()
+            global_step += 1
+
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
-            agent.replay_memory(state, action, reward, next_state, done)
+            next_state = np.reshape(next_state, [1, state_size])
+            reward = reward if not done else -100
             # print("episode:", e, "  state:", state, "  action:", action, "  reward:", reward)
+            agent.replay_memory(state, action, reward, next_state, done)
+
+            score += reward
+            state = next_state
+
+            if global_step > agent.train_start:
+                agent.train_replay()
+
             if done:
                 env.reset()
-                print("episode:", e, "  score:", count)
+
+                scores.append(score)
+                episodes.append(e)
+                pylab.plot(episodes, scores, 'b')
+                pylab.savefig("./save/Cartpole_woongwon4.png")
+                print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
+                      "  epsilon:", agent.epsilon)
