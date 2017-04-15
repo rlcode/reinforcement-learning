@@ -11,8 +11,8 @@ class DQNAgent:
         self.render = "True"
         self.state_size = state_size
         self.action_size = action_size
-        self.discount_factor = 0.99
-        self.learning_rate = 0.00025
+        self.discount_factor = 0.9
+        self.learning_rate = 0.01
 
     def build_model(self):
         model = Sequential()
