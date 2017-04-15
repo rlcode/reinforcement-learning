@@ -1,4 +1,4 @@
-<p align="center"><img width="80%" src="/images/Reinforcement-Learning.png" /></p>
+<p align="center"><img width="90%" src="/images/Reinforcement-Learning.png" /></p>
 
 --------------------------------------------------------------------------------
 
@@ -17,18 +17,27 @@
 5. pandas
 6. matplot
 
-## 목차
+## 목차 (Table of Contents)
 
-**강화학습의 기초** - 비교적 단순한 환경인 그리드월드에서 각종 강화학습의 기초를 쌓아봅시다.
+**Code 1** - 비교적 단순한 환경인 그리드월드에서 강화학습의 기초를 쌓기
 
-- [정책 이터레이션 (Policy Iteration)](./01_policy_iteration)
-- [가치 이터레이션 (Value Iteration)](./02_value_iteration)
-- [몬테카를로 (Monte Carlo)](./03_monte_carlo)
-- [살사 (SARSA)](./04_sarsa)
-- [큐러닝 (Q-Learning)](./05_q_learning)
+- [정책 이터레이션 (Policy Iteration)](./Code%201.%20Grid%20World/1.%20Policy%20Iteration)
+- [가치 이터레이션 (Value Iteration)](./Code%201.%20Grid%20World/2.%20Value%20Iteration)
+- [살사 (SARSA)](./Code%201.%20Grid%20World/3.%20SARSA)
+- [큐러닝 (Q-Learning)](./Code%201.%20Grid%20World/4.%20Q%20Learning)
+- [몬테카를로 (Monte Carlo)](./Code%201.%20Grid%20World/5.%20Monte-Carlo)
+- [DQN](./Code%201.%20Grid%20World/6.%20DQN)
+- [Policy Gradient](./Code%201.%20Grid%20World/7.%20Policy%20Gradient)
 
-**딥러닝과 강화학습** - 딥러닝을 응용하여 게임같이 좀더 복잡한 환경에서 사람을 이길 수 있는 알고리즘들을 알아보겠습니다.
+**Code 2** - 카트폴 예제를 이용하여 여러가지 알고리즘을 적용해보기
 
-- [신경망 (Neural Network)]()
-- [딥 큐러닝 (Deep Q-Learning)]()
-- [Policy Gradient]()
+- [Deep Q Network](./Code%202.%20Cartpole/1.%20DQN)
+- [Double Deep Q Network](./Code%202.%20Cartpole/2.%20Double%20DQN)
+- [Dueling Deep Q Network](./Code%202.%20Cartpole/3.%20Dueling%20DQN)
+- [Policy Gradient](./Code%202.%20Cartpole/4.%20Policy%20Gradient)
+- [Actor Critic](./Code%202.%20Cartpole/5.%20Actor-Critic)
+
+**Code 3** - 딥러닝을 응용하여 좀더 복잡한 Atari게임 환경에서 사람을 이겨보기
+
+- [벽돌깨기 (Breakout)](./Code%203.%20Atari%20Game/1.%20Breakout)
+- [퐁 (Pong)](./Code%203.%20Atari%20Game/2.%20Pong)
