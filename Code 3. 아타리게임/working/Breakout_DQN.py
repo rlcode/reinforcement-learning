@@ -14,10 +14,10 @@ class DQNAgent:
         self.action_size = 3  # Left, Right, Stay
         self.discount_factor = 0.99
         self.learning_rate = 0.00025
-        pass
 
     def build_model(self):
-        pass
+        model = Sequential()
+
 
     def get_action(self):
         pass

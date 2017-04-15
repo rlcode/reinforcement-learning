@@ -7,6 +7,7 @@ in_size = 4
 out_size = 2
 experience_size = 2000
 
+
 class DQNAgent:
     def __init__(self):
         self.gamma = 0.99
@@ -41,10 +42,8 @@ class DQNAgent:
         self.W4_ = tf.Variable(self.W4.initialized_value(), trainable=False)
         self.b4_ = tf.Variable(self.b4.initialized_value(), trainable=False)
 
-
     def weight_variable(self, shape):
         return tf.Variable(self.xavier_initializer(shape))
-
 
     def bias_variable(self, shape):
         return tf.Variable(self.xavier_initializer(shape))
@@ -52,7 +51,6 @@ class DQNAgent:
     def xavier_initializer(self, shape):
         bound = 1 / np.sqrt(np.sum(shape))
         return tf.random_uniform(shape, minval=-bound, maxval=bound)
-
 
     def get_Q_val(self):
         obs = tf.placeholder(tf.float32, [None, in_size])
@@ -74,7 +72,7 @@ class DQNAgent:
         return x[1:]
 
     def get_action(self, Q, feed):
-        act_values = Q.eval(feed_dict = feed)
+        act_values = Q.eval(feed_dict=feed)
 
         if np.random.uniform() <= self.epsilon:
             act = random.randrange(out_size)
@@ -92,18 +90,18 @@ def learning(env):
 
     obs, Q1 = agent.get_Q_val()
     act = tf.placeholder(tf.float32, [None, out_size])
-    rwd = tf.placeholder(tf.float32, [None,])
+    rwd = tf.placeholder(tf.float32, [None, ])
     next_obs, Q2 = agent.target_Q_val()
 
-    y = tf.reduce_sum(tf.mul(Q1, act), reduction_indices=1)
-    t = rwd + agent.gamma*tf.reduce_max(Q2, reduction_indices=1)
-    loss = tf.reduce_mean(tf.square(tf.sub(y,t)))
+    y = tf.reduce_sum(tf.multiply(Q1, act), reduction_indices=1)
+    t = rwd + agent.gamma * tf.reduce_max(Q2, reduction_indices=1)
+    loss = tf.reduce_mean(tf.square(tf.subtract(y, t)))
     train = tf.train.RMSPropOptimizer(agent.learning_rate).minimize(loss)
 
     sess.run(tf.initialize_all_variables())
 
     feed = {}
-    global_step, exp_pointer = 0,0
+    global_step, exp_pointer = 0, 0
 
     xs = np.empty([experience_size, in_size])
     acts = np.empty([experience_size, out_size])
@@ -112,14 +110,13 @@ def learning(env):
 
     score_queue = []
 
-
     x = env.reset()
     score, loss_value, episode_num = 0, 0, 0
     while True:
-        #x = agent.prepro(x)
+        # x = agent.prepro(x)
         xs[exp_pointer] = x
 
-        action = agent.get_action(Q1, {obs : np.reshape(x, (1,-1))})
+        action = agent.get_action(Q1, {obs: np.reshape(x, (1, -1))})
         acts[exp_pointer] = action
 
         x, reward, done, _ = env.step(np.argmax(action))
@@ -130,7 +127,6 @@ def learning(env):
 
         rwds[exp_pointer] = score
         next_xs[exp_pointer] = x
-
 
         exp_pointer += 1
         if exp_pointer >= experience_size:
@@ -145,9 +141,9 @@ def learning(env):
             feed.update({next_obs: next_xs[rand_indexs]})
 
             if agent.learning:
-                step_loss,_ = sess.run([loss, train], feed_dict = feed)
+                step_loss, _ = sess.run([loss, train], feed_dict=feed)
             else:
-                step_loss = sess.run(loss, feed_dict = feed)
+                step_loss = sess.run(loss, feed_dict=feed)
 
             loss_value += step_loss
 
@@ -157,10 +153,10 @@ def learning(env):
                 agent.epsilon = 1e-4
 
         if done:
-            print ("pisode : {}, score : {}, avg_loss = {}".format(episode_num, score, loss_value/score))
-            print ("Epsilon : {}".format(agent.epsilon))
+            print("episode : {}, score : {}, avg_loss = {}".format(episode_num, score, loss_value / score))
+            print("Epsilon : {}".format(agent.epsilon))
             if not learning:
-                print ("test!!")
+                print("test!!")
             if episode_num >= 200:
                 score_queue.pop(0)
                 score_queue.append(score)
@@ -177,12 +173,12 @@ def learning(env):
                 agent.W4_.assign(agent.W4)
                 agent.b4_.assign(agent.b4)
 
-
             if np.mean(score) > 195:
                 agent.learning = False
             score, loss_value = 0, 0
             episode_num += 1
             x = env.reset()
+
 
 if __name__ == "__main__":
     env = gym.make("CartPole-v0")
