@@ -56,40 +56,40 @@ class DQNAgent:
         self.target_model.set_weights(self.model.get_weights())
 
     def get_action(self, history):
-        if np.random.rand() <= self.epsilon:
+        if np.random.rand() <= 0:
             return random.randrange(self.action_size)
         else:
             q_value = self.model.predict(np.reshape(np.float32(history[:, :, 0:4] / 255.), [1, 84, 84, 4]))
+            print(q_value)
             return np.argmax(q_value[0])
 
-    def replay_memory(self, history, action, reward, done, info):
-        self.memory.append((history, action, reward, done, info))
+    def replay_memory(self, history, action, reward, done):
+        self.memory.append((history, action, reward, done))
         if self.epsilon > self.epsilon_end:
             self.epsilon -= self.epsilon_decay_step
         # print(len(self.memory))
 
     def train_replay(self):
-        if len(self.memory) < self.train_start:
-            return
+        #if len(self.memory) < self.train_start:
+        #    return
         batch_size = min(self.batch_size, len(self.memory))
         mini_batch = random.sample(self.memory, batch_size)
 
-        update_input = np.zeros((batch_size, self.state_size))
+        update_input = []
         update_target = np.zeros((batch_size, self.action_size))
 
         for i in range(batch_size):
-            history, action, reward, done, info = mini_batch[i]
-            target = self.model.predict(np.reshape(np.float32(history[:, :, 0:4] / 255.), [1, 84, 84, 4]))[0]
+            history, action, reward, done = mini_batch[i]
+            history = np.float32(history/255.)
+            target = self.model.predict(np.reshape(history[:, :, 0:4], [1, 84, 84, 4]))[0]
 
             if done:
                 target[action] = reward
             else:
                 target[action] = reward + self.discount_factor * np.amax(self.target_model.predict
-                                                                         (np.reshape(
-                                                                             np.float32(history[:, :, 1:5] / 255.),
-                                                                             [1, 84, 84, 4]))[0])
-            update_input[i] = history[:, :, 0:4]
+                                        (np.reshape(history[:, :, 1:5], [1, 84, 84, 4]))[0])
             update_target[i] = target
+            update_input.append(np.reshape(history[:, :, 0:4], [1, 84, 84, 4]))
 
         self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     for e in range(EPISODES):
         done = False
-        score = 0
+        score, start_live = 0, 5
         observe = env.reset()
         state = pre_processing(observe)
         for i in range(4):
@@ -129,15 +129,19 @@ if __name__ == "__main__":
         while not done:
             if agent.render == "True":
                 env.render()
-            global_step += 1
-
             action = agent.get_action(history)
             next_observe, reward, done, info = env.step(action)
-
             next_state = pre_processing(next_observe)
+            if start_live > info['ale.lives']:
+                done = True
+                start_live = info['ale.lives']
+                reward = -1
+
             history[:, :, 4] = next_state
-            agent.replay_memory(history[:, :, 0:5], action, reward, done, info)
+
+            agent.replay_memory(history[:, :, 0:5], action, reward, done)
             agent.train_replay()
+
             history[:, :, 0:4] = history[:, :, 1:5]
             score += reward
 
