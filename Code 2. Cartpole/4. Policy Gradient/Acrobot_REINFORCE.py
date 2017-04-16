@@ -105,6 +105,6 @@ for i in range(10000):
             s,a,r = [],[],[]
             
             if reward_avg > -90:
-                saver.save(sess, "../tmp/acrobot.ckpt")
+                saver.save(sess, "../openai_upload/acrobot.ckpt")
                 is_train = False
             break
