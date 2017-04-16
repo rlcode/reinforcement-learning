@@ -100,6 +100,6 @@ for i in range(10000):
             s,a,r = [],[],[]
 
             if reward_avg > 800:
-                saver.save(sess, "../tmp/cartpole.ckpt")
+                saver.save(sess, "../openai_upload/cartpole.ckpt")
                 is_train = False
             break
