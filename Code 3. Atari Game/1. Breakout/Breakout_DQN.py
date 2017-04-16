@@ -56,11 +56,10 @@ class DQNAgent:
         self.target_model.set_weights(self.model.get_weights())
 
     def get_action(self, history):
-        if np.random.rand() <= 0:
+        if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
         else:
             q_value = self.model.predict(np.reshape(np.float32(history[:, :, 0:4] / 255.), [1, 84, 84, 4]))
-            print(q_value)
             return np.argmax(q_value[0])
 
     def replay_memory(self, history, action, reward, done):
@@ -89,9 +88,9 @@ class DQNAgent:
                 target[action] = reward + self.discount_factor * np.amax(self.target_model.predict
                                         (np.reshape(history[:, :, 1:5], [1, 84, 84, 4]))[0])
             update_target[i] = target
-            update_input.append(np.reshape(history[:, :, 0:4], [1, 84, 84, 4]))
+            update_input.append(np.reshape(history[:, :, 0:4], [84, 84, 4]))
 
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit(np.array(update_input), update_target, batch_size=batch_size, epochs=1, verbose=0)
 
     def load_model(self, name):
         self.model.load_weights(name)
@@ -130,6 +129,7 @@ if __name__ == "__main__":
             if agent.render == "True":
                 env.render()
             action = agent.get_action(history)
+            print(action)
             next_observe, reward, done, info = env.step(action)
             next_state = pre_processing(next_observe)
             if start_live > info['ale.lives']:
