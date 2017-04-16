@@ -1,4 +1,5 @@
 import gym
+from gym import wrappers
 import numpy as np
 import random
 from collections import deque
@@ -12,7 +13,7 @@ EPISODES = 5000
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        self.render = "False"
+        self.render = "True"
 
         self.state_size = state_size
         self.action_size = action_size
@@ -76,20 +77,20 @@ class DQNAgent:
 
         self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
-    def load_model(self):
-        pass
+    def load_model(self, name):
+        self.model.load_weights(name)
 
-    def save_model(self):
-        pass
+    def save_model(self, name):
+        self.model.save_weights(name)
 
 
 if __name__ == "__main__":
     env = gym.make('CartPole-v1')
+    env = wrappers.Monitor(env, '/openai_upload/cartpole-experiment-1')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
 
-    global_step = 0
     scores, episodes = [], []
 
     for e in range(EPISODES):
@@ -98,24 +99,21 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, [1, state_size])
         agent.update_target_model()
+        # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
             if agent.render == "True":
                 env.render()
-            global_step += 1
 
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            reward = reward if not done else -100
+            reward = reward if not done else -10
             # print("episode:", e, "  state:", state, "  action:", action, "  reward:", reward)
             agent.replay_memory(state, action, reward, next_state, done)
-
+            agent.train_replay()
             score += reward
             state = next_state
-
-            if global_step > agent.train_start:
-                agent.train_replay()
 
             if done:
                 env.reset()
@@ -123,6 +121,9 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save/Cartpole_woongwon5.png")
+                pylab.savefig("./save_graph/Cartpole_woongwon10.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
+
+        if e % 20 == 0:
+            agent.save_model("./save_model/Cartpole10.h5")
