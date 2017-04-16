@@ -14,7 +14,7 @@ EPISODES = 5000
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        self.render = "True"
+        self.render = "False"
 
         self.state_size = state_size
         self.action_size = action_size
@@ -69,8 +69,8 @@ class DQNAgent:
         # print(len(self.memory))
 
     def train_replay(self):
-        #if len(self.memory) < self.train_start:
-        #    return
+        if len(self.memory) < self.train_start:
+            return
         batch_size = min(self.batch_size, len(self.memory))
         mini_batch = random.sample(self.memory, batch_size)
 
@@ -129,7 +129,6 @@ if __name__ == "__main__":
             if agent.render == "True":
                 env.render()
             action = agent.get_action(history)
-            print(action)
             next_observe, reward, done, info = env.step(action)
             next_state = pre_processing(next_observe)
             if start_live > info['ale.lives']:
@@ -146,11 +145,13 @@ if __name__ == "__main__":
             score += reward
 
             if global_step % agent.update_target_rate == 0:
-               agent.update_target_model()
+                agent.update_target_model()
 
             if done:
                 env.reset()
                 scores.append(score)
                 episodes.append(e)
+                pylab.plot(episodes, scores, 'b')
+                pylab.savefig("./save_graph/Breakout_DQN1.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
