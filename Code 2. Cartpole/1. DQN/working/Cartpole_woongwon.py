@@ -18,23 +18,27 @@ class DQNAgent:
         self.action_size = action_size
 
         self.discount_factor = 0.99
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
-        self.epsilon_min = 0.05
+        self.epsilon_min = 0.01
 
         self.model = self.build_model()
-        self.memory = deque(maxlen=50000)
-        self.batch_size = 10
-        self.train_start = 12000
+        self.target_model = self.build_model()
+        self.memory = deque(maxlen=2000)
+        self.batch_size = 64
+        self.train_start = 1000
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(16, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
+
+    def update_target_model(self):
+        self.target_model.set_weights(self.model.get_weights())
 
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
@@ -66,7 +70,7 @@ class DQNAgent:
                 target[action] = reward
             else:
                 target[action] = reward + self.discount_factor * \
-                                          np.amax(self.model.predict(next_state)[0])
+                                          np.amax(self.target_model.predict(next_state)[0])
             update_input[i] = state
             update_target[i] = target
 
@@ -93,6 +97,7 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
+        agent.update_target_model()
 
         while not done:
             if agent.render == "True":
@@ -114,10 +119,10 @@ if __name__ == "__main__":
 
             if done:
                 env.reset()
-
+                agent.update_target_model()
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save/Cartpole_woongwon4.png")
+                pylab.savefig("./save/Cartpole_woongwon5.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
