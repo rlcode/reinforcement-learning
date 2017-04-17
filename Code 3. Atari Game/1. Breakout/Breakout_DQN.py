@@ -14,7 +14,7 @@ EPISODES = 5000
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        self.render = "True"
+        self.render = False
 
         self.state_size = state_size
         self.action_size = action_size
@@ -48,8 +48,7 @@ class DQNAgent:
         model.add(Flatten())
         model.add(Dense(512, activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(self.action_size, activation='linear'))
-        model.compile(loss='mse', optimizer=Adam(lr=0.00025, beta_1=0.95, beta_2=0.95,
-                                                 epsilon=0.01, clipnorm=1.))
+        model.compile(loss='mse', optimizer=Adam(lr=0.00025, beta_1=0.95, beta_2=0.95, epsilon=0.01))
         return model
 
     def update_target_model(self):
@@ -101,7 +100,9 @@ class DQNAgent:
 
 def pre_processing(observe):
     observe = np.uint8(np.dot(observe[:, :, :3], [0.299, 0.587, 0.114]))
+    print(observe[30, :])
     observe = resize(observe, (110, 84), mode='reflect')
+    print(observe[30, :])
     observe = observe[17:101, :]
     return observe
 
@@ -126,11 +127,11 @@ if __name__ == "__main__":
             history[:, :, i] = state
 
         while not done:
-            if agent.render == "True":
+            if agent.render:
                 env.render()
             action = agent.get_action(history)
             next_observe, reward, done, info = env.step(action)
-            next_state = pre_processing(next_observe)
+            # next_state = pre_processing(next_observe)
             if start_live > info['ale.lives']:
                 done = True
                 start_live = info['ale.lives']
