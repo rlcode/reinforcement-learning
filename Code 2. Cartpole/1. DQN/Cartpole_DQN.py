@@ -2,13 +2,12 @@ import gym
 import pylab
 import random
 import numpy as np
-from gym import wrappers
 from collections import deque
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
 
-EPISODES = 100
+EPISODES = 300
 
 
 class DQNAgent:
@@ -104,8 +103,6 @@ class DQNAgent:
 if __name__ == "__main__":
     # CartPole-v1의 경우 500 타임스텝까지 플레이가능
     env = gym.make('CartPole-v1')
-    # openai 홈페이지에 올릴 파일 생성
-    env2 = wrappers.Monitor(env, './openai_upload/cartpole_DQN')
     # 환경으로부터 상태와 행동의 크기를 가져옴
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
@@ -155,5 +152,3 @@ if __name__ == "__main__":
         # 20 에피소드마다 학습 모델을 저장
         if e % 20 == 0:
             agent.save_model("./save_model/Cartpole_DQN1.h5")
-
-    env2.close()
