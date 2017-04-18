@@ -63,7 +63,7 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-        # print(len(self.memory))
+            # print(len(self.memory))
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
     def train_replay(self):
@@ -83,13 +83,13 @@ class DQNAgent:
             if done:
                 target[action] = reward
             else:
+                # Double DQN의 핵심. 행동의 선택은 학습 모델로, 업데이트하는 값은 타겟 모델로
+                a = np.argmax(self.model.predict(next_state)[0])
                 target[action] = reward + self.discount_factor * \
-                                          np.amax(self.target_model.predict(next_state)[0])
-            update_input[i] = state
-            update_target[i] = target
+                                          (self.target_model.predict(next_state)[0][a])
 
-        # 학습할 정답인 타겟과 현재 자신의 값의 minibatch를 만들고 그것으로 한 번에 모델 업데이트
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+            # 학습할 정답인 타겟과 현재 자신의 값의 minibatch를 만들고 그것으로 한 번에 모델 업데이트
+            self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
     # 저장한 모델을 불러옴
     def load_model(self, name):
@@ -145,10 +145,10 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DQN1.png")
+                pylab.savefig("./save_graph/Cartpole_DoubleDQN1.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
         # 20 에피소드마다 학습 모델을 저장
         if e % 20 == 0:
-            agent.save_model("./save_model/Cartpole_DQN1.h5")
+            agent.save_model("./save_model/Cartpole_DoubleDQN1.h5")

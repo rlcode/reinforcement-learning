@@ -2,7 +2,7 @@
 
 --------------------------------------------------------------------------------
 
-> Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [Korean Documentation (한국어 문서)](./README-kr.md)
+> Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [[Korean (한국어)](./README-kr.md)]
 >
 > Maintainers - [Woongwon](https://github.com/dnddnjs), [Youngmoo](https://github.com/zzing0907), [Hyeokreal](https://github.com/Hyeokreal), [Uiryeong](https://github.com/wooridle), [Keon](https://github.com/keon)
 
@@ -19,7 +19,7 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 
 ## Table of Contents
 
-**Code 1** - Mastering the basics of reinforcement learning in a simplified world called "Grid World"
+**Code 1** - Mastering the basics of reinforcement learning in the simplified world called "Grid World"
 
 - [Policy Iteration](./Code%201.%20Grid%20World/1.%20Policy%20Iteration)
 - [Value Iteration](./Code%201.%20Grid%20World/2.%20Value%20Iteration)
@@ -29,7 +29,7 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 - [Deep Q Network](./Code%201.%20Grid%20World/6.%20DQN)
 - [Policy Gradient](./Code%201.%20Grid%20World/7.%20Policy%20Gradient)
 
-**Code 2** - Applying deep reinforcement learning algorithms on the Cartpole game.
+**Code 2** - Applying deep reinforcement learning on basic Cartpole game.
 
 - [Deep Q Network](./Code%202.%20Cartpole/1.%20DQN)
 - [Double Deep Q Network](./Code%202.%20Cartpole/2.%20Double%20DQN)
