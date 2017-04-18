@@ -1,5 +1,4 @@
-<p align="center"><img width="90%" src="/images/Reinforcement-Learning.png" /></p>
-
+<p align="center"><img width="90%" src="images/Reinforcement-Learning.png"></p>
 --------------------------------------------------------------------------------
 
 > Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [[Korean (한국어)](./README-kr.md)]
@@ -16,6 +15,10 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 4. numpy
 5. pandas
 6. matplot
+
+### Install Requirements
+pip install -r requirements.txt
+
 
 ## Table of Contents
 

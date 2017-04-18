@@ -1,4 +1,4 @@
-<p align="center"><img width="90%" src="/images/Reinforcement-Learning.png" /></p>
+<p align="center"><img width="90%" src="images/Reinforcement-Learning.png" /></p>
 
 --------------------------------------------------------------------------------
 
