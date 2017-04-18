@@ -8,7 +8,7 @@ from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.layers import Dense, Input, Lambda
 
-EPISODES = 100
+EPISODES = 300
 
 
 class DQNAgent:
