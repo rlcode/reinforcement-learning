@@ -1,105 +1,152 @@
-import tensorflow as tf
-import numpy as np
 import gym
+import pylab
+import numpy as np
+from keras.layers import Dense
+from keras.models import Sequential
+from keras.optimizers import Adam
+from keras import backend as K
 
 
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape=shape, stddev= 0.1)
-    return tf.Variable(initial)
+EPISODES = 5000
 
-def bias_variable(shape):
-    initial = tf.constant(0.0, shape=shape)
-    return tf.Variable(initial)
+class PGAgent:
+    def __init__(self, state_size, action_size):
+        # Cartpole이 학습하는 것을 보려면 True로 바꿀 것
+        self.render = False
 
-sess = tf.InteractiveSession()
+        # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
+        self.state_size = state_size
+        self.action_size = action_size
 
-x = tf.placeholder(tf.float32, [None, 4])
+        # Cartpole REINFORCE 학습의 Hyper parameter 들
+        self.discount_factor = 0.99
+        self.learning_rate = 0.001
 
-fc_W1 = weight_variable([4,10])
-fc_b1 = bias_variable([10])
+        # 학습할 모델을 생성
+        self.model = self.build_model()
 
-fc_W2 = weight_variable([10,10])
-fc_b2 = bias_variable([10])
+        # Policy Gradient 네트워크 학습하는 함수를 만듬
+        self.optimizer = self.optimizer()
 
-fc_W3 = weight_variable([10,2])
-fc_b3 = bias_variable([2])
+        # 상태, 행동, 보상을 기억하기 위한 리스트 생성
+        self.states, self.actions, self.rewards = [],[],[]
+
+    # Deep Neural Network 를 통해서 정책을 근사
+    # 상태가 입력, 각 행동에 대한 확률이 출력인 모델을 생성
+    def build_model(self):
+        model = Sequential()
+        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+
+        # 마지막 softmax 계층으로 각 행동에 대한 확률을 만드는 모델을 생성
+        model.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
+        model.summary()
+
+        return model
+
+    def optimizer(self):
+        action = K.placeholder(shape=[None, 2])
+        discounted_rewards = K.placeholder(shape=[None,])
+
+        # Policy Gradient 의 핵심
+        # log(정책) * return 의 gradient 를 구해서 최대화시킴
+        good_prob = K.sum(action * self.model.output, axis=1)
+        eligibility = K.log(good_prob) * discounted_rewards
+        loss = -K.sum(eligibility)
+
+        optimizer = Adam(lr=self.learning_rate)
+        updates = optimizer.get_updates(self.model.trainable_weights, [], loss)
+        train = K.function([self.model.input, action, discounted_rewards], [], updates=updates)
+
+        return train
+
+    # 행동의 선택은 현재 네트워크에 대해서 각 행동에 대한 확률로 정책을 사용
+    def get_action(self, state):
+        policy = self.model.predict(state, batch_size=1).flatten()
+        return np.random.choice(self.action_size, 1, p=policy)[0]
+
+    # 에피소드가 끝나면 해당 에피소드의 보상를 이용해 return을 계산
+    def discount_rewards(self, rewards):
+        discounted_rewards = np.zeros_like(rewards)
+        running_add = 0
+        for t in reversed(range(0, len(rewards))):
+            running_add = running_add * self.discount_factor + rewards[t]
+            discounted_rewards[t] = running_add
+        return discounted_rewards
+
+    # 각 스텝의 <s, a, r>을 저장하는 함수
+    def memory(self, state, action, reward):
+        self.states.append(state[0])
+        self.rewards.append(reward)
+        act = np.zeros(self.action_size)
+        act[action] = 1
+        self.actions.append(act)
+
+    # 에피소드가 끝나면 모아진 메모리로 학습
+    def train_episodes(self):
+        discounted_rewards = self.discount_rewards(self.rewards)
+        discounted_rewards -= np.mean(discounted_rewards)
+        discounted_rewards /= np.std(discounted_rewards)
+
+        self.optimizer([self.states, self.actions, discounted_rewards])
+        self.states, self.actions, self.rewards = [],[],[]
+
+    # 저장한 모델을 불러옴
+    def load_model(self, name):
+        self.model.load_weights(name)
+
+    # 학습된 모델을 저장함
+    def save_model(self, name):
+        self.model.save_weights(name)
 
 
-h1 = tf.nn.tanh(tf.matmul(x, fc_W1) + fc_b1)
-h2 = tf.nn.tanh(tf.matmul(h1, fc_W2) + fc_b2)
-out = tf.nn.softmax(tf.matmul(h2, fc_W3) + fc_b3)
+if __name__ == "__main__":
+    # CartPole-v1의 경우 500 타임스텝까지 플레이가능
+    env = gym.make('CartPole-v1')
 
-act = tf.placeholder(tf.float32, [None, 2])
-rwd = tf.placeholder(tf.float32, [None, ])
+    # 환경으로부터 상태와 행동의 크기를 가져옴
+    state_size = env.observation_space.shape[0]
+    action_size = env.action_space.n
 
-good_prob = tf.reduce_sum(tf.mul(out,act), reduction_indices=[1])
-egibility = tf.log(good_prob)*rwd
-loss = -tf.reduce_sum(egibility)
-train = tf.train.RMSPropOptimizer(1e-2).minimize(loss)
+    # PG 에이전트의 생성
+    agent = PGAgent(state_size, action_size)
 
-def get_action(obs):
-    action = out.eval(feed_dict={x: obs})
-    if action[0][0] > np.random.random():
-        return 0
-    else:
-        return 1
+    scores, episodes = [], []
 
-def discounted_reward(r):
-    discounted_r = np.zeros_like(r)
-    running_add = 0
-    for t in reversed(range(0, len(r))):
-        running_add = running_add * 0.99 + r[t]
-        discounted_r[t] = running_add
+    for e in range(EPISODES):
+        done = False
+        score = 0
+        state = env.reset()
+        state = np.reshape(state, [1, state_size])
+        # agent.load_model("./save_model/cartpole-master.h5")
 
-    return discounted_r
+        while not done:
+            if agent.render == "True":
+                env.render()
 
-saver = tf.train.Saver()
-sess.run(tf.global_variables_initializer())
+            # 현재 상태에서 행동을 선택하고 한 스텝을 진행
+            action = agent.get_action(state)
+            next_state, reward, done, info = env.step(action)
+            next_state = np.reshape(next_state, [1, state_size])
 
-env = gym.make('CartPole-v0')
-obs = env.reset()
-_epi, reward_sum = 0,0
-reward_avg = 0
-s, a, r = [],[],[]
-is_train = True
+            # <s, a, r>을 memory에 저장
+            agent.memory(state, action, reward)
 
-for i in range(10000):
-    while True:
-        if not is_train:
-            env.render()
-        s.append(obs)
-        action = get_action(np.array([obs]))
-        action_array = np.zeros(2)
+            score += reward
+            state = next_state
 
-        if action == 0:
-            action_array[0] = 1
-        else:
-            action_array[1] = 1
+            if done:
+                env.reset()
+                # 매 에피소드마다 모아온 <s, a, r>을 학습
+                agent.train_episodes()
 
-        a.append(action_array)
-        obs, reward, done, _ = env.step(action)
-        r.append(reward)
-        reward_sum += reward
+                # 에피소드에 따른 score를 plot
+                scores.append(score)
+                episodes.append(e)
+                pylab.plot(episodes, scores, 'b')
+                pylab.savefig("./save_graph/Cartpole_REINFORCE.png")
+                print("episode:", e, "  score:", score)
 
-        if done or reward_sum >= 1000:
-            reward_avg = reward_avg*0.9 + reward_sum*0.1
-            print ("Episode %i finished. Reward is %i. Average Reward is %f" \
-                   %(_epi, reward_sum, reward_avg))
-
-            obs = env.reset()
-            reward_sum=0
-            _epi += 1
-
-            discount_r = discounted_reward(r)
-            discount_r -= np.mean(discount_r)
-            discount_r /= np.std(discount_r)
-
-            if is_train:
-                _, step_result = sess.run([train, out], feed_dict = \
-                                          {x: s, act: a, rwd: discount_r})
-            s,a,r = [],[],[]
-
-            if reward_avg > 800:
-                saver.save(sess, "../openai_upload/cartpole.ckpt")
-                is_train = False
-            break
+        # 20 에피소드마다 학습 모델을 저장
+        if e % 20 == 0:
+            agent.save_model("./save_model/Cartpole_DQN1.h5")
