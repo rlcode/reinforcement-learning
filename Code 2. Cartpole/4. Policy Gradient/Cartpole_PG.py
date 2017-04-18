@@ -12,7 +12,7 @@ EPISODES = 5000
 class PGAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 True로 바꿀 것
-        self.render = False
+        self.render = True
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
