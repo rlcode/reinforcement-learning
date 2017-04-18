@@ -6,7 +6,7 @@ from collections import deque
 from keras import backend as k
 from keras.optimizers import Adam
 from keras.models import Sequential
-from keras.layers import Dense, Input, Lambda
+from keras.layers import Dense, Lambda
 
 EPISODES = 300
 
@@ -29,7 +29,7 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=10000)
 
         # 학습할 모델과 타겟 모델을 생성
         self.model = self.build_model()
@@ -42,8 +42,8 @@ class DQNAgent:
     # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
     def build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         # State Value가 1개, 어드밴티지가 action의 갯수 -> (action_size + 1)개의 output을 만들어 냄
         model.add(Dense(self.action_size + 1, activation='linear', kernel_initializer='he_uniform'))
         # State Value에 어드밴티지를 더해서 Q Value를 만들어 냄
@@ -69,8 +69,9 @@ class DQNAgent:
     # <s,a,r,s'>을 replay_memory에 저장함
     def replay_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        if len(self.memory) > self.train_start:
+            if self.epsilon > self.epsilon_min:
+                self.epsilon *= self.epsilon_decay
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
     def train_replay(self):
@@ -119,6 +120,7 @@ if __name__ == "__main__":
     # DQN 에이전트의 생성
     agent = DQNAgent(state_size, action_size)
 
+    global_step = 0
     scores, episodes = [], []
 
     for e in range(EPISODES):
@@ -131,6 +133,7 @@ if __name__ == "__main__":
         while not done:
             if agent.render:
                 env.render()
+            global_step += 1
 
             # 현재 상태에서 행동을 선택하고 한 스텝을 진행
             action = agent.get_action(state)
@@ -143,22 +146,24 @@ if __name__ == "__main__":
             agent.replay_memory(state, action, reward, next_state, done)
             # 매 타임스텝마다 학습을 진행
             agent.train_replay()
+
             score += reward
             state = next_state
+            # 1000스텝마다 학습하는 모델을 타겟 모델로 복사
+            if global_step % 1000 == 0:
+                agent.update_target_model()
 
             if done:
                 env.reset()
-                # 매 에피소드마다 학습하는 모델을 타겟 모델로 복사
-                agent.update_target_model()
-
                 # 에피소드에 따른 score를 plot
-                scores.append(score + 100)
+                score = score + 100
+                scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_Dueling_DQN.png")
-                print("episode:", e, "  score:", score + 100, "  memory length:", len(agent.memory),
+                pylab.savefig("./save_graph/Cartpole_Dueling_DQN2.png")
+                print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
-        # 20 에피소드마다 학습 모델을 저장
+        # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DQN.h5")
+            agent.save_model("./save_model/Cartpole_DQN2.h5")

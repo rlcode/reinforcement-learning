@@ -143,13 +143,14 @@ if __name__ == "__main__":
                 agent.update_target_model()
 
                 # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
-                scores.append(score + 100)
+                score = score + 100
+                scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DQN13.png")
+                pylab.savefig("./save_graph/Cartpole_DQN14.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DQN13.h5")
+            agent.save_model("./save_model/Cartpole_DQN14.h5")

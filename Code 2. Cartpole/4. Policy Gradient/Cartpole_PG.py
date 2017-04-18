@@ -6,8 +6,8 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras import backend as K
 
-
 EPISODES = 5000
+
 
 class PGAgent:
     def __init__(self, state_size, action_size):
@@ -29,24 +29,24 @@ class PGAgent:
         self.optimizer = self.optimizer()
 
         # 상태, 행동, 보상을 기억하기 위한 리스트 생성
-        self.states, self.actions, self.rewards = [],[],[]
+        self.states, self.actions, self.rewards = [], [], []
 
     # Deep Neural Network 를 통해서 정책을 근사
     # 상태가 입력, 각 행동에 대한 확률이 출력인 모델을 생성
     def build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='glorot_uniform'))
+        model.add(Dense(24, activation='relu', kernel_initializer='glorot_uniform'))
 
         # 마지막 softmax 계층으로 각 행동에 대한 확률을 만드는 모델을 생성
-        model.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
+        model.add(Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform'))
         model.summary()
 
         return model
 
     def optimizer(self):
         action = K.placeholder(shape=[None, 2])
-        discounted_rewards = K.placeholder(shape=[None,])
+        discounted_rewards = K.placeholder(shape=[None, ])
 
         # Policy Gradient 의 핵심
         # log(정책) * return 의 gradient 를 구해서 최대화시킴
@@ -89,7 +89,7 @@ class PGAgent:
         discounted_rewards /= np.std(discounted_rewards)
 
         self.optimizer([self.states, self.actions, discounted_rewards])
-        self.states, self.actions, self.rewards = [],[],[]
+        self.states, self.actions, self.rewards = [], [], []
 
     # 저장한 모델을 불러옴
     def load_model(self, name):
@@ -121,13 +121,14 @@ if __name__ == "__main__":
         # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
-            if agent.render == "True":
+            if agent.render:
                 env.render()
 
             # 현재 상태에서 행동을 선택하고 한 스텝을 진행
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
+            reward = reward if not done else -100
 
             # <s, a, r>을 memory에 저장
             agent.memory(state, action, reward)
@@ -141,12 +142,13 @@ if __name__ == "__main__":
                 agent.train_episodes()
 
                 # 에피소드에 따른 score를 plot
+                score = score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_REINFORCE.png")
+                pylab.savefig("./save_graph/Cartpole_PG.png")
                 print("episode:", e, "  score:", score)
 
         # 20 에피소드마다 학습 모델을 저장
-        if e % 20 == 0:
-            agent.save_model("./save_model/Cartpole_DQN1.h5")
+        if e % 50 == 0:
+            agent.save_model("./save_model/Cartpole_PG.h5")
