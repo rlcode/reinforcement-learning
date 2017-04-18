@@ -57,8 +57,7 @@ python run.py
 - If all is ok.
 ![](img/link-env-with-pychar-2.png)
 
-- Play It (Run).
-![](img/link-env-with-pychar-2.png)
+- Play It with samples (Run).
 
 
 
