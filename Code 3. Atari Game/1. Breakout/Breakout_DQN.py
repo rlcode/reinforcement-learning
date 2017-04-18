@@ -49,6 +49,7 @@ class DQNAgent:
         model.add(Flatten())
         model.add(Dense(512, activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(self.action_size, activation='linear'))
+        model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=0.001))
         return model
 
