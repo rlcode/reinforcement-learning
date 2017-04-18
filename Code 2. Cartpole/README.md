@@ -1,9 +1,8 @@
-# deep-q-learning
-
-Introduction to Making a Simple Game AI with Deep Reinforcement Learning
+# OpenAI gym Cartpole
 
 
+Various reinforcement learning algorithms for Cartpole example.
 
-![img](./1. DQN/save_graph/Cartpole_DQN13.png)
+This is graph of DQN algorithm
 
-
+<p align="center"><img width="90%" src="./1. DQN/save_graph/Cartpole_DQN13.png" /></p>
