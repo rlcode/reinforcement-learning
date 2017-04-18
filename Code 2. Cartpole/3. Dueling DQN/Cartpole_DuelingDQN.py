@@ -2,12 +2,11 @@ import gym
 import pylab
 import random
 import numpy as np
-from gym import wrappers
 from collections import deque
-from keras.layers import Dense, Input, Lambda
-from keras.models import Model
+from keras import backend as k
 from keras.optimizers import Adam
-from keras import backend as K
+from keras.models import Sequential
+from keras.layers import Dense, Input, Lambda
 
 EPISODES = 100
 
@@ -15,7 +14,7 @@ EPISODES = 100
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
-        self.render = "False"
+        self.render = False
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -33,13 +32,8 @@ class DQNAgent:
         self.memory = deque(maxlen=2000)
 
         # 학습할 모델과 타겟 모델을 생성
-        state, value = self.build_model()
-        self.model = Model(inputs=state, outputs=value)
-        self.model.summary()
-        self.model.compile(loss='mse', optimizer=Adam(self.learning_rate))
-
-        state, value = self.build_model()
-        self.target_model = Model(inputs=state, outputs=value)
+        self.model = self.build_model()
+        self.target_model = self.build_model()
 
         # 학습할 모델을 타겟 모델로 복사 --> 타겟 모델의 초기화(weight를 같게 해주고 시작해야 함)
         self.update_target_model()
@@ -47,19 +41,18 @@ class DQNAgent:
     # Deep Neural Network를 통해서 Q Function을 근사
     # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
     def build_model(self):
-        state = Input(shape=(state_size, ))
-        hidden1 = Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform')(state)
-        hidden2 = Dense(16, activation='relu', kernel_initializer='he_uniform')(hidden1)
-
+        model = Sequential()
+        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
         # State Value가 1개, 어드밴티지가 action의 갯수 -> (action_size + 1)개의 output을 만들어 냄
-        output = Dense(self.action_size + 1, activation='linear', kernel_initializer='he_uniform')(hidden2)
-
+        model.add(Dense(self.action_size + 1, activation='linear', kernel_initializer='he_uniform'))
         # State Value에 어드밴티지를 더해서 Q Value를 만들어 냄
         # 어드밴티지는 평균을 취하는 방식으로 한 값에서 평균을 뺀 값을 어드밴티지로 함
-        value = Lambda(lambda a: K.expand_dims(a[:, 0], -1) + a[:, 1:] - K.mean(a[:, 1:], keepdims=True),
-                       output_shape=(self.action_size, ))(output)
-
-        return state, value
+        model.add(Lambda(lambda a: k.expand_dims(a[:, 0], -1) + a[:, 1:] - k.mean(a[:, 1:], keepdims=True),
+                         output_shape=(self.action_size,)))
+        model.summary()
+        model.compile(loss='mse', optimizer=Adam(self.learning_rate))
+        return model
 
     # 일정한 시간 간격마다 타겟 모델을 현재 학습하고 있는 모델로 업데이트
     def update_target_model(self):
@@ -78,7 +71,6 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-        # print(len(self.memory))
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
     def train_replay(self):
@@ -121,8 +113,6 @@ class DQNAgent:
 if __name__ == "__main__":
     # CartPole-v1의 경우 500 타임스텝까지 플레이가능
     env = gym.make('CartPole-v1')
-    # openai 홈페이지에 올릴 파일 생성
-    # env2 = wrappers.Monitor(env, './openai_upload/cartpole_DQN')
     # 환경으로부터 상태와 행동의 크기를 가져옴
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
@@ -139,7 +129,7 @@ if __name__ == "__main__":
         # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
-            if agent.render == "True":
+            if agent.render:
                 env.render()
 
             # 현재 상태에서 행동을 선택하고 한 스텝을 진행
@@ -165,12 +155,10 @@ if __name__ == "__main__":
                 scores.append(score + 100)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_Dueling_DQN1.png")
+                pylab.savefig("./save_graph/Cartpole_Dueling_DQN.png")
                 print("episode:", e, "  score:", score + 100, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
         # 20 에피소드마다 학습 모델을 저장
-        if e % 20 == 0:
-            agent.save_model("./save_model/Cartpole_DQN1.h5")
-
-    # env2.close()
+        if e % 50 == 0:
+            agent.save_model("./save_model/Cartpole_DQN.h5")

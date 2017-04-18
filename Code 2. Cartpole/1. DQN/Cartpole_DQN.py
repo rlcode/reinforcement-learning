@@ -13,7 +13,7 @@ EPISODES = 300
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
-        self.render = "False"
+        self.render = False
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -43,6 +43,7 @@ class DQNAgent:
         model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
+        model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
@@ -119,7 +120,7 @@ if __name__ == "__main__":
         # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
-            if agent.render == "True":
+            if agent.render:
                 env.render()
 
             # 현재 상태에서 행동을 선택하고 한 스텝을 진행
@@ -141,14 +142,14 @@ if __name__ == "__main__":
                 # 매 에피소드마다 학습하는 모델을 타겟 모델로 복사
                 agent.update_target_model()
 
-                # 에피소드에 따른 score를 plot
-                scores.append(score)
+                # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
+                scores.append(score + 100)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DQN1.png")
+                pylab.savefig("./save_graph/Cartpole_DQN.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
-        # 20 에피소드마다 학습 모델을 저장
-        if e % 20 == 0:
-            agent.save_model("./save_model/Cartpole_DQN1.h5")
+        # 50 에피소드마다 학습 모델을 저장
+        if e % 50 == 0:
+            agent.save_model("./save_model/Cartpole_DQN.h5")
