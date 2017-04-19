@@ -1,3 +1,4 @@
+import sys
 import gym
 import pylab
 import random
@@ -114,6 +115,7 @@ class DQNAgent:
 if __name__ == "__main__":
     # CartPole-v1의 경우 500 타임스텝까지 플레이가능
     env = gym.make('CartPole-v1')
+
     # 환경으로부터 상태와 행동의 크기를 가져옴
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
@@ -140,7 +142,7 @@ if __name__ == "__main__":
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
             # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
-            reward = reward if not done else -100
+            reward = reward if not done or score == 499 else -100
 
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
@@ -156,14 +158,18 @@ if __name__ == "__main__":
             if done:
                 env.reset()
                 # 에피소드에 따른 score를 plot
-                score = score + 100
+                score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_Dueling_DQN2.png")
+                pylab.savefig("./save_graph/Cartpole_Dueling_DQN.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
+                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    sys.exit()
+
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DQN2.h5")
+            agent.save_model("./save_model/Cartpole_DQN.h5")

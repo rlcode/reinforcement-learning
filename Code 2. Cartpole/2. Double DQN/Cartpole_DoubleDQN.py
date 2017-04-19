@@ -1,3 +1,4 @@
+import sys
 import gym
 import pylab
 import random
@@ -128,7 +129,7 @@ if __name__ == "__main__":
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
             # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
-            reward = reward if not done else -100
+            reward = reward if not done or score == 499 else -100
 
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
@@ -143,12 +144,17 @@ if __name__ == "__main__":
                 agent.update_target_model()
 
                 # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
-                scores.append(score + 100)
+                score = score if score == 500 else score + 100
+                scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/Cartpole_DoubleDQN.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
+
+                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    sys.exit()
 
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:

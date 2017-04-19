@@ -1,3 +1,4 @@
+import sys
 import gym
 import pylab
 import random
@@ -11,13 +12,10 @@ from keras import backend as K
 EPISODES = 300
 
 
-class ACAgent():
+class ACAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 True로 바꿀 것
         self.render = False
-
-        # agent를 학습시키지 않으려면 False로 바꿀 것
-        self.is_train = True
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -161,8 +159,7 @@ if __name__ == "__main__":
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
             # 매 타임스텝마다 학습을 진행
-            if agent.is_train:
-                agent.train_replay()
+            agent.train_replay()
 
             score += reward
             state = next_state
@@ -180,7 +177,7 @@ if __name__ == "__main__":
 
                 # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    agent.is_train = False
+                    sys.exit()
 
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:

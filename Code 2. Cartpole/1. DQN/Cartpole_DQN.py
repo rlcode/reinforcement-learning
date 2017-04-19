@@ -1,3 +1,4 @@
+import sys
 import gym
 import pylab
 import random
@@ -28,7 +29,7 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=10000)
 
         # 학습할 모델과 타겟 모델을 생성
         self.model = self.build_model()
@@ -40,8 +41,8 @@ class DQNAgent:
     # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
     def build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -128,7 +129,7 @@ if __name__ == "__main__":
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
             # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
-            reward = reward if not done else -100
+            reward = reward if not done or score == 499 else -100
 
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
@@ -143,13 +144,18 @@ if __name__ == "__main__":
                 agent.update_target_model()
 
                 # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
-                scores.append(score + 100)
+                score = score if score == 500 else score + 100
+                scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DQN.png")
+                pylab.savefig("./save_graph/Cartpole_DQN14.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
+                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    sys.exit()
+
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DQN.h5")
+            agent.save_model("./save_model/Cartpole_DQN14.h5")

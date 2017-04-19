@@ -1,3 +1,4 @@
+import sys
 import gym
 import pylab
 import numpy as np
@@ -40,7 +41,6 @@ class PGAgent:
         model = Sequential()
         model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(24, activation='relu', kernel_initializer='glorot_uniform'))
-
         # 마지막 softmax 계층으로 각 행동에 대한 확률을 만드는 모델을 생성
         model.add(Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform'))
         model.summary()
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            reward = reward if not done or score==499 else -100
+            reward = reward if not done or score == 499 else -100
 
             # <s, a, r>을 memory에 저장
             if agent.is_train:
@@ -147,16 +147,16 @@ if __name__ == "__main__":
                     agent.train_episodes()
 
                 # 에피소드에 따른 score를 plot
-                score = score if score==500 else score+100
+                score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/Cartpole_PG.png")
                 print("episode:", e, "  score:", score)
-                
+
                 # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    agent.is_train = False
+                    sys.exit()
 
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:

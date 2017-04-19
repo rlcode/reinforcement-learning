@@ -2,7 +2,7 @@
 
 
 Various reinforcement learning algorithms for Cartpole example.
-<p align="left"><img width="40%" src="./4. Policy Gradient/cartpole.png" /></p>
+<p align="left"><img width="40%" src="./cartpole.png" /></p>
 
 
 <br/>
