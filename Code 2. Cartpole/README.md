@@ -11,6 +11,16 @@ This is graph of DQN algorithm
 <p align="left"><img width="40%" src="./1. DQN/save_graph/Cartpole_DQN.png" /></p>
 
 <br/>
+This is graph of Doubel DQN algorithm
+
+<p align="left"><img width="40%" src="./2. Double DQN/save_graph/Cartpole_DoubleDQN.png" /></p>
+
+<br/>
+This is graph of Dueling DQN algorithm (This doesn't work at all...)
+
+<p align="left"><img width="40%" src="./3. Dueling DQN/save_graph/Cartpole_Dueling_DQN.png" /></p>
+
+<br/>
 This is graph of Policy Gradient algorithm
 <p align="left"><img width="40%" src="./4. Policy Gradient/save_graph/Cartpole_PG.png" /></p>
 
