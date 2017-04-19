@@ -25,7 +25,7 @@ class DQNAgent:
         self.epsilon_decay = .9999
         self.epsilon_min = 0.01
         self.batch_size = 32
-        self.train_start = 1000
+        self.train_start = 100
 
         self.model = self.build_model()
         self.target_model = self.build_model()
@@ -37,7 +37,7 @@ class DQNAgent:
         model = Sequential()
         model.add(Dense(20, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(20, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(5, activation='linear', kernel_initializer='he_uniform'))
+        model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -64,7 +64,7 @@ class DQNAgent:
         if len(self.memory) < self.train_start:
             return
         batch_size = min(self.batch_size, len(self.memory))
-        mini_batch = np.random.choice(len(self.memory), batch_size)
+        mini_batch = random.sample(self.memory, batch_size)
 
         update_input = np.zeros((batch_size, self.state_size))
         update_target = np.zeros((batch_size, self.action_size))
@@ -128,7 +128,7 @@ if __name__ == "__main__":
             score += reward
             # swap observation
             state = copy.deepcopy(next_state)
-            print("reward:", reward, "  time_step:", global_step, "  epsilon:", agent.epsilon)
+            print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.epsilon)
 
             if global_step % 100 == 0:
                 agent.update_target_model()
