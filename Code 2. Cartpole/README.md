@@ -26,4 +26,4 @@ This is graph of Policy Gradient algorithm
 
 <br/>
 This is graph of Actor Critic algorithm
-<p align="left"><img width="40%" src="./5. Actor-Critic/save_graph/Cartpole_ActorCritic.png" /></p>
+<p align="left"><img width="40%" src="./5. Actor-Critic/save_graph/Cartpole_ActorCritc.png" /></p>
