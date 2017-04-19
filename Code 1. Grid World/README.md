@@ -5,15 +5,15 @@ This is Grid World example that we made for the simple algorithm test
 <br/>
 
 ## Dynamic Programming
-####1. Policy Iteration
-####2. Value Iteration
+1. Policy Iteration
+2. Value Iteration
     
 <br/>
 
 ## Reinforcement Learning Fundamental Algorithms
-####3. Monte-Carlo
-####4. SARSA
-####5. Q-Learning
+3. Monte-Carlo
+4. SARSA
+5. Q-Learning
 
 <br/>
 
@@ -25,7 +25,7 @@ We used Neural Network as function approximator
 
 <br/>
 
-####6. DQN
-####7. Policy Gradient
+6. DQN
+7. Policy Gradient
     
     
