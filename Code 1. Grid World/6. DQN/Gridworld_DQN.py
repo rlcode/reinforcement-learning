@@ -142,7 +142,8 @@ if __name__ == "__main__":
                       "  epsilon:", agent.epsilon)
 
         if e % 100 == 0:
-            # agent.save_model("./save_model/10by10 : " + str(e))
+            pass
+            agent.save_model("./save_model/10by10")
 
     # end of game
     print('game over')
