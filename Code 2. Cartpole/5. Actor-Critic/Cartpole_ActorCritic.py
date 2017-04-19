@@ -8,13 +8,16 @@ from keras.optimizers import Adam
 from keras.models import Sequential
 from keras import backend as K
 
-EPISODES = 1000
+EPISODES = 300
 
 class ACAgent():
     def __init__(self,state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 True로 바꿀 것
         self.render = False
-
+        
+        # agent를 학습시키지 않으려면 False로 바꿀 것
+        self.is_train = True
+        
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
         self.action_size = action_size
@@ -149,12 +152,13 @@ if __name__ == "__main__":
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
             # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
-            reward = reward if not done else -100
+            reward = reward if not done or score == 499 else -100
 
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
             # 매 타임스텝마다 학습을 진행
-            agent.train_replay()
+            if agent.is_train:
+                agent.train_replay()
 
             score += reward
             state = next_state
@@ -163,13 +167,17 @@ if __name__ == "__main__":
                 env.reset()
 
                 # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
-                score = score + 100
+                score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/Cartpole_ActorCritc.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory))
-
+                
+                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    agent.is_train = False
+                    
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
             agent.save_model("./save_model/Cartpole_ActorCritic.h5")
