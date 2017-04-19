@@ -143,7 +143,8 @@ if __name__ == "__main__":
             if done:
                 env.reset()
                 # 매 에피소드마다 모아온 <s, a, r>을 학습
-                agent.train_episodes()
+                if agent.is_train:
+                    agent.train_episodes()
 
                 # 에피소드에 따른 score를 plot
                 score = score if score==500 else score+100
