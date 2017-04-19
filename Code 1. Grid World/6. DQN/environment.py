@@ -1,21 +1,20 @@
-import numpy as np
-
-np.random.seed(1)
-import tkinter as tk
 import time
-import random
+import numpy as np
+import tkinter as tk
 from PIL import ImageTk, Image
 
 UNIT = 100  # pixels
 HEIGHT = 10  # grid height
 WIDTH = 10  # grid width
 
+np.random.seed(1)
+
 
 class Env(tk.Tk):
     def __init__(self):
         super(Env, self).__init__()
         self.action_space = ['u', 'd', 'l', 'r']
-        self.n_actions = len(self.action_space)
+        self.action_size = len(self.action_space)
         self.title('DeepQNetwork')
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT))
         self.build_graphic()
@@ -57,7 +56,7 @@ class Env(tk.Tk):
         #
         #
         # #goal
-        self.set_reward([9, 9], 10)
+        self.set_reward([9, 9], 100)
 
         # add image to canvas
         self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
@@ -86,7 +85,7 @@ class Env(tk.Tk):
         #
         #
         # #goal
-        self.set_reward([9, 9], 10)
+        self.set_reward([9, 9], 100)
 
     def set_reward(self, state, reward):
         state = [int(state[0]), int(state[1])]
@@ -192,7 +191,7 @@ class Env(tk.Tk):
         if s[0] < (WIDTH - 1) * UNIT:
             base_action[0] += UNIT
         else:
-            base_action[0] = -(WIDTH-1)*UNIT
+            base_action[0] = -(WIDTH - 1) * UNIT
 
         # if action == 4 # move _none
 
