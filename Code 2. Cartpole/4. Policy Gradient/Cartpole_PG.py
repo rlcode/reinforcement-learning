@@ -6,13 +6,16 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 from keras import backend as K
 
-EPISODES = 5000
+EPISODES = 1000
 
 
 class PGAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 True로 바꿀 것
         self.render = True
+        
+        # agent를 학습시키지 않으려면 False로 바꿀 것
+        self.is_train = True
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -128,10 +131,11 @@ if __name__ == "__main__":
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            reward = reward if not done else -100
+            reward = reward if not done or score==499 else -100
 
             # <s, a, r>을 memory에 저장
-            agent.memory(state, action, reward)
+            if agent.is_train:
+                agent.memory(state, action, reward)
 
             score += reward
             state = next_state
@@ -139,16 +143,21 @@ if __name__ == "__main__":
             if done:
                 env.reset()
                 # 매 에피소드마다 모아온 <s, a, r>을 학습
-                agent.train_episodes()
+                if agent.is_train:
+                    agent.train_episodes()
 
                 # 에피소드에 따른 score를 plot
-                score = score + 100
+                score = score if score==500 else score+100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/Cartpole_PG.png")
                 print("episode:", e, "  score:", score)
+                
+                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    agent.is_train = False
 
-        # 20 에피소드마다 학습 모델을 저장
+        # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
             agent.save_model("./save_model/Cartpole_PG.h5")
