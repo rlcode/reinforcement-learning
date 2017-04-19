@@ -20,6 +20,7 @@ we have changed Grid World so the obstacles are moving. To solve this problem, w
 We used Neural Network as function approximator.
 <p align="left"><img width="40%" src="./gridworld_changing.png" /></p>
 <br/>
+
 3. Futher Reinforcement Learning Algorithms
     1. DQN
     2. Policy Gradient
