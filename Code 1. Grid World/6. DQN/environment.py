@@ -115,7 +115,7 @@ class Env(tk.Tk):
         for reward in self.rewards:
             if reward['state'] == state:
                 rewards += reward['reward']
-                if reward['reward'] == 10:
+                if reward['reward'] == 100:
                     check_list['if_goal'] = True
         check_list['rewards'] = rewards
 
