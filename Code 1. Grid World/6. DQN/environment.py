@@ -3,7 +3,7 @@ import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
 
-UNIT = 100  # pixels
+UNIT = 50  # pixels
 HEIGHT = 10  # grid height
 WIDTH = 10  # grid width
 
@@ -35,9 +35,9 @@ class Env(tk.Tk):
 
         # image_load
         self.rectangle_image = ImageTk.PhotoImage(
-            Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
-        self.fire_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
-        self.fish_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
+            Image.open("../resources/rectangle.png").resize((30, 30), Image.ANTIALIAS))
+        self.fire_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((30, 30)))
+        self.fish_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((30, 30)))
 
         self.rewards = list()
         self.goal = list()
@@ -92,14 +92,14 @@ class Env(tk.Tk):
         temp = {}
         if reward > 0:
             temp['reward'] = reward
-            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + 50, (UNIT * state[1]) + 50,
+            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
                                                       image=self.fish_image)
             self.goal.append(temp['figure'])
 
 
         elif reward < 0:
             temp['reward'] = reward
-            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + 50, (UNIT * state[1]) + 50,
+            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
                                                       image=self.fire_image)
 
         temp['coords'] = self.canvas.coords(temp['figure'])
@@ -131,7 +131,7 @@ class Env(tk.Tk):
         time.sleep(0.5)
         self.canvas.delete(self.rectangle)
         origin = np.array([UNIT / 2, UNIT / 2])
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+        self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rectangle_image)
         # return observation
 
         self.reset_reward()
