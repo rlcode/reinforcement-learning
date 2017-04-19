@@ -18,7 +18,9 @@ This is Grid World example that we made for the simple algorithm test
 <br/>
 we have changed Grid World so the obstacles are moving. To solve this problem, we have to use function approximator. 
 We used Neural Network as function approximator.
+
 <p align="left"><img width="40%" src="./gridworld_changing.png" /></p>
+
 <br/>
 
 3. Futher Reinforcement Learning Algorithms
