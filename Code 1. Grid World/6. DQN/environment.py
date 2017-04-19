@@ -56,7 +56,7 @@ class Env(tk.Tk):
         #
         #
         # #goal
-        self.set_reward([9, 9], 100)
+        self.set_reward([9, 9], 11)
 
         # add image to canvas
         self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
@@ -85,7 +85,7 @@ class Env(tk.Tk):
         #
         #
         # #goal
-        self.set_reward([9, 9], 100)
+        self.set_reward([9, 9], 11)
 
     def set_reward(self, state, reward):
         state = [int(state[0]), int(state[1])]
@@ -115,7 +115,7 @@ class Env(tk.Tk):
         for reward in self.rewards:
             if reward['state'] == state:
                 rewards += reward['reward']
-                if reward['reward'] == 100:
+                if reward['reward'] == 11:
                     check_list['if_goal'] = True
         check_list['rewards'] = rewards
 

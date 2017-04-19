@@ -53,7 +53,7 @@ class DQNAgent:
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
             # The agent acts randomly
-            return random.choice(self.action_space)
+            return random.randrange(self.action_size)
         else:
             # Predict the reward value based on the given state
             state = np.float32(state)
