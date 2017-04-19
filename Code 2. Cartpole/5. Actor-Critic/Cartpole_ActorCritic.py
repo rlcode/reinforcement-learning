@@ -2,7 +2,6 @@ import gym
 import pylab
 import random
 import numpy as np
-from gym import wrappers
 from collections import deque
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -173,5 +172,4 @@ if __name__ == "__main__":
 
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
-            pass
-            # agent.save_model("./save_model/Cartpole_ActorCritic.h5")
+            agent.save_model("./save_model/Cartpole_ActorCritic.h5")
