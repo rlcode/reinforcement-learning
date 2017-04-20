@@ -11,7 +11,7 @@ from keras.models import Sequential
 EPISODES = 300
 
 
-class DQNAgent:
+class DoubleDQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
         self.render = False
@@ -41,8 +41,8 @@ class DQNAgent:
     # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
     def build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -65,7 +65,7 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-            # print(len(self.memory))
+        # print(len(self.memory))
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
     def train_replay(self):
@@ -89,9 +89,11 @@ class DQNAgent:
                 a = np.argmax(self.model.predict(next_state)[0])
                 target[action] = reward + self.discount_factor * \
                                           (self.target_model.predict(next_state)[0][a])
+            update_input[i] = state
+            update_target[i] = target
 
-            # 학습할 정답인 타겟과 현재 자신의 값의 minibatch를 만들고 그것으로 한 번에 모델 업데이트
-            self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        # 학습할 정답인 타겟과 현재 자신의 값의 minibatch를 만들고 그것으로 한 번에 모델 업데이트
+        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
     # 저장한 모델을 불러옴
     def load_model(self, name):
@@ -109,7 +111,7 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     # DQN 에이전트의 생성
-    agent = DQNAgent(state_size, action_size)
+    agent = DoubleDQNAgent(state_size, action_size)
 
     scores, episodes = [], []
 
@@ -157,5 +159,5 @@ if __name__ == "__main__":
                     sys.exit()
 
         # 50 에피소드마다 학습 모델을 저장
-        if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DoubleDQN.h5")
+        # if e % 50 == 0:
+        #     agent.save_model("./save_model/Cartpole_DoubleDQN.h5")

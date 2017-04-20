@@ -5,14 +5,14 @@ import random
 import numpy as np
 from collections import deque
 from keras import backend as k
+from keras.models import Model
 from keras.optimizers import Adam
-from keras.models import Sequential
-from keras.layers import Dense, Lambda
+from keras.layers import Dense, Lambda, merge, Input
 
 EPISODES = 300
 
 
-class DQNAgent:
+class DuelingDQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
         self.render = False
@@ -28,9 +28,9 @@ class DQNAgent:
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
-        self.batch_size = 64
+        self.batch_size = 24
         self.train_start = 1000
-        self.memory = deque(maxlen=10000)
+        self.memory = deque(maxlen=2000)
 
         # 학습할 모델과 타겟 모델을 생성
         self.model = self.build_model()
@@ -42,15 +42,19 @@ class DQNAgent:
     # Deep Neural Network를 통해서 Q Function을 근사
     # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
     def build_model(self):
-        model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
-        # State Value가 1개, 어드밴티지가 action의 갯수 -> (action_size + 1)개의 output을 만들어 냄
-        model.add(Dense(self.action_size + 1, activation='linear', kernel_initializer='he_uniform'))
-        # State Value에 어드밴티지를 더해서 Q Value를 만들어 냄
-        # 어드밴티지는 평균을 취하는 방식으로 한 값에서 평균을 뺀 값을 어드밴티지로 함
-        model.add(Lambda(lambda a: k.expand_dims(a[:, 0], -1) + a[:, 1:] - k.mean(a[:, 1:], keepdims=True),
-                         output_shape=(self.action_size,)))
+        input = Input(shape=(self.state_size,))
+        x = Dense(32, input_shape=(self.state_size,), activation='relu', kernel_initializer='he_uniform')(input)
+        x = Dense(16, activation='relu', kernel_initializer='he_uniform')(x)
+
+        state_value = Dense(1, kernel_initializer='he_uniform')(x)
+        state_value = Lambda(lambda s: k.expand_dims(s[:, 0], -1), output_shape=(self.action_size,))(state_value)
+
+        action_advantage = Dense(self.action_size, kernel_initializer='he_uniform')(x)
+        action_advantage = Lambda(lambda a: a[:, :] - k.mean(a[:, :], keepdims=True),
+                                  output_shape=(self.action_size,))(action_advantage)
+
+        q_value = merge([state_value, action_advantage], mode='sum')
+        model = Model(input=input, output=q_value)
         model.summary()
         model.compile(loss='mse', optimizer=Adam(self.learning_rate))
         return model
@@ -70,9 +74,8 @@ class DQNAgent:
     # <s,a,r,s'>을 replay_memory에 저장함
     def replay_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        if len(self.memory) > self.train_start:
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_decay
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
     def train_replay(self):
@@ -120,7 +123,7 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     # DQN 에이전트의 생성
-    agent = DQNAgent(state_size, action_size)
+    agent = DuelingDQNAgent(state_size, action_size)
 
     global_step = 0
     scores, episodes = [], []
@@ -142,7 +145,7 @@ if __name__ == "__main__":
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
             # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
-            reward = reward if not done or score == 499 else -100
+            reward = reward if not done or score == 500 else -100
 
             # <s, a, r, s'>을 replay memory에 저장
             agent.replay_memory(state, action, reward, next_state, done)
@@ -151,12 +154,10 @@ if __name__ == "__main__":
 
             score += reward
             state = next_state
-            # 1000스텝마다 학습하는 모델을 타겟 모델로 복사
-            if global_step % 1000 == 0:
-                agent.update_target_model()
 
             if done:
                 env.reset()
+                agent.update_target_model()
                 # 에피소드에 따른 score를 plot
                 score = score if score == 500 else score + 100
                 scores.append(score)

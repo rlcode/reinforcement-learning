@@ -29,7 +29,7 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
-        self.memory = deque(maxlen=10000)
+        self.memory = deque(maxlen=2000)
 
         # 학습할 모델과 타겟 모델을 생성
         self.model = self.build_model()
