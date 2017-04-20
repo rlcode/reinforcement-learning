@@ -48,7 +48,7 @@ class PGAgent:
         return model
 
     def optimizer(self):
-        action = K.placeholder(shape=[None, 2])
+        action = K.placeholder(shape=[None, self.action_size])
         discounted_rewards = K.placeholder(shape=[None, ])
 
         # Policy Gradient 의 핵심
