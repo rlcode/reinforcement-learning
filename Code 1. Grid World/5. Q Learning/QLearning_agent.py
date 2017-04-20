@@ -24,12 +24,11 @@ class QLearningAgent:
                 )
             )
 
-    # 큐 함수를 큐러닝 알고리즘에 따라 업데이트
+    # update q function with sample <s, a, r, s'>
     def learn(self, state, action, reward, next_state):
-        # 먼저 가본 적이 있는 상태인지 확인하고 아니라면 초기화
         self.check_state_exist(next_state)
         q_1 = self.q_table.ix[state, action]
-        # 다음 상태의 큐함수 중 최대
+        # using Bellman Optimality Equation to update q function
         q_2 = reward + self.discount_factor * self.q_table.ix[next_state, :].max()
         self.q_table.ix[state, action] += self.learning_rate * (q_2 - q_1)
 
