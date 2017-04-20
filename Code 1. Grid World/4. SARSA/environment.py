@@ -34,14 +34,14 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.cat_image = ImageTk.PhotoImage(Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
-        self.fire_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
+        self.rectangle_image = ImageTk.PhotoImage(Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
+        self.triangle_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
         self.fish_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
 
         # add image to canvas
-        self.cat = self.canvas.create_image(50, 50, image=self.cat_image)
-        self.hell1 = self.canvas.create_image(250, 150, image=self.fire_image)
-        self.hell2 = self.canvas.create_image(150, 250, image=self.fire_image)
+        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+        self.triangle1 = self.canvas.create_image(250, 150, image=self.triangle_image)
+        self.triangle2 = self.canvas.create_image(150, 250, image=self.triangle_image)
         self.fish = self.canvas.create_image(250, 250, image=self.fish_image)
 
         # pack all
@@ -87,14 +87,14 @@ class Env(tk.Tk):
     def reset(self):
         self.update()
         time.sleep(0.5)
-        self.canvas.delete(self.cat)
+        self.canvas.delete(self.rectangle)
         origin = np.array([UNIT / 2, UNIT / 2])
-        self.cat = self.canvas.create_image(50, 50, image=self.cat_image)
+        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
         # return observation
-        return self.coords_to_state(self.canvas.coords(self.cat))
+        return self.coords_to_state(self.canvas.coords(self.rectangle))
 
     def step(self, action):
-        s = self.canvas.coords(self.cat)
+        s = self.canvas.coords(self.rectangle)
         base_action = np.array([0, 0])
         self.render()
 
@@ -111,15 +111,15 @@ class Env(tk.Tk):
             if s[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
-        self.canvas.move(self.cat, base_action[0], base_action[1])  # move agent
+        self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
 
-        s_ = self.canvas.coords(self.cat)  # next state
+        s_ = self.canvas.coords(self.rectangle)  # next state
 
         # reward function
         if s_ == self.canvas.coords(self.fish):
             reward = 100
             done = True
-        elif s_ in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
+        elif s_ in [self.canvas.coords(self.triangle1), self.canvas.coords(self.triangle2)]:
             reward = -100
             done = True
         else:

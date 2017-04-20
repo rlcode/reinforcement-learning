@@ -34,15 +34,15 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.cat_image = ImageTk.PhotoImage(Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
-        self.fire_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
-        self.fish_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
+        self.rectangle_image = ImageTk.PhotoImage(Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
+        self.triangle_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
+        self.circle_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
 
         # add image to canvas
-        self.cat = self.canvas.create_image(50, 50, image=self.cat_image)
-        self.hell1 = self.canvas.create_image(250, 150, image=self.fire_image)
-        self.hell2 = self.canvas.create_image(150, 250, image=self.fire_image)
-        self.fish = self.canvas.create_image(250, 250, image=self.fish_image)
+        self.cat = self.canvas.create_image(50, 50, image=self.rectangle_image)
+        self.triangle1 = self.canvas.create_image(250, 150, image=self.triangle_image)
+        self.triangle2 = self.canvas.create_image(150, 250, image=self.triangle_image)
+        self.circle = self.canvas.create_image(250, 250, image=self.circle_image)
 
         # pack all
         self.canvas.pack()
@@ -52,7 +52,7 @@ class Env(tk.Tk):
         time.sleep(0.5)
         self.canvas.delete(self.cat)
         origin = np.array([UNIT / 2, UNIT / 2])
-        self.cat = self.canvas.create_image(50, 50, image=self.cat_image)
+        self.cat = self.canvas.create_image(50, 50, image=self.rectangle_image)
         # return observation
         return self.coords_to_state(self.canvas.coords(self.cat))
 
@@ -116,10 +116,10 @@ class Env(tk.Tk):
         s_ = self.canvas.coords(self.cat)  # next state
 
         # reward function
-        if s_ == self.canvas.coords(self.fish):
+        if s_ == self.canvas.coords(self.circle):
             reward = 100
             done = True
-        elif s_ in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
+        elif s_ in [self.canvas.coords(self.triangle1), self.canvas.coords(self.triangle2)]:
             reward = -100
             done = True
         else:
