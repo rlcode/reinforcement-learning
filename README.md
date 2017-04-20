@@ -28,15 +28,9 @@ pip install -r requirements.txt
 
 - [Policy Iteration](./Code%201.%20Grid%20World/1.%20Policy%20Iteration)
 - [Value Iteration](./Code%201.%20Grid%20World/2.%20Value%20Iteration)
-<<<<<<< Updated upstream
 - [Monte Carlo](./Code%201.%20Grid%20World/3.%20Monte-Carlo)
 - [SARSA](./Code%201.%20Grid%20World/4.%20SARSA)
 - [Q-Learning](./Code%201.%20Grid%20World/5.%20Q%20Learning)
-=======
-- [SARSA](Code 1. Grid World/4. SARSA)
-- [Q-Learning](Code 1. Grid World/5. Q Learning)
-- [Monte Carlo](Code 1. Grid World/3. Monte-Carlo)
->>>>>>> Stashed changes
 - [Deep Q Network](./Code%201.%20Grid%20World/6.%20DQN)
 - [Policy Gradient](./Code%201.%20Grid%20World/7.%20Policy%20Gradient)
 
