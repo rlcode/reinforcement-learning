@@ -1,4 +1,5 @@
 <p align="center"><img width="90%" src="images/Reinforcement-Learning.png"></p>
+
 --------------------------------------------------------------------------------
 
 > Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [[한국어]](./README-kr.md)
