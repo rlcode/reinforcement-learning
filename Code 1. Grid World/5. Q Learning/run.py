@@ -1,40 +1,34 @@
 from environment import Env
-from agent import QLearning
-
-
-def update():
-    for episode in range(1000):
-        # 환경 초기화와  환경으로 부터 현재 상태 받아오기
-        state = env.reset()
-
-        while True:
-            # Gui 렌더링
-            env.render()
-
-            # 에이전트로부터 해당 상태에 대한 행동을 받아옴
-            action = agent.get_action(str(state))
-
-            # 에이전트의 행동을 취하고 다음 상태와 보상과 에피소드가 끝났는지의 여부를 받아옴
-            state_, reward, done = env.step(action)
-
-            # 에이전트의 learn 함수에 S A R S_ 를 넣어줌
-            agent.learn(str(state), action, reward, str(state_))
-
-            # 현재 상태에 다음 상태를 대입,
-            state = state_
-
-            env.print_value_all(agent.q_table)
-
-            # 에피소드가 끝나면 break
-            if done:
-                break
-
-    # 모든 에피소드가 다 끝나면 게임오버
-    print('game over')
-    # env.destroy()
+from QLearning_agent import QLearningAgent
 
 
 if __name__ == "__main__":
     env = Env()
-    agent = QLearning(actions=list(range(env.n_actions)))
-    update()
+    agent = QLearningAgent(actions=list(range(env.n_actions)))
+
+    for episode in range(1000):
+        # reset environment and initialize state
+        state = env.reset()
+
+        while True:
+            env.render()
+
+            # get action of state from agent
+            action = agent.get_action(str(state))
+
+            # take action and doing one step in the environment
+            # environment return next state, immediate reward and
+            # information about terminal of episode
+            next_state, reward, done = env.step(action)
+
+            # with sample <s,a,r,s'>, agent learns new q function
+            agent.learn(str(state), action, reward, str(next_state))
+
+            state = next_state
+
+            # print q function of all states at screen
+            env.print_value_all(agent.q_table)
+
+            # if episode ends, then break
+            if done:
+                break

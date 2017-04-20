@@ -11,14 +11,20 @@ from keras.models import Sequential
 EPISODES = 1000
 
 
+# this is DQN Agent for the Cartpole
+# it uses Neural Network to approximate q function
+# and replay memory & target q network
 class DQNAgent:
     def __init__(self):
+        # if you want to see Cartpole learning, then change to True
         self.render = False
 
+        # actions which agent can do
         self.action_space = [0, 1, 2, 3, 4]
+        # get size of state and action
         self.action_size = len(self.action_space)
         self.state_size = 22
-        self.discount_factor = 0.99  # decay rate
+        self.discount_factor = 0.99
         self.learning_rate = 0.001
 
         self.epsilon = 1.  # exploration
@@ -27,13 +33,17 @@ class DQNAgent:
         self.batch_size = 32
         self.train_start = 100
 
+        # create replay memory using deque
+        self.memory = deque(maxlen=10000)
         self.model = self.build_model()
         self.target_model = self.build_model()
-        self.memory = deque(maxlen=10000)
+        # copy the model to target model
+        # --> initialize the target model so that the parameters of model & target model to be same
         self.update_target_model()
 
+    # approximate Q function using Neural Network
+    # state is input and Q Value of each action is output of network
     def build_model(self):
-        # Neural Net for Deep Q Learning
         model = Sequential()
         model.add(Dense(20, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(20, activation='relu', kernel_initializer='he_uniform'))
@@ -42,14 +52,11 @@ class DQNAgent:
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
+    # after some time interval update the target model to be same with model
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
 
-    def replay_memory(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
-
+    # get action from model using epsilon-greedy policy
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
             # The agent acts randomly
@@ -60,6 +67,13 @@ class DQNAgent:
             q_values = self.model.predict(state)
             return np.argmax(q_values[0])
 
+    # save sample <s,a,r,s'> to the replay memory
+    def replay_memory(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
+    # pick samples randomly from replay memory (with batch_size)
     def train_replay(self):
         if len(self.memory) < self.train_start:
             return
@@ -76,6 +90,8 @@ class DQNAgent:
             next_state = np.float32(next_state)
             target = self.model.predict(state)[0]
 
+            # like Q Learning, get maximum Q value at s'
+            # But from target model
             if done:
                 target[action] = reward
             else:
@@ -85,12 +101,15 @@ class DQNAgent:
             update_input[i] = state
             update_target[i] = target
 
-            # Train the Neural Net with the state and target_f
-            self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        # make minibatch which includes target q value and predicted q value
+        # and do the model fit!
+        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
+    # load the saved model
     def load_model(self, name):
         self.model.load_weights(name)
 
+    # save the model which is under training
     def save_model(self, name):
         self.model.save_weights(name)
 
@@ -117,19 +136,20 @@ if __name__ == "__main__":
                 env.render()
             global_step += 1
 
-            # RL choose action based on observation and go one step
+            # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done = env.step(action)
             next_state = np.reshape(next_state, [1, 22])
 
             agent.replay_memory(state, action, reward, next_state, done)
-            # every time step we do train from the replay memory
+            # every time step we do training
             agent.train_replay()
             score += reward
-            # swap observation
+
             state = copy.deepcopy(next_state)
             print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.epsilon)
 
+            # every 100 time steps update the target model to be same with model
             if global_step % 100 == 0:
                 agent.update_target_model()
 

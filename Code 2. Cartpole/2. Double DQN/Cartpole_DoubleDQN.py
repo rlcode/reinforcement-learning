@@ -11,17 +11,19 @@ from keras.models import Sequential
 EPISODES = 300
 
 
-class DQNAgent:
+# this is Double DQN Agent for the Cartpole
+# it uses Neural Network to approximate q function
+# and replay memory & target q network
+class DoubleDQNAgent:
     def __init__(self, state_size, action_size):
-        # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
+        # if you want to see Cartpole learning, then change to True
         self.render = False
 
-        # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
+        # get size of state and action
         self.state_size = state_size
         self.action_size = action_size
 
-        # Cartpole DQN 학습의 Hyper parameter 들
-        # deque를 통해서 replay memory 생성
+        # these is hyper parameters for the Double DQN
         self.discount_factor = 0.99
         self.learning_rate = 0.001
         self.epsilon = 1.0
@@ -29,30 +31,32 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
+        # create replay memory using deque
         self.memory = deque(maxlen=2000)
 
-        # 학습할 모델과 타겟 모델을 생성
+        # create main model and target model
         self.model = self.build_model()
         self.target_model = self.build_model()
-        # 학습할 모델을 타겟 모델로 복사 --> 타겟 모델의 초기화(weight를 같게 해주고 시작해야 함)
+        # copy the model to target model
+        # --> initialize the target model so that the parameters of model & target model to be same
         self.update_target_model()
 
-    # Deep Neural Network를 통해서 Q Function을 근사
-    # state가 입력, 각 행동에 대한 Q Value가 출력인 모델을 생성
+    # approximate Q function using Neural Network
+    # state is input and Q Value of each action is output of network
     def build_model(self):
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(16, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
 
-    # 일정한 시간 간격마다 타겟 모델을 현재 학습하고 있는 모델로 업데이트
+    # after some time interval update the target model to be same with model
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
 
-    # 행동의 선택은 현재 네트워크에 대해서 epsilon-greedy 정책을 사용
+    # get action from model using epsilon-greedy policy
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
@@ -60,14 +64,13 @@ class DQNAgent:
             q_value = self.model.predict(state)
             return np.argmax(q_value[0])
 
-    # <s,a,r,s'>을 replay_memory에 저장함
+    # save sample <s,a,r,s'> to the replay memory
     def replay_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-            # print(len(self.memory))
 
-    # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
+    # pick samples randomly from replay memory (with batch_size)
     def train_replay(self):
         if len(self.memory) < self.train_start:
             return
@@ -81,35 +84,41 @@ class DQNAgent:
             state, action, reward, next_state, done = mini_batch[i]
             target = self.model.predict(state)[0]
 
-            # 큐러닝에서와 같이 s'에서의 최대 Q Value를 가져옴. 단, 타겟 모델에서 가져옴
+            # like Q Learning, get maximum Q value at s'
+            # But from target model
             if done:
                 target[action] = reward
             else:
-                # Double DQN의 핵심. 행동의 선택은 학습 모델로, 업데이트하는 값은 타겟 모델로
+                # the key point of Double DQN
+                # selection of action is from model
+                # update is from target model
                 a = np.argmax(self.model.predict(next_state)[0])
                 target[action] = reward + self.discount_factor * \
                                           (self.target_model.predict(next_state)[0][a])
+            update_input[i] = state
+            update_target[i] = target
 
-            # 학습할 정답인 타겟과 현재 자신의 값의 minibatch를 만들고 그것으로 한 번에 모델 업데이트
-            self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        # make minibatch which includes target q value and predicted q value
+        # and do the model fit!
+        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
 
-    # 저장한 모델을 불러옴
+    # load the saved model
     def load_model(self, name):
         self.model.load_weights(name)
 
-    # 학습된 모델을 저장함
+    # save the model which is under training
     def save_model(self, name):
         self.model.save_weights(name)
 
 
 if __name__ == "__main__":
-    # CartPole-v1의 경우 500 타임스텝까지 플레이가능
+    # in case of CartPole-v1, you can play until 500 time step
     env = gym.make('CartPole-v1')
-    # 환경으로부터 상태와 행동의 크기를 가져옴
+    # get size of state and action from environment
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
-    # DQN 에이전트의 생성
-    agent = DQNAgent(state_size, action_size)
+
+    agent = DoubleDQNAgent(state_size, action_size)
 
     scores, episodes = [], []
 
@@ -124,26 +133,26 @@ if __name__ == "__main__":
             if agent.render:
                 env.render()
 
-            # 현재 상태에서 행동을 선택하고 한 스텝을 진행
+            # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            # 에피소드를 끝나게 한 행동에 대해서 -100의 패널티를 줌
+            # if an action make the episode end, then gives penalty of -100
             reward = reward if not done or score == 499 else -100
 
-            # <s, a, r, s'>을 replay memory에 저장
+            # save the sample <s, a, r, s'> to the replay memory
             agent.replay_memory(state, action, reward, next_state, done)
-            # 매 타임스텝마다 학습을 진행
+            # every time step do the training
             agent.train_replay()
             score += reward
             state = next_state
 
             if done:
                 env.reset()
-                # 매 에피소드마다 학습하는 모델을 타겟 모델로 복사
+                # every episode update the target model to be same with model
                 agent.update_target_model()
 
-                # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
+                # every episode, plot the play time
                 score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
@@ -152,10 +161,11 @@ if __name__ == "__main__":
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
-                # 지난 10 에피소드의 평균이 490 이상이면 학습을 멈춤
+                # if the mean of scores of last 10 episode is bigger than 490
+                # stop training
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
                     sys.exit()
 
-        # 50 에피소드마다 학습 모델을 저장
+        # save the model
         if e % 50 == 0:
             agent.save_model("./save_model/Cartpole_DoubleDQN.h5")

@@ -1,9 +1,9 @@
+import time
 import numpy as np
+import tkinter as tk
+from PIL import ImageTk, Image
 
 np.random.seed(1)
-import tkinter as tk
-import time
-from PIL import ImageTk, Image
 
 UNIT = 100  # pixels
 HEIGHT = 5  # grid height
@@ -34,7 +34,8 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.rectangle_image = ImageTk.PhotoImage(Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
+        self.rectangle_image = ImageTk.PhotoImage(
+            Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
         self.triange_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
         self.circle_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
 
@@ -94,41 +95,41 @@ class Env(tk.Tk):
         return self.coords_to_state(self.canvas.coords(self.rectangle))
 
     def step(self, action):
-        s = self.canvas.coords(self.rectangle)
+        state = self.canvas.coords(self.rectangle)
         base_action = np.array([0, 0])
         self.render()
 
         if action == 0:  # up
-            if s[1] > UNIT:
+            if state[1] > UNIT:
                 base_action[1] -= UNIT
         elif action == 1:  # down
-            if s[1] < (HEIGHT - 1) * UNIT:
+            if state[1] < (HEIGHT - 1) * UNIT:
                 base_action[1] += UNIT
         elif action == 2:  # left
-            if s[0] > UNIT:
+            if state[0] > UNIT:
                 base_action[0] -= UNIT
         elif action == 3:  # right
-            if s[0] < (WIDTH - 1) * UNIT:
+            if state[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
         self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
 
-        s_ = self.canvas.coords(self.rectangle)  # next state
+        next_state = self.canvas.coords(self.rectangle)  # next state
 
         # reward function
-        if s_ == self.canvas.coords(self.circle):
+        if next_state == self.canvas.coords(self.circle):
             reward = 100
             done = True
-        elif s_ in [self.canvas.coords(self.triangle1), self.canvas.coords(self.triangle2)]:
+        elif next_state in [self.canvas.coords(self.triangle1), self.canvas.coords(self.triangle2)]:
             reward = -100
             done = True
         else:
             reward = 0
             done = False
 
-        s_ = self.coords_to_state(s_)
+        next_state = self.coords_to_state(next_state)
 
-        return s_, reward, done
+        return next_state, reward, done
 
     def render(self):
         time.sleep(0.05)
