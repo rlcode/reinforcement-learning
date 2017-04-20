@@ -16,6 +16,9 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 4. numpy
 5. pandas
 6. matplot
+7. pillow
+8. Skimage
+9. h5py
 
 ### Install Requirements
 ```

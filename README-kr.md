@@ -19,6 +19,7 @@
 6. pillow
 7. matplot
 8. Skimage
+9. h5py
 
 ## 목차 (Table of Contents)
 

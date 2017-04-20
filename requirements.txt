@@ -6,3 +6,4 @@ tensorflow==1.0.0
 Pillow==4.1.0
 gym==0.8.1
 h5py==2.7.0
+scikit-image==0.13.0
