@@ -8,15 +8,15 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
 
-EPISODES = 300
+EPISODES = 5000
 
 
-# this is DQN Agent for the Cartpole
+# this is DQN Agent for the MountainCar
 # it uses Neural Network to approximate q function
 # and replay memory & target q network
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        # if you want to see Cartpole learning, then change to True
+        # if you want to see MountainCar learning, then change to True
         self.render = False
 
         # get size of state and action
@@ -27,12 +27,12 @@ class DQNAgent:
         self.discount_factor = 0.99
         self.learning_rate = 0.001
         self.epsilon = 1.0
-        self.epsilon_decay = 0.999
+        self.epsilon_decay = 0.99999
         self.epsilon_min = 0.01
         self.batch_size = 64
-        self.train_start = 1000
+        self.train_start = 100000
         # create replay memory using deque
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=100000)
 
         # create main model and target model
         self.model = self.build_model()
@@ -45,8 +45,7 @@ class DQNAgent:
     # state is input and Q Value of each action is output of network
     def build_model(self):
         model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(64, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
@@ -67,13 +66,15 @@ class DQNAgent:
     # save sample <s,a,r,s'> to the replay memory
     def replay_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
 
     # pick samples randomly from replay memory (with batch_size)
     def train_replay(self):
         if len(self.memory) < self.train_start:
             return
+
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+
         batch_size = min(self.batch_size, len(self.memory))
         mini_batch = random.sample(self.memory, batch_size)
 
@@ -109,21 +110,21 @@ class DQNAgent:
 
 if __name__ == "__main__":
     # in case of CartPole-v1, you can play until 500 time step
-    env = gym.make('CartPole-v1')
+    env = gym.make('MountainCar-v0')
     # get size of state and action from environment
     state_size = env.observation_space.shape[0]
-    action_size = env.action_space.n
-
+    action_size = 2 # env.action_space.n
     agent = DQNAgent(state_size, action_size)
 
     scores, episodes = [], []
+    action_fake = 0
 
     for e in range(EPISODES):
         done = False
         score = 0
         state = env.reset()
+
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
             if agent.render:
@@ -131,11 +132,15 @@ if __name__ == "__main__":
 
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
-            next_state, reward, done, info = env.step(action)
-            next_state = np.reshape(next_state, [1, state_size])
-            # if an action make the episode end, then gives penalty of -100
-            reward = reward if not done or score == 499 else -100
+            if action == 0:
+                action_fake = 0
+            if action == 1:
+                action_fake = 2
 
+            next_state, reward, done, info = env.step(action_fake)
+            next_state = np.reshape(next_state, [1, state_size])
+            if reward > -1:
+                reward = 100
             # save the sample <s, a, r, s'> to the replay memory
             agent.replay_memory(state, action, reward, next_state, done)
             # every time step do the training
@@ -144,24 +149,16 @@ if __name__ == "__main__":
             state = next_state
 
             if done:
-                env.reset()
-                # every episode update the target model to be same with model
-                agent.update_target_model()
-
                 # every episode, plot the play time
-                score = score if score == 500 else score + 100
+                if score > -200:
+                    score = score - 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DQN14.png")
+                pylab.savefig("./save_graph/MountainCar_DQN1.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
-                # if the mean of scores of last 10 episode is bigger than 490
-                # stop training
-                if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    sys.exit()
-
         # save the model
-        if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DQN14.h5")
+        # if e % 50 == 0:
+        #     agent.save_model("./save_model/MountainCar_DQN.h5")
