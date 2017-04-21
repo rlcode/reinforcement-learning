@@ -165,8 +165,6 @@ if __name__ == "__main__":
             state = next_state
 
             if done:
-                env.reset()
-
                 # 각 에피소드마다 cartpole이 서있었던 타임스텝을 plot
                 score = score if score == 500 else score + 100
                 scores.append(score)
