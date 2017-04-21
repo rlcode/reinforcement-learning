@@ -23,7 +23,7 @@ class DQNAgent:
         self.state_size = state_size
         self.action_size = action_size
 
-        # These are hyper parameters for the DQN
+        # these is hyper parameters for the DQN
         self.discount_factor = 0.99
         self.learning_rate = 0.001
         self.epsilon = 1.0
@@ -108,7 +108,7 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    # In case of CartPole-v1, you can play until 500 time step
+    # in case of CartPole-v1, you can play until 500 time step
     env = gym.make('CartPole-v1')
     # get size of state and action from environment
     state_size = env.observation_space.shape[0]
@@ -144,6 +144,7 @@ if __name__ == "__main__":
             state = next_state
 
             if done:
+                env.reset()
                 # every episode update the target model to be same with model
                 agent.update_target_model()
 
@@ -152,7 +153,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                # pylab.savefig("./save_graph/Cartpole_DQN.png")
+                pylab.savefig("./save_graph/Cartpole_DQN14.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
@@ -162,5 +163,5 @@ if __name__ == "__main__":
                     sys.exit()
 
         # save the model
-        # if e % 50 == 0:
-        #     agent.save_model("./save_model/Cartpole_DQN.h5")
+        if e % 50 == 0:
+            agent.save_model("./save_model/Cartpole_DQN14.h5")
