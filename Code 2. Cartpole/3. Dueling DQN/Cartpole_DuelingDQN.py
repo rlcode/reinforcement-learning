@@ -157,9 +157,7 @@ if __name__ == "__main__":
             state = next_state
 
             if done:
-                env.reset()
                 # every episode update the target model to be same with model
-
                 agent.update_target_model()
                 # every episode, plot the play time
                 score = score if score == 499 else score + 100
