@@ -41,7 +41,7 @@ class PGAgent:
         # Policy Gradient 의 핵심
         # log(정책) * return 의 gradient 를 구해서 최대화시킴
         good_prob = K.sum(action * self.model.output, axis=1)
-        eligibility = K.log(good_prob) * discounted_rewards
+        eligibility = K.log(good_prob) * K.stop_gradient(discounted_rewards)
         loss = -K.sum(eligibility)
 
         optimizer = Adam(lr=self.learning_rate)

@@ -5,7 +5,7 @@ import numpy as np
 from collections import deque
 from skimage.color import rgb2gray
 from skimage.transform import resize
-
+from keras import backend as K
 from keras.models import Sequential
 from keras.optimizers import RMSprop
 from keras.layers import Dense, Flatten
@@ -16,7 +16,7 @@ EPISODES = 5000
 
 class DQNAgent:
     def __init__(self):
-        self.render = True
+        self.render = False
 
         self.state_size = (84, 84, 4)
         self.action_size = 6
@@ -33,7 +33,7 @@ class DQNAgent:
         self.update_target_rate = 10000
         self.discount_factor = 0.99
         self.memory = deque(maxlen=400000)
-        self.no_op_steps = 30
+        self.not_move_steps = 30
         self.learning_rate = 0.00025
         self.momentum = 0.95
         self.min_gradient = 0.01
@@ -44,19 +44,25 @@ class DQNAgent:
 
     def build_model(self):
         model = Sequential()
-        model.add(Conv2D(32, (8, 8), input_shape=self.state_size, activation='relu', strides=(4, 4),
-                         kernel_initializer='glorot_uniform'))
-        model.add(Conv2D(64, (4, 4), activation='relu', strides=(2, 2),
-                         kernel_initializer='glorot_uniform'))
-        model.add(Conv2D(64, (3, 3), activation='relu', strides=(1, 1),
-                         kernel_initializer='glorot_uniform'))
+        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.state_size))
+        model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
+        model.add(Conv2D(64, (3, 3), strides=(1, 1), activation='relu'))
         model.add(Flatten())
-        model.add(Dense(512, activation='relu', kernel_initializer='glorot_uniform'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dense(self.action_size))
         model.summary()
-        model.compile(loss='mse', optimizer=RMSprop(
-            lr=self.learning_rate, rho=self.momentum, epsilon=self.min_gradient))
         return model
+
+    def optimizer(self):
+        action = K.placeholder(shape=[None, self.action_size])
+        predicted_q_value = K.placeholder(shape=[None, ])
+
+        loss = a
+
+        optimizer = RMSprop(lr=self.learning_rate, rho=self.momentum, epsilon=self.min_gradient)
+        updates = optimizer.get_updates(self.model.trainable_weights, [], loss)
+        train = K.function([self.model.input, action, predicted_q_value], [], updates=updates)
+        return train
 
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())
@@ -123,7 +129,7 @@ if __name__ == "__main__":
         score, start_live = 0, 5
         observe = env.reset()
         next_observe = observe
-        for _ in range(random.randint(1, agent.no_op_steps)):
+        for _ in range(random.randint(1, agent.not_move_steps)):
             observe = next_observe
             next_observe, _, _, _ = env.step(1)
 
