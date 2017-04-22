@@ -26,9 +26,10 @@ class DQNAgent:
         # these is hyper parameters for the DQN
         self.discount_factor = 0.99
         self.learning_rate = 0.001
+
         self.epsilon = 1.0
         self.epsilon_decay = 0.99999
-        self.epsilon_min = 0.01
+        self.epsilon_min = 0.1
         self.batch_size = 64
         self.train_start = 100000
         # create replay memory using deque
@@ -118,18 +119,20 @@ if __name__ == "__main__":
 
     scores, episodes = [], []
     action_fake = 0
+    goal_position = 0.5
+    global_step = 0
 
     for e in range(EPISODES):
         done = False
         score = 0
         state = env.reset()
-
+        at_top = False
         state = np.reshape(state, [1, state_size])
 
         while not done:
             if agent.render:
                 env.render()
-
+            global_step += 1
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
             if action == 0:
@@ -139,8 +142,10 @@ if __name__ == "__main__":
 
             next_state, reward, done, info = env.step(action_fake)
             next_state = np.reshape(next_state, [1, state_size])
-            if reward > -1:
+
+            if next_state[0][0] >= goal_position:
                 reward = 100
+                at_top = True
             # save the sample <s, a, r, s'> to the replay memory
             agent.replay_memory(state, action, reward, next_state, done)
             # every time step do the training
@@ -150,14 +155,12 @@ if __name__ == "__main__":
 
             if done:
                 # every episode, plot the play time
-                if score > -200:
-                    score = score - 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 pylab.savefig("./save_graph/MountainCar_DQN1.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
-                      "  epsilon:", agent.epsilon)
+                      "  global_step:", global_step, "  epsilon:", agent.epsilon, "  at_top:", at_top)
 
         # save the model
         # if e % 50 == 0:

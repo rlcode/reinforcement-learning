@@ -64,7 +64,7 @@ class ACAgent:
         # Policy Gradient 의 핵심
         # log(정책) * return 의 gradient 를 구해서 최대화시킴
         good_prob = K.sum(action * self.actor.output, axis=1)
-        eligibility = K.log(good_prob + 1e-10) * advantages
+        eligibility = K.log(good_prob + 1e-10) * K.stop_gradient(advantages)
         loss = -K.sum(eligibility)
 
         optimizer = Adam(lr=self.actor_lr)
