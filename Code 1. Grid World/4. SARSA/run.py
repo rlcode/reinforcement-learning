@@ -1,5 +1,5 @@
 from environment import Env
-from SARSA_agent import SARSAgent
+from SARSA_agent_edit import SARSAgent
 
 if __name__ == "__main__":
     env = Env()

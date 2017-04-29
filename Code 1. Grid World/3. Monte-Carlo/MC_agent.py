@@ -58,7 +58,7 @@ class MCAgent:
     @staticmethod
     def arg_max(next_state):
         max_index_list = []
-        max_value = -999999999
+        max_value = next_state[0]
         for index, value in enumerate(next_state):
             if value > max_value:
                 max_index_list.clear()

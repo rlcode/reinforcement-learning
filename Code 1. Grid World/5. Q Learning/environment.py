@@ -15,7 +15,7 @@ class Env(tk.Tk):
         super(Env, self).__init__()
         self.action_space = ['u', 'd', 'l', 'r']
         self.n_actions = len(self.action_space)
-        self.title('monte carlo')
+        self.title('Q Learning')
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT))
         self.buildGraphic()
         self.texts = []
@@ -71,8 +71,8 @@ class Env(tk.Tk):
             for j in range(WIDTH):
                 for action in range(0, 4):
                     state = [i, j]
-                    if str(state) in q_table.index:
-                        temp = q_table.ix[str(state), action]
+                    if str(state) in q_table.keys():
+                        temp = q_table[str(state)][action]
                         self.text_value(j, i, round(temp, 2), action)
 
     def coords_to_state(self, coords):
@@ -132,5 +132,5 @@ class Env(tk.Tk):
         return next_state, reward, done
 
     def render(self):
-        time.sleep(0.05)
+        time.sleep(0.03)
         self.update()
