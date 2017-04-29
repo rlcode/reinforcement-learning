@@ -61,12 +61,10 @@ class MCAgent:
         max_value = -999999999
         for index, value in enumerate(next_state):
             if value > max_value:
-                print(value, " > ", max_value)
                 max_index_list.clear()
                 max_value = value
                 max_index_list.append(index)
             elif value == max_value:
-                print(value, " = ", max_value)
                 max_index_list.append(index)
         return random.choice(max_index_list)
 
