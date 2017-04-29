@@ -10,7 +10,6 @@ from keras import backend as K
 
 
 # global variables for threading
-global episode
 episode = 0
 
 EPISODES = 2000
@@ -104,6 +103,7 @@ class A3CAgent:
 
     def train(self):
         #self.load_model('./save_model/Cartpole_A3C')
+        global scores, lock
 
         agents = [Agent(self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
                         self.action_size, self.state_size) for _ in range(self.threads)]
@@ -112,7 +112,7 @@ class A3CAgent:
             agent.start()
 
         while True:
-            time.sleep(10)
+            time.sleep(20)
             self.save_model('./save_model/Cartpole_A3C')
 
     def save_model(self, name):

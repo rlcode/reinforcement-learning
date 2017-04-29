@@ -23,9 +23,9 @@ class DQNAgent:
         # deque를 통해서 replay memory 생성
         self.discount_factor = 0.99
         self.learning_rate = 0.001
-        self.epsilon = 1.0
-        self.epsilon_decay = 0.99999
-        self.epsilon_min = 0.1
+        self.epsilon = 1.
+        self.epsilon_min = 0.05
+        self.epsilon_decay = (self.epsilon - self.epsilon_min) / 50000
         self.batch_size = 64
         self.train_start = 1000
         self.memory = deque(maxlen=10000)
@@ -61,9 +61,11 @@ class DQNAgent:
 
     # <s,a,r,s'>을 replay_memory에 저장함
     def replay_memory(self, state, action, reward, next_state, done):
+        if action == 2:
+            action = 1
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+            self.epsilon -= self.epsilon_decay
         # print(len(self.memory))
 
     # replay memory에서 batch_size 만큼의 샘플들을 무작위로 뽑아서 학습
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     action_size = 2
     # DQN 에이전트의 생성
     agent = DQNAgent(state_size, action_size)
-
+    agent.load_model("./save_model/MountainCar_DQN.h5")
     scores, episodes = [], []
 
     for e in range(EPISODES):
@@ -119,7 +121,6 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, [1, state_size])
         print(state)
-        #agent.load_model("./save_model/MountainCar_DQN.h5")
 
         # 액션 0(좌), 1(아무것도 안함), 3(아무것도 하지 않는 액션을 하지 않기 위한 fake_action 선언
         fake_action = 0
@@ -139,11 +140,10 @@ if __name__ == "__main__":
                 action_count = 0
 
                 if action == 0:
-                    fake_action == 0
+                    fake_action = 0
                 elif action == 1:
-                    fake_action == 2
+                    fake_action = 2
 
-            print(fake_action)
             # 선택한 액션으로 1 step을 시행한다
             next_state, reward, done, info = env.step(fake_action)
             next_state = np.reshape(next_state, [1, state_size])
@@ -173,4 +173,3 @@ if __name__ == "__main__":
         # 50 에피소드마다 학습 모델을 저장
         if e % 50 == 0:
              agent.save_model("./save_model/MountainCar_DQN.h5")
-             pass
