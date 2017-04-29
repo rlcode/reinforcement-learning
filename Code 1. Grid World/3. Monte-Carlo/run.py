@@ -10,21 +10,26 @@ if __name__ == "__main__":
         # reset environment and initialize state
         state = env.reset()
 
+        # take action and doing one step in the environment
+        action = agent.get_action(state)
+
         while True:
             env.render()
 
-            # take action and doing one step in the environment
             # environment return next state, immediate reward and
             # information about terminal of episode
-            action = agent.get_action(state)
+
             next_state, reward, done = env.step(action)
 
             agent.save_sample(next_state, reward, done)
 
+            # take action and doing one step in the environment
+            action = agent.get_action(next_state)
+
             # at the end of episode, update the q function table
             if done:
                 print("episode : ", episode)
-                print("returns : ", agent.returns)
+                print("value_table : ", agent.value_table)
                 agent.update()
-                agent.returns.clear()
+                agent.samples.clear()
                 break

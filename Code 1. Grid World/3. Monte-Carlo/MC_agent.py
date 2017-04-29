@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import random
 
 
 # this is Monte-Carlo agent for the grid world
@@ -14,19 +14,13 @@ class MCAgent:
         self.discount_factor = 0.9
         self.epsilon = 0.9
         self.samples = []
-        self.value_table = pd.DataFrame(columns=['value'])
+        self.value_table = {}
 
     # check whether the state was visited
     # if this is first visitation, then initialize the q function of the state
     def check_state_exist(self, state):
-        if str(state) not in self.value_table.index:
-            self.value_table = self.value_table.append(
-                pd.Series(
-                    [0] * len(self.value_table.columns),
-                    index=self.value_table.columns,
-                    name=str(state)
-                )
-            )
+        if str(state) not in self.value_table.keys():
+            self.value_table[str(state)] = 0.0
 
     # append sample to memory(state, reward, done)
     def save_sample(self, state, reward, done):
@@ -36,16 +30,15 @@ class MCAgent:
     def update(self):
         G_t = 0
         visit_state = []
+        print(self.samples)
         for reward in reversed(self.samples):
             state = str(reward[0])
             if state not in visit_state:
                 visit_state.append(state)
                 G_t = self.discount_factor * (reward[1] + G_t)
                 self.check_state_exist(state)
-                value = self.value_table.ix[state, 'value']
-                self.value_table.ix[state, 'value'] = value + self.learning_rate * (G_t - value)
-                print("state : ", state, " G : ", G_t, " update : ", value + self.learning_rate * (G_t - value))
-        print("values : ", self.value_table)
+                value = self.value_table[state]
+                self.value_table[state] = value + self.learning_rate * (G_t - value)
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
@@ -58,32 +51,51 @@ class MCAgent:
         else:
             # take action according to the q function table
             next_state = self.possible_next_state(state)
-            next_state = next_state.reindex(np.random.permutation(next_state.index))
-            action = next_state.argmax()
-
+            action = self.arg_max(next_state)
         return int(action)
+
+    # compute arg_max if multiple candidates exit, pick one randomly
+    @staticmethod
+    def arg_max(next_state):
+        max_index_list = []
+        max_value = -999999999
+        for index, value in enumerate(next_state):
+            if value > max_value:
+                print(value, " > ", max_value)
+                max_index_list.clear()
+                max_value = value
+                max_index_list.append(index)
+            elif value == max_value:
+                print(value, " = ", max_value)
+                max_index_list.append(index)
+        return random.choice(max_index_list)
 
     # get the possible next states
     def possible_next_state(self, state):
         state_col = state[0]
         state_row = state[1]
 
-        next_state = pd.Series(
-            [0] * len(self.actions),
-            index=self.actions,
-        )
+        next_state = [0.0, 0.0, 0.0, 0.0]
 
         if state_row != 0:
             self.check_state_exist(str([state_col, state_row - 1]))
-            next_state.set_value(0, self.value_table.ix[str([state_col, state_row - 1]), 'value'])  # up
+            next_state[0] = self.value_table[str([state_col, state_row - 1])]
+        else:
+            next_state[0] = self.value_table[str(state)]
         if state_row != self.height - 1:
             self.check_state_exist(str([state_col, state_row + 1]))
-            next_state.set_value(1, self.value_table.ix[str([state_col, state_row + 1]), 'value'])  # down
+            next_state[1] = self.value_table[str([state_col, state_row + 1])]
+        else:
+            next_state[1] = self.value_table[str(state)]
         if state_col != 0:
             self.check_state_exist(str([state_col - 1, state_row]))
-            next_state.set_value(2, self.value_table.ix[str([state_col - 1, state_row]), 'value'])  # left
+            next_state[2] = self.value_table[str([state_col - 1, state_row])]
+        else:
+            next_state[2] = self.value_table[str(state)]
         if state_col != self.width - 1:
             self.check_state_exist(str([state_col + 1, state_row]))
-            next_state.set_value(3, self.value_table.ix[str([state_col + 1, state_row]), 'value'])  # right
+            next_state[3] = self.value_table[str([state_col + 1, state_row])]
+        else:
+            next_state[3] = self.value_table[str(state)]
 
         return next_state
