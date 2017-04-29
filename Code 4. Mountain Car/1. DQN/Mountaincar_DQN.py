@@ -13,7 +13,7 @@ EPISODES = 300
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
-        self.render = False
+        self.render = True
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -24,7 +24,7 @@ class DQNAgent:
         self.discount_factor = 0.99
         self.learning_rate = 0.001
         self.epsilon = 1.0
-        self.epsilon_decay = 0.9999
+        self.epsilon_decay = 0.99999
         self.epsilon_min = 0.1
         self.batch_size = 64
         self.train_start = 1000
@@ -106,7 +106,8 @@ if __name__ == "__main__":
     env = gym.make('MountainCar-v0')
     # 환경으로부터 상태와 행동의 크기를 가져옴
     state_size = env.observation_space.shape[0]
-    action_size = env.action_space.n
+    #action_size = env.action_space.n
+    action_size = 2
     # DQN 에이전트의 생성
     agent = DQNAgent(state_size, action_size)
 
@@ -118,7 +119,7 @@ if __name__ == "__main__":
         state = env.reset()
         state = np.reshape(state, [1, state_size])
         print(state)
-        agent.load_model("./save_model/MountainCar_DQN.h5")
+        #agent.load_model("./save_model/MountainCar_DQN.h5")
 
         # 액션 0(좌), 1(아무것도 안함), 3(아무것도 하지 않는 액션을 하지 않기 위한 fake_action 선언
         fake_action = 0
@@ -131,7 +132,7 @@ if __name__ == "__main__":
                 env.render()
 
             # 현재 상태에서 행동을 선택하고 한 스텝을 진행
-            action_count =+ 1
+            action_count = action_count + 1
 
             if action_count == 4:
                 action = agent.get_action(state)
@@ -140,8 +141,6 @@ if __name__ == "__main__":
                 if action == 0:
                     fake_action == 0
                 elif action == 1:
-                    fake_action == 2
-                elif action == 2:
                     fake_action == 2
 
             print(fake_action)
