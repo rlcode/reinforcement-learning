@@ -30,7 +30,6 @@ class MCAgent:
     def update(self):
         G_t = 0
         visit_state = []
-        print(self.samples)
         for reward in reversed(self.samples):
             state = str(reward[0])
             if state not in visit_state:
