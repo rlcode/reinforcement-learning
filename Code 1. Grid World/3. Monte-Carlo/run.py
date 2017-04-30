@@ -29,7 +29,6 @@ if __name__ == "__main__":
             # at the end of episode, update the q function table
             if done:
                 print("episode : ", episode)
-                print("value_table : ", agent.value_table)
                 agent.update()
                 agent.samples.clear()
                 break

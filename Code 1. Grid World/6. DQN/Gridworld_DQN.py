@@ -168,7 +168,3 @@ if __name__ == "__main__":
     # end of game
     print('game over')
     env.destroy()
-
-
-
-
