@@ -59,7 +59,7 @@ class Env(tk.Tk):
         self.set_reward([9, 9], 5)
 
         # add image to canvas
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+        self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rectangle_image)
 
         # pack all`
         self.canvas.pack()
@@ -130,7 +130,6 @@ class Env(tk.Tk):
         self.update()
         time.sleep(0.5)
         self.canvas.delete(self.rectangle)
-        origin = np.array([UNIT / 2, UNIT / 2])
         self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rectangle_image)
         # return observation
 
