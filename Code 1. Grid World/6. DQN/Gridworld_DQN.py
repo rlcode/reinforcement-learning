@@ -121,7 +121,7 @@ if __name__ == "__main__":
     agent = DQNAgent()
 
     global_step = 0
-    # agent.load("same_vel_episode2 : 1000")
+    # agent.load_model("./save_model/10by10")
     scores, episodes = [], []
 
     for e in range(EPISODES):
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/10by10.png")
+                # pylab.savefig("./save_graph/10by10.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
