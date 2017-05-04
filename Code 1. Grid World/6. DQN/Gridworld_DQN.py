@@ -23,7 +23,7 @@ class DQNAgent:
         self.action_space = [0, 1, 2, 3, 4]
         # get size of state and action
         self.action_size = len(self.action_space)
-        self.state_size = 22
+        self.state_size = 20
         self.discount_factor = 0.99
         self.learning_rate = 0.001
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         done = False
         score = 0
         state = env.reset()
-        state = np.reshape(state, [1, 22])
+        state = np.reshape(state, [1, 20])
 
         while not done:
             # fresh env
@@ -139,7 +139,7 @@ if __name__ == "__main__":
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done = env.step(action)
-            next_state = np.reshape(next_state, [1, 22])
+            next_state = np.reshape(next_state, [1, 20])
 
             agent.replay_memory(state, action, reward, next_state, done)
             # every time step we do training
@@ -147,7 +147,8 @@ if __name__ == "__main__":
             score += reward
 
             state = copy.deepcopy(next_state)
-            print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.epsilon)
+            # if reward > 3:
+            #     print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.epsilon)
 
             # every 100 time steps update the target model to be same with model
             if global_step % 100 == 0:

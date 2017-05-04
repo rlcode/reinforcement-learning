@@ -46,7 +46,7 @@ class Env(tk.Tk):
         self.set_reward([2, 7], -1)
         self.set_reward([3, 2], -1)
         self.set_reward([2, 5], -1)
-        self.set_reward([4, 9], -1)
+        # self.set_reward([4, 9], -1)
         self.set_reward([5, 7], -1)
         self.set_reward([6, 4], -1)
         self.set_reward([7, 8], -1)
@@ -75,7 +75,7 @@ class Env(tk.Tk):
         self.set_reward([2, 7], -1)
         self.set_reward([3, 2], -1)
         self.set_reward([2, 5], -1)
-        self.set_reward([4, 9], -1)
+        # self.set_reward([4, 9], -1)
         self.set_reward([5, 7], -1)
         self.set_reward([6, 4], -1)
         self.set_reward([7, 8], -1)
@@ -112,18 +112,20 @@ class Env(tk.Tk):
         check_list = dict()
         check_list['if_goal'] = False
         rewards = 0
+
         for reward in self.rewards:
             if reward['state'] == state:
                 rewards += reward['reward']
                 if reward['reward'] == 5:
                     check_list['if_goal'] = True
+
         check_list['rewards'] = rewards
 
         return check_list
 
     def coords_to_state(self, coords):
-        x = int((coords[0] - 50) / 100)
-        y = int((coords[1] - 50) / 100)
+        x = int((coords[0] - UNIT/2) / UNIT)
+        y = int((coords[1] - UNIT/2) / UNIT)
         return [x, y]
 
     def reset(self):
@@ -141,11 +143,11 @@ class Env(tk.Tk):
         self.counter += 1
         self.render()
 
-        next_coords = self.move(self.rectangle, action)
 
         if self.counter % 2 == 1:
             self.rewards = self.move_rewards()
 
+        next_coords = self.move(self.rectangle, action)
         check = self.check_if_reward(self.coords_to_state(next_coords))
         done = check['if_goal']
         reward = check['rewards']
@@ -175,7 +177,7 @@ class Env(tk.Tk):
     def move_rewards(self):
         new_rewards = []
         for temp in self.rewards:
-            if temp['reward'] == 10:
+            if temp['reward'] == 5:
                 new_rewards.append(temp)
                 continue
             temp['coords'] = self.move_const(temp['figure'])
@@ -224,8 +226,8 @@ class Env(tk.Tk):
 
         # if action == 4 # move _none
 
-        if target is not self.rectangle and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
-            base_action = np.array([0, 0])
+        # if target is not self.rectangle and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
+        #     base_action = np.array([0, 0])
 
         self.canvas.move(target, base_action[0], base_action[1])
 
