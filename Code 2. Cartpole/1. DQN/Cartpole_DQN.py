@@ -4,9 +4,11 @@ import pylab
 import random
 import numpy as np
 from collections import deque
+import tensorflow as tf
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
+
 
 EPISODES = 300
 
@@ -78,25 +80,31 @@ class DQNAgent:
         mini_batch = random.sample(self.memory, batch_size)
 
         update_input = np.zeros((batch_size, self.state_size))
-        update_target = np.zeros((batch_size, self.action_size))
+        update_target = np.zeros((batch_size, self.state_size))
+        action, reward, done = [], [], []
 
-        for i in range(batch_size):
-            state, action, reward, next_state, done = mini_batch[i]
-            target = self.model.predict(state)[0]
+        for i in range(self.batch_size):
+            update_input[i] = np.float32(mini_batch[i][0] / 255.)
+            update_target[i] = np.float32(mini_batch[i][3] / 255.)
+            action.append(mini_batch[i][1])
+            reward.append(mini_batch[i][2])
+            done.append(mini_batch[i][4])
 
+        target = self.model.predict(update_input)
+        target_val = self.target_model.predict(update_target)
+
+        for i in range(self.batch_size):
             # like Q Learning, get maximum Q value at s'
             # But from target model
-            if done:
-                target[action] = reward
+            if done[i]:
+                target[i][action[i]] = reward[i]
             else:
-                target[action] = reward + self.discount_factor * \
-                                          np.amax(self.target_model.predict(next_state)[0])
-            update_input[i] = state
-            update_target[i] = target
+                target[i][action[i]] = reward[i] + self.discount_factor * np.amax(target_val[i])
 
-        # make minibatch which includes target q value and predicted q value
         # and do the model fit!
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=0)
+        #hist = self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        #self.avg_loss += hist.history['loss'][0]
 
     # load the saved model
     def load_model(self, name):
@@ -105,6 +113,21 @@ class DQNAgent:
     # save the model which is under training
     def save_model(self, name):
         self.model.save_weights(name)
+
+    # def setup_summary(self):
+    #     episode_total_reward = tf.Variable(0.)
+    #     tf.summary.scalar('CarPole_DQN/Total Reward/Episode', episode_total_reward)
+    #     episode_avg_max_q = tf.Variable(0.)
+    #     tf.summary.scalar('CartPole_DQN/Average Max Q/Episode', episode_avg_max_q)
+    #     episode_duration = tf.Variable(0.)
+    #     tf.summary.scalar('CartPole_DQN/Duration/Episode', episode_duration)
+    #     episode_avg_loss = tf.Variable(0.)
+    #     tf.summary.scalar('CartPole_DQN/Average Loss/Episode', episode_avg_loss)
+    #     summary_vars = [episode_total_reward, episode_avg_max_q, episode_duration, episode_avg_loss]
+    #     summary_placeholders = [tf.placeholder(tf.float32) for _ in range(len(summary_vars))]
+    #     update_ops = [summary_vars[i].assign(summary_placeholders[i]) for i in range(len(summary_vars)))]
+    #     summary_op = tf.summary_merge_all()
+    #     return summary_placeholders, update_ops, summary_op
 
 
 if __name__ == "__main__":
