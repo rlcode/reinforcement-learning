@@ -9,7 +9,6 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
 
-
 EPISODES = 300
 
 
@@ -84,10 +83,10 @@ class DQNAgent:
         action, reward, done = [], [], []
 
         for i in range(self.batch_size):
-            update_input[i] = np.float32(mini_batch[i][0] / 255.)
-            update_target[i] = np.float32(mini_batch[i][3] / 255.)
+            update_input[i] = mini_batch[i][0]
             action.append(mini_batch[i][1])
             reward.append(mini_batch[i][2])
+            update_target[i] = mini_batch[i][3]
             done.append(mini_batch[i][4])
 
         target = self.model.predict(update_input)
