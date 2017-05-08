@@ -42,7 +42,7 @@ pip install -r requirements.txt
 - [Deep Q Network](./Code%202.%20Cartpole/1.%20DQN)
 - [Double Deep Q Network](./Code%202.%20Cartpole/2.%20Double%20DQN)
 - [Policy Gradient](./Code%202.%20Cartpole/3.%20Policy%20Gradient)
-- [Actor Critic](./Code%202.%20Cartpole/4.%20Actor-Critic)
+- [Actor Critic (A2C)](./Code%202.%20Cartpole/4.%20Actor-Critic)
 - [Asynchronous Advantage Actor Critic (A3C)](./Code%202.%20Cartpole/5.%20A3C)
 
 **Code 3** - Mastering Atari games with Deep Reinforcement Learning
