@@ -4,7 +4,6 @@ import pylab
 import random
 import numpy as np
 from collections import deque
-import tensorflow as tf
 from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
@@ -18,7 +17,7 @@ EPISODES = 300
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
-        self.render = False
+        self.render = True
 
         # get size of state and action
         self.state_size = state_size
@@ -102,8 +101,6 @@ class DQNAgent:
 
         # and do the model fit!
         self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=0)
-        #hist = self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
-        #self.avg_loss += hist.history['loss'][0]
 
     # load the saved model
     def load_model(self, name):
@@ -157,7 +154,7 @@ if __name__ == "__main__":
                 score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
+                #pylab.plot(episodes, scores, 'b')
                 # pylab.savefig("./save_graph/Cartpole_DQN.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
