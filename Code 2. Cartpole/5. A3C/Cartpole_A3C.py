@@ -16,7 +16,7 @@ scores = []
 
 EPISODES = 2000
 
-# This is A3C(Asynchronous Advantage Actor Critic) agent for the Cartpole
+# This is A3C(Asynchronous Advantage Actor Critic) agent(global) for the Cartpole
 # In this example, we use A3C algorithm
 class A3CAgent:
     def __init__(self, state_size, action_size, env_name):
@@ -45,8 +45,8 @@ class A3CAgent:
         self.sess.run(tf.global_variables_initializer())
 
     # approximate policy and value using Neural Network
-    # actor -> state is input and probability of each action is output
-    # critic -> state is input and value of state is output
+    # actor -> state is input and probability of each action is output of network
+    # critic -> state is input and value of state is output of network
     # actor and critic network share first hidden layer
     def build_model(self):
         state = Input(batch_shape=(None,  self.state_size))
@@ -103,9 +103,10 @@ class A3CAgent:
         updates = optimizer.get_updates(self.critic.trainable_weights, [], loss)
         train = K.function([self.critic.input, discounted_reward], [], updates=updates)
         return train
-
+    
+    # make agents(local) and start training 
     def train(self):
-        #self.load_model('./save_model/Cartpole_A3C')
+        # self.load_model('./save_model/Cartpole_A3C')
         agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
                         self.action_size, self.state_size) for i in range(self.threads)]
 
@@ -129,6 +130,7 @@ class A3CAgent:
         self.actor.load_weights(name + "_actor.h5")
         self.critic.load_weights(name + "_critic.h5")
 
+# This is Agent(local) class for threading
 class Agent(threading.Thread):
     def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size):
         threading.Thread.__init__(self)
@@ -190,7 +192,7 @@ class Agent(threading.Thread):
         self.actions.append(act)
         self.rewards.append(reward)
 
-    # update policy network and value network every episodes
+    # update policy network and value network every episode
     def train_episode(self, done):
         discounted_rewards = self.discount_rewards(self.rewards, done)
 
@@ -214,6 +216,8 @@ if __name__ == "__main__":
 
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
+
+    env.close()
 
     global_agent = A3CAgent(state_size, action_size, env_name)
     global_agent.train()

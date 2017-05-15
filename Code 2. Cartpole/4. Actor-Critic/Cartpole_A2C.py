@@ -36,19 +36,21 @@ class A2CAgent:
         # lists for the states, actions and rewards
         self.states, self.actions, self.rewards = [], [], []
 
-    # approximate policy using Neural Network
-    # state is input and probability of each action is output of network
+    # approximate policy and value using Neural Network
+    # actor -> state is input and probability of each action is output of network
+    # critic -> state is input and value of state is output of network
     def build_model(self):
+        # make actor network
         actor = Sequential()
         actor.add(Dense(self.hidden1, input_dim=self.state_size, activation='relu', kernel_initializer='glorot_uniform'))
         actor.add(Dense(self.hidden2, activation='relu', kernel_initializer='glorot_uniform'))
         actor.add(Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform'))
         actor.summary()
 
-        # critic 네트워크 생성
+        # make critic network
         critic = Sequential()
-        critic.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer="he_uniform"))
-        critic.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
+        critic.add(Dense(self.hidden1, input_dim=self.state_size, activation='relu', kernel_initializer="he_uniform"))
+        critic.add(Dense(self.hidden2, activation='relu', kernel_initializer='he_uniform'))
         critic.add(Dense(1, activation='linear', kernel_initializer='he_uniform'))
         critic.compile(loss="mse", optimizer=Adam(lr=self.critic_lr))
         critic.summary()
@@ -96,7 +98,7 @@ class A2CAgent:
         act[action] = 1
         self.actions.append(act)
 
-    # update policy network every episodes
+    # update policy network every episode
     def train_episodes(self, done):
         discounted_rewards = self.discount_rewards(self.rewards, done)
 
@@ -136,7 +138,7 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/cartpole-master.h5")
+        # agent.load_model("./save_model/Cartpole_A2C.h5")
 
         while not done:
             if agent.render:
@@ -146,7 +148,6 @@ if __name__ == "__main__":
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            # reward = reward if not done or score == 499 else -100
 
             # save the sample <s, a, r> to the memory
             agent.memory(state, action, reward)
@@ -159,11 +160,10 @@ if __name__ == "__main__":
                 agent.train_episodes((score!=500))
 
                 # every episode, plot the play time
-                # score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_Advantage_ActorCritic.png")
+                pylab.savefig("./save_graph/Cartpole_A2C.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -173,4 +173,4 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_Advantage_ActorCritic")
+            agent.save_model("./save_model/Cartpole_A2C")

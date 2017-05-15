@@ -123,11 +123,10 @@ if __name__ == "__main__":
     scores, episodes = [], []
 
     for e in range(EPISODES):
-        done = False
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/cartpole-master.h5")
+        # agent.load_model("./save_model/Cartpole_DoubleDQN.h5")
 
         while not done:
             if agent.render:

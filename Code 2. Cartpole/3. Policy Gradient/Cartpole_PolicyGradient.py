@@ -15,7 +15,7 @@ EPISODES = 1000
 class PGAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
-        self.render = True
+        self.render = False
 
         # get size of state and action
         self.state_size = state_size
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/cartpole-master.h5")
+        # agent.load_model("./save_model/Cartpole_PG.h5")
 
         while not done:
             if agent.render:
@@ -144,7 +144,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                # pylab.savefig("./save_graph/Cartpole_PG.png")
+                pylab.savefig("./save_graph/Cartpole_PG.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -153,5 +153,5 @@ if __name__ == "__main__":
                     sys.exit()
 
         # save the model
-        # if e % 50 == 0:
-        #     agent.save_model("./save_model/Cartpole_PG.h5")
+        if e % 50 == 0:
+            agent.save_model("./save_model/Cartpole_PG.h5")
