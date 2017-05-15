@@ -5,9 +5,9 @@ import tensorflow as tf
 from collections import deque
 from skimage.color import rgb2gray
 from skimage.transform import resize
-from keras.models import Sequential
+from keras.models import Model
 from keras.optimizers import RMSprop
-from keras.layers import Dense, Flatten
+from keras.layers import Input, Dense, Flatten, Lambda, merge
 from keras.layers.convolutional import Conv2D
 from keras import backend as K
 
@@ -31,7 +31,7 @@ class DQNAgent:
         self.discount_factor = 0.99
         self.memory = deque(maxlen=400000)
         self.no_op_steps = 30
-        # build model
+        # build
         self.model = self.build_model()
         self.target_model = self.build_model()
         self.update_target_model()
@@ -43,7 +43,7 @@ class DQNAgent:
 
         self.avg_q_max, self.avg_loss = 0, 0
         self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/Breakout_DQN', self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter('summary/Breakout_Dueling_DDQN', self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
     # if the error is in the interval [-1, 1], then the cost is quadratic to the error
@@ -70,15 +70,29 @@ class DQNAgent:
 
     # approximate Q function using Convolution Neural Network
     # state is input and Q Value of each action is output of network
+    # dueling network's Q Value is sum of advantages and state value 
     def build_model(self):
-        model = Sequential()
-        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.state_size))
-        model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
-        model.add(Conv2D(64, (3, 3), strides=(1, 1), activation='relu'))
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(self.action_size))
+        input = Input(shape=self.state_size)
+        shared = Conv2D(32, (8, 8), strides=(4, 4), activation='relu')(input)
+        shared = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(shared)
+        shared = Conv2D(64, (3, 3), strides=(1, 1), activation='relu')(shared)
+        flatten = Flatten()(shared)
+	
+        # network separate state value and advantages
+        advantage_fc = Dense(512, activation='relu')(flatten)
+        advantage = Dense(self.action_size)(advantage_fc)
+        advantage = Lambda(lambda a: a[:, :] - K.mean(a[:, :], keepdims=True),
+                           output_shape=(self.action_size,))(advantage)
+
+        value_fc = Dense(512, activation='relu')(flatten)
+        value =  Dense(1)(value_fc)
+        value = Lambda(lambda s: K.expand_dims(s[:, 0], -1), output_shape=(self.action_size,))(value)
+	
+        # network merged and make Q Value
+        q_value = merge([value, advantage], mode='sum')
+        model = Model(inputs=input, outputs=q_value)
         model.summary()
+
         return model
 
     # after some time interval update the target model to be same with model
@@ -119,6 +133,7 @@ class DQNAgent:
             reward.append(mini_batch[i][2])
             dead.append(mini_batch[i][4])
 
+        value = self.model.predict(history)
         target_value = self.target_model.predict(next_history)
         
         # like Q Learning, get maximum Q value at s'
@@ -127,7 +142,10 @@ class DQNAgent:
             if dead[i]:
                 target[i] = reward[i]
             else:
-                target[i] = reward[i] + self.discount_factor * np.amax(target_value[i])
+                # the key point of Double DQN
+                # selection of action is from model
+                # update is from target model
+                target[i] = reward[i] + self.discount_factor * target_value[i][np.argmax(value[i])]
 
         loss = self.optimizer([history, action, target])
         self.avg_loss += loss[0]
@@ -138,7 +156,6 @@ class DQNAgent:
     def save_model(self, name):
         self.model.save_weights(name)
 
-    # make summary operators for tensorboard
     def setup_summary(self):
         episode_total_reward = tf.Variable(0.)
         episode_avg_max_q = tf.Variable(0.)
@@ -247,4 +264,4 @@ if __name__ == "__main__":
                 agent.avg_q_max, agent.avg_loss = 0, 0
 
         if e % 1000 == 0:
-            agent.save_model("./save_model/Breakout_DQN.h5")
+            agent.save_model("./save_model/Breakout_Dueling_DDQN.h5")

@@ -31,7 +31,7 @@ class DQNAgent:
         self.discount_factor = 0.99
         self.memory = deque(maxlen=400000)
         self.no_op_steps = 30
-        # build model
+        # build
         self.model = self.build_model()
         self.target_model = self.build_model()
         self.update_target_model()
@@ -43,7 +43,7 @@ class DQNAgent:
 
         self.avg_q_max, self.avg_loss = 0, 0
         self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/Breakout_DQN', self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter('summary/Breakout_DDQN', self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
     # if the error is in the interval [-1, 1], then the cost is quadratic to the error
@@ -79,6 +79,7 @@ class DQNAgent:
         model.add(Dense(512, activation='relu'))
         model.add(Dense(self.action_size))
         model.summary()
+
         return model
 
     # after some time interval update the target model to be same with model
@@ -119,6 +120,7 @@ class DQNAgent:
             reward.append(mini_batch[i][2])
             dead.append(mini_batch[i][4])
 
+        value = self.model.predict(history)
         target_value = self.target_model.predict(next_history)
         
         # like Q Learning, get maximum Q value at s'
@@ -127,7 +129,10 @@ class DQNAgent:
             if dead[i]:
                 target[i] = reward[i]
             else:
-                target[i] = reward[i] + self.discount_factor * np.amax(target_value[i])
+                # the key point of Double DQN
+                # selection of action is from model
+                # update is from target model
+                target[i] = reward[i] + self.discount_factor * target_value[i][np.argmax(value[i])]
 
         loss = self.optimizer([history, action, target])
         self.avg_loss += loss[0]
@@ -247,4 +252,4 @@ if __name__ == "__main__":
                 agent.avg_q_max, agent.avg_loss = 0, 0
 
         if e % 1000 == 0:
-            agent.save_model("./save_model/Breakout_DQN.h5")
+            agent.save_model("./save_model/Breakout_DDQN.h5")
