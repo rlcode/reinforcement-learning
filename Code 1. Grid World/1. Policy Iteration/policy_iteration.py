@@ -20,13 +20,13 @@ class PolicyIteration:
     # method for the policy evaluation
     # use Bellman Expectation Equation for calculating next value function table
     def policy_evaluation(self):
-        next_value_table = copy.deepcopy(self.value_table)
+        # next_value_table = copy.deepcopy(self.value_table)
+        next_value_table = [[0.00] * self.env.width for _ in range(self.env.height)]
 
         # Bellman Expectation Equation for the every states
         for state in self.env.get_all_states():
             next_value_table[state[0]][state[1]] = round(self.calculate_value(state), 2)
-
-        self.value_table = copy.deepcopy(next_value_table)
+        self.value_table = next_value_table
 
     # calculating new value function using Bellman Expectation Equation
     def calculate_value(self, state):
@@ -89,6 +89,7 @@ class PolicyIteration:
         self.policy_table = next_policy
 
     # get action according to the current policy
+
     def get_action(self, state):
         random_pick = random.randrange(100) / 100
 
@@ -102,7 +103,7 @@ class PolicyIteration:
 
     # get the policy table for the all states
     def get_policy_table(self):
-        return copy.deepcopy(self.policy_table)
+        return self.policy_table
 
     # get policy of specific state and action
     def get_policy(self, state, action=None):
@@ -116,7 +117,7 @@ class PolicyIteration:
         return self.policy_table[state[0]][state[1]][self.env.possible_actions.index(action)]
 
     def get_value_table(self):
-        return copy.deepcopy(self.value_table)
+        return self.value_table
 
     def get_value(self, state):
         return round(self.value_table[state[0]][state[1]], 2)

@@ -14,11 +14,10 @@ class ValueIteration:
 
     # get next value function table from the current value function table
     def iteration(self):
-        value_table_copy = copy.deepcopy(self.value_table)
+        next_value_table = [[0.00] * self.env.width for _ in range(self.env.height)]
         for state in self.env.get_all_states():
-            value_table_copy[state[0]][state[1]] = round(self.calculate_max_value(state), 2)
-        self.value_table = copy.deepcopy(value_table_copy)
-        print("value_table  : " , self.value_table)
+            next_value_table[state[0]][state[1]] = round(self.calculate_max_value(state), 2)
+        self.value_table = next_value_table
 
     # calculate next value function using Bellman Optimality Equation
     def calculate_max_value(self, state):
@@ -35,8 +34,6 @@ class ValueIteration:
             reward = self.env.get_reward(state, action)
             next_value = self.get_value(next_state)
             value_list.append((reward + DISCOUNT_FACTOR * next_value))
-
-        print("value _ list : " , value_list)
 
         # return the maximum value(it is optimality equation!!)
         return max(value_list)

@@ -19,9 +19,12 @@ class GraphicDisplay(tk.Tk):
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT + 50))
         self.texts = []
         self.arrows = []
-        self.util = Util()
-        self.agent = ValueIteration(self.util)
+        self.env = Env()
+        self.agent = ValueIteration(self.env)
         self._build_env()
+        self.iteration_count = 0
+        self.improvement_count = 0
+        self.is_moving = 0
 
     def _build_env(self):
         self.canvas = tk.Canvas(self, bg='white',
@@ -78,15 +81,19 @@ class GraphicDisplay(tk.Tk):
         self.canvas.pack()
 
     def clear(self):
-        for i in self.texts:
-            self.canvas.delete(i)
 
-        for i in self.arrows:
-            self.canvas.delete(i)
+        if self.is_moving == 0:
+            self.iteration_count = 0
+            self.improvement_count = 0
+            for i in self.texts:
+                self.canvas.delete(i)
 
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-        self.agent = ValueIteration(self.util)
+            for i in self.arrows:
+                self.canvas.delete(i)
+
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+            self.agent = ValueIteration(self.env)
 
     def reset(self):
         self.update()
@@ -144,7 +151,6 @@ class GraphicDisplay(tk.Tk):
 
         base_action = np.array([0, 0])
         self.render()
-
         if action[0] == 1:  # down
             base_action[1] += UNIT
         elif action[0] == -1:  # up
@@ -163,12 +169,16 @@ class GraphicDisplay(tk.Tk):
         return int(y), int(x)
 
     def move_by_policy(self):
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-        agent_state = [self.rectangle_location()[0], self.rectangle_location()[1]]
-        while len(self.agent.get_action(agent_state, False)) != 0:
+
+        if self.improvement_count != 0 and self.is_moving != 1:
+            self.is_moving = 1
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
             agent_state = [self.rectangle_location()[0], self.rectangle_location()[1]]
-            self.after(100, self.rectangle_move(self.agent.get_action(agent_state, True)))
+            while len(self.agent.get_action(agent_state, False)) != 0:
+                self.after(100, self.rectangle_move(self.agent.get_action(agent_state, True)))
+                agent_state = [self.rectangle_location()[0], self.rectangle_location()[1]]
+            self.is_moving = 0
 
     def draw_one_arrow(self, col, row, action):
         if action[0] == 1:  # down
@@ -206,21 +216,22 @@ class GraphicDisplay(tk.Tk):
         self.update()
 
     def calculate_value(self):
+        self.iteration_count += 1
         for i in self.texts:
             self.canvas.delete(i)
         self.agent.iteration()
-        print(self.agent.get_value_table)
         self.print_values(self.agent.get_value_table())
 
     def print_optimal_policy(self):
+        self.improvement_count += 1
         for i in self.arrows:
             self.canvas.delete(i)
-        for state in self.util.get_all_states():
+        for state in self.env.get_all_states():
             action = self.agent.get_action(state, False)
             self.draw_from_values(state, action)
 
 
-class Util:
+class Env:
     def __init__(self):
         self.transition_probability = TRANSITION_PROB  # 상태 변환 확률
         self.width = WIDTH  # 그리드월드의 가로 길이
@@ -238,7 +249,7 @@ class Util:
                 self.all_state.append(state)
 
     def get_reward(self, state, action):
-        next_state = self.state_after_action(state,action)
+        next_state = self.state_after_action(state, action)
         return self.reward[next_state[0]][next_state[1]]
 
     def state_after_action(self, state, action):

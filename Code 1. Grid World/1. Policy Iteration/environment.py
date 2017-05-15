@@ -11,7 +11,6 @@ TRANSITION_PROB = 1
 POSSIBLE_ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 가능한 모든 행동
 REWARDS = []
 
-
 class GraphicDisplay(tk.Tk):
 
     def __init__(self):
@@ -23,6 +22,9 @@ class GraphicDisplay(tk.Tk):
         self.util = Util()
         self.agent = PolicyIteration(self.util)
         self._build_env()
+        self.evaluation_count = 0
+        self.improvement_count = 0
+        self.is_moving = 0
 
     def _build_env(self):
         self.canvas = tk.Canvas(self, bg='white',
@@ -79,15 +81,19 @@ class GraphicDisplay(tk.Tk):
         self.canvas.pack()
 
     def clear(self):
-        for i in self.texts:
-            self.canvas.delete(i)
 
-        for i in self.arrows:
-            self.canvas.delete(i)
+        if self.is_moving == 0:
+            self.evaluation_count = 0
+            self.improvement_count = 0
+            for i in self.texts:
+                self.canvas.delete(i)
 
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-        self.agent = PolicyIteration(self.util)
+            for i in self.arrows:
+                self.canvas.delete(i)
+
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+            self.agent = PolicyIteration(self.util)
 
     def text_value(self, row, col, contents,font='Helvetica', size=10, style='normal', anchor="nw"):
         origin_x, origin_y = 85, 70
@@ -103,14 +109,15 @@ class GraphicDisplay(tk.Tk):
 
     def rectangle_move(self, action):
         base_action = np.array([0, 0])
+        location = self.rectangle_location()
         self.render()
-        if action[0] == 1:  # down
+        if action[0] == 1 and location[0] < HEIGHT-1:  # down
             base_action[1] += UNIT
-        elif action[0] == -1:  # up
+        elif action[0] == -1 and location[0] > 0:  # up
             base_action[1] -= UNIT
-        elif action[1] == 1:  # right
+        elif action[1] == 1 and location[1] < WIDTH-1:  # right
             base_action[0] += UNIT
-        elif action[1] == -1:  # left
+        elif action[1] == -1 and location[1] > 0:  # left
             base_action[0] -= UNIT
 
         self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
@@ -122,11 +129,15 @@ class GraphicDisplay(tk.Tk):
         return int(y), int(x)
 
     def move_by_policy(self):
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-        while len(self.agent.get_policy_table()[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
-            self.after(100, self.rectangle_move(
-                self.agent.get_action([self.rectangle_location()[0], self.rectangle_location()[1]])))
+
+        if self.improvement_count != 0 and self.is_moving != 1:
+            self.is_moving = 1
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+            while len(self.agent.get_policy_table()[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
+                self.after(100, self.rectangle_move(
+                    self.agent.get_action([self.rectangle_location()[0], self.rectangle_location()[1]])))
+            self.is_moving = 0
 
     def draw_one_arrow(self, col, row, action):
 
@@ -165,12 +176,14 @@ class GraphicDisplay(tk.Tk):
         self.update()
 
     def policy_evaluation(self):
+        self.evaluation_count += 1
         for i in self.texts:
             self.canvas.delete(i)
         self.agent.policy_evaluation()
         self.print_value_table(self.agent.get_value_table())
 
     def policy_improvement(self):
+        self.improvement_count += 1
         for i in self.arrows:
             self.canvas.delete(i)
         self.agent.policy_improvement()
