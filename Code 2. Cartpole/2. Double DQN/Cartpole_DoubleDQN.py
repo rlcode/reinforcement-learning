@@ -78,29 +78,34 @@ class DoubleDQNAgent:
         mini_batch = random.sample(self.memory, batch_size)
 
         update_input = np.zeros((batch_size, self.state_size))
-        update_target = np.zeros((batch_size, self.action_size))
+        update_target = np.zeros((batch_size, self.state_size))
+        action, reward, done = [], [], []
 
         for i in range(batch_size):
-            state, action, reward, next_state, done = mini_batch[i]
-            target = self.model.predict(state)[0]
+            update_input[i] = mini_batch[i][0]
+            action.append(mini_batch[i][1])
+            reward.append(mini_batch[i][2])
+            update_target[i] = mini_batch[i][3]
+            done.append(mini_batch[i][4])
 
+        target = self.model.predict(update_input)
+        target_val = self.target_model.predict(update_target)
+
+        for i in range(self.batch_size):
             # like Q Learning, get maximum Q value at s'
             # But from target model
-            if done:
-                target[action] = reward
+            if done[i]:
+                target[i][action[i]] = reward[i]
             else:
                 # the key point of Double DQN
                 # selection of action is from model
                 # update is from target model
-                a = np.argmax(self.model.predict(next_state)[0])
-                target[action] = reward + self.discount_factor * \
-                                          (self.target_model.predict(next_state)[0][a])
-            update_input[i] = state
-            update_target[i] = target
+                a = np.argmax(target_val[i])
+                target[i][action[i]] = reward[i] + self.discount_factor * (target_val[i][a])
 
         # make minibatch which includes target q value and predicted q value
         # and do the model fit!
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=0)
 
     # load the saved model
     def load_model(self, name):
@@ -112,7 +117,7 @@ class DoubleDQNAgent:
 
 
 if __name__ == "__main__":
-    # in case of CartPole-v1, you can play until 500 time step
+    # In case of CartPole-v1, you can play until 500 time step
     env = gym.make('CartPole-v1')
     # get size of state and action from environment
     state_size = env.observation_space.shape[0]

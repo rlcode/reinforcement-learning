@@ -17,7 +17,7 @@ EPISODES = 300
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
-        self.render = False
+        self.render = True
 
         # get size of state and action
         self.state_size = state_size
@@ -78,25 +78,29 @@ class DQNAgent:
         mini_batch = random.sample(self.memory, batch_size)
 
         update_input = np.zeros((batch_size, self.state_size))
-        update_target = np.zeros((batch_size, self.action_size))
+        update_target = np.zeros((batch_size, self.state_size))
+        action, reward, done = [], [], []
 
-        for i in range(batch_size):
-            state, action, reward, next_state, done = mini_batch[i]
-            target = self.model.predict(state)[0]
+        for i in range(self.batch_size):
+            update_input[i] = mini_batch[i][0]
+            action.append(mini_batch[i][1])
+            reward.append(mini_batch[i][2])
+            update_target[i] = mini_batch[i][3]
+            done.append(mini_batch[i][4])
 
+        target = self.model.predict(update_input)
+        target_val = self.target_model.predict(update_target)
+
+        for i in range(self.batch_size):
             # like Q Learning, get maximum Q value at s'
             # But from target model
-            if done:
-                target[action] = reward
+            if done[i]:
+                target[i][action[i]] = reward[i]
             else:
-                target[action] = reward + self.discount_factor * \
-                                          np.amax(self.target_model.predict(next_state)[0])
-            update_input[i] = state
-            update_target[i] = target
+                target[i][action[i]] = reward[i] + self.discount_factor * np.amax(target_val[i])
 
-        # make minibatch which includes target q value and predicted q value
         # and do the model fit!
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit(update_input, target, batch_size=self.batch_size, epochs=1, verbose=0)
 
     # load the saved model
     def load_model(self, name):
@@ -150,7 +154,7 @@ if __name__ == "__main__":
                 score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
+                #pylab.plot(episodes, scores, 'b')
                 # pylab.savefig("./save_graph/Cartpole_DQN.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
