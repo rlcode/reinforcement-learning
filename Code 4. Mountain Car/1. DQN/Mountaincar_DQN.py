@@ -13,7 +13,7 @@ EPISODES = 4000
 class DQNAgent:
     def __init__(self, state_size, action_size):
         # Cartpole이 학습하는 것을 보려면 "True"로 바꿀 것
-        self.render = False
+        self.render = True
 
         # state와 action의 크기를 가져와서 모델을 생성하는데 사용함
         self.state_size = state_size
@@ -23,8 +23,8 @@ class DQNAgent:
         # deque를 통해서 replay memory 생성
         self.discount_factor = 0.99
         self.learning_rate = 0.001
-        self.epsilon = 0.2
-        self.epsilon_min = 0.05
+        self.epsilon = 1.0
+        self.epsilon_min = 0.005
         self.epsilon_decay = (self.epsilon - self.epsilon_min) / 50000
         self.batch_size = 64
         self.train_start = 1000
