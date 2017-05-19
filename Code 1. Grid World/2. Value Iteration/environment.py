@@ -2,25 +2,25 @@ import tkinter as tk
 import time
 import numpy as np
 from PIL import ImageTk, Image
-from value_iteration import ValueIteration
 
 UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
 TRANSITION_PROB = 1
-POSSIBLE_ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 가능한 모든 행동
+POSSIBLE_ACTIONS = [0, 1, 2, 3]  # 가능한 모든 행동 순서대로 상,하, 좌 우
+ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 행동을 좌표로 나타낸 것
 REWARDS = []
 
 
 class GraphicDisplay(tk.Tk):
-    def __init__(self):
+    def __init__(self, value_iteration):
         super(GraphicDisplay, self).__init__()
         self.title('Value Iteration')
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT + 50))
         self.texts = []
         self.arrows = []
         self.env = Env()
-        self.agent = ValueIteration(self.env)
+        self.agent = value_iteration
         self._build_env()
         self.iteration_count = 0
         self.improvement_count = 0
@@ -115,50 +115,18 @@ class GraphicDisplay(tk.Tk):
         font = (font, str(size), style)
         return self.canvas.create_text(x, y, fill="black", text=contents, font=font, anchor=anchor)
 
-    def step(self, action):
-        s = self.canvas.coords(self.rectangle)
-
-        base_action = np.array([0, 0])
-        if action == 0:  # up
-            if s[1] > UNIT:
-                base_action[1] -= UNIT
-        elif action == 1:  # down
-            if s[1] < (HEIGHT - 1) * UNIT:
-                base_action[1] += UNIT
-        elif action == 2:  # right
-            if s[0] < (WIDTH - 1) * UNIT:
-                base_action[0] += UNIT
-        elif action == 3:  # left
-            if s[0] > UNIT:
-                base_action[0] -= UNIT
-
-        self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
-        s_ = self.canvas.coords(self.rectangle)  # next state
-        # reward function
-        if s_ == self.canvas.coords(self.circle):
-            reward = 1
-            done = True
-        elif s_ in [self.canvas.coords(self.hell1), self.canvas.coords(self.hell2)]:
-            reward = -1
-            done = True
-        else:
-            reward = 0
-            done = False
-
-        return s_, reward, done
-
     def rectangle_move(self, action):
 
         base_action = np.array([0, 0])
         self.render()
-        if action[0] == 1:  # down
-            base_action[1] += UNIT
-        elif action[0] == -1:  # up
+        if action == 0:  # up
             base_action[1] -= UNIT
-        elif action[1] == 1:  # right
-            base_action[0] += UNIT
-        elif action[1] == -1:  # left
+        elif action == 1:  # down
+            base_action[1] += UNIT
+        elif action == 2:  # left
             base_action[0] -= UNIT
+        elif action == 3:  # right
+            base_action[0] += UNIT
 
         self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
 
@@ -181,19 +149,20 @@ class GraphicDisplay(tk.Tk):
             self.is_moving = 0
 
     def draw_one_arrow(self, col, row, action):
-        if action[0] == 1:  # down
-            origin_x, origin_y = 50 + (UNIT * row), 90 + (UNIT * col)
-            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.down_image))
 
-        elif action[0] == -1:  # up
+        if action == 0:  # up
             origin_x, origin_y = 50 + (UNIT * row), 10 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.up_image))
 
-        elif action[1] == 1:  # right
+        elif action == 1:  # down
+            origin_x, origin_y = 50 + (UNIT * row), 90 + (UNIT * col)
+            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.down_image))
+
+        elif action == 3:  # right
             origin_x, origin_y = 90 + (UNIT * row), 50 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.right_image))
 
-        elif action[1] == -1:  # left
+        elif action == 2:  # left
             origin_x, origin_y = 10 + (UNIT * row), 50 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.left_image))
 
@@ -220,7 +189,7 @@ class GraphicDisplay(tk.Tk):
         for i in self.texts:
             self.canvas.delete(i)
         self.agent.iteration()
-        self.print_values(self.agent.get_value_table())
+        self.print_values(self.agent.value_table)
 
     def print_optimal_policy(self):
         self.improvement_count += 1
@@ -252,7 +221,8 @@ class Env:
         next_state = self.state_after_action(state, action)
         return self.reward[next_state[0]][next_state[1]]
 
-    def state_after_action(self, state, action):
+    def state_after_action(self, state, action_num):
+        action = ACTIONS[action_num]
         return self.check_boundary([state[0] + action[0], state[1] + action[1]])
 
     def check_boundary(self, state):

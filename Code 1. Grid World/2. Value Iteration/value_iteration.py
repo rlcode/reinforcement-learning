@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import copy
 import random
+from environment import GraphicDisplay, Env
 
 DISCOUNT_FACTOR = 0.9
 
@@ -16,27 +16,21 @@ class ValueIteration:
     def iteration(self):
         next_value_table = [[0.00] * self.env.width for _ in range(self.env.height)]
         for state in self.env.get_all_states():
-            next_value_table[state[0]][state[1]] = round(self.calculate_max_value(state), 2)
+            if state == [2, 2]:
+                next_value_table[state[0]][state[1]] = 0.0
+                continue
+            # empty list for the value function
+            value_list = []
+
+            # do the calculation for the all possible actions
+            for action in self.env.possible_actions:
+                next_state = self.env.state_after_action(state, action)
+                reward = self.env.get_reward(state, action)
+                next_value = self.get_value(next_state)
+                value_list.append((reward + DISCOUNT_FACTOR * next_value))
+            # return the maximum value(it is optimality equation!!)
+            next_value_table[state[0]][state[1]] = round(max(value_list), 2)
         self.value_table = next_value_table
-
-    # calculate next value function using Bellman Optimality Equation
-    def calculate_max_value(self, state):
-
-        if state == [2, 2]:
-            return 0.0
-
-        # empty list for the value function
-        value_list = []
-
-        # do the calculation for the all possible actions
-        for action in self.env.possible_actions:
-            next_state = self.env.state_after_action(state, action)
-            reward = self.env.get_reward(state, action)
-            next_value = self.get_value(next_state)
-            value_list.append((reward + DISCOUNT_FACTOR * next_value))
-
-        # return the maximum value(it is optimality equation!!)
-        return max(value_list)
 
     # get action according to the current value function table
     def get_action(self, state, random_pick=True):
@@ -69,8 +63,11 @@ class ValueIteration:
 
         return action_list
 
-    def get_value_table(self):
-        return copy.deepcopy(self.value_table)
-
     def get_value(self, state):
         return round(self.value_table[state[0]][state[1]], 2)
+
+if __name__ == "__main__":
+    env = Env()
+    value_iteration = ValueIteration(env)
+    grid_world = GraphicDisplay(value_iteration)
+    grid_world.mainloop()
