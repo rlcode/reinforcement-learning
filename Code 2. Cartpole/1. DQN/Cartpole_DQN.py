@@ -123,6 +123,7 @@ if __name__ == "__main__":
     scores, episodes = [], []
 
     for e in range(EPISODES):
+        done = False
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
