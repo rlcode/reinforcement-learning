@@ -191,7 +191,7 @@ class GraphicDisplay(tk.Tk):
         self.iteration_count += 1
         for i in self.texts:
             self.canvas.delete(i)
-        self.agent.iteration()
+        self.agent.value_iteration()
         self.print_values(self.agent.value_table)
 
     def print_optimal_policy(self):

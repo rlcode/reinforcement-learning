@@ -13,7 +13,7 @@ class ValueIteration:
         self.value_table = [[0.00] * env.width for _ in range(env.height)]
 
     # get next value function table from the current value function table
-    def iteration(self):
+    def value_iteration(self):
         next_value_table = [[0.00] * self.env.width for _ in range(self.env.height)]
         for state in self.env.get_all_states():
             if state == [2, 2]:
