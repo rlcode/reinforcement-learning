@@ -207,7 +207,7 @@ if __name__ == "__main__":
             elif action == 1: real_action = 2
             else: real_action = 3
 
-            observe, reward, done, info = env.step(action)
+            observe, reward, done, info = env.step(real_action)
             # pre-process the observation --> history
             next_state = pre_processing(observe)
             next_state = np.reshape([next_state], (1, 84, 84, 1))

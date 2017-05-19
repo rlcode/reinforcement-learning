@@ -209,7 +209,7 @@ class Agent(threading.Thread):
                 elif action == 1: real_action = 2
                 else: real_action = 3
 
-                next_observe, reward, done, info = env.step(fake_action)
+                next_observe, reward, done, info = env.step(real_action)
                 # pre-process the observation --> history
                 next_state = pre_processing(next_observe, observe)
                 next_state = np.reshape([next_state], (1, 84, 84, 1))
