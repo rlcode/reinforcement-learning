@@ -2,25 +2,25 @@ import tkinter as tk
 import time
 import numpy as np
 from PIL import ImageTk, Image
-from policy_iteration import PolicyIteration
 
 UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
 TRANSITION_PROB = 1
-POSSIBLE_ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 가능한 모든 행동
+POSSIBLE_ACTIONS = [0, 1, 2, 3]  # 가능한 모든 행동 순서대로 상,하, 좌 우
+ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 행동을 좌표로 나타낸 것
 REWARDS = []
 
 class GraphicDisplay(tk.Tk):
 
-    def __init__(self):
+    def __init__(self,agent):
         super(GraphicDisplay, self).__init__()
         self.title('Policy Iteration')
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT + 50))
         self.texts = []
         self.arrows = []
-        self.util = Util()
-        self.agent = PolicyIteration(self.util)
+        self.env = Env()
+        self.agent = agent
         self._build_env()
         self.evaluation_count = 0
         self.improvement_count = 0
@@ -111,14 +111,14 @@ class GraphicDisplay(tk.Tk):
         base_action = np.array([0, 0])
         location = self.rectangle_location()
         self.render()
-        if action[0] == 1 and location[0] < HEIGHT-1:  # down
-            base_action[1] += UNIT
-        elif action[0] == -1 and location[0] > 0:  # up
+        if action == 0 and location[0] > 0:  # up
             base_action[1] -= UNIT
-        elif action[1] == 1 and location[1] < WIDTH-1:  # right
-            base_action[0] += UNIT
-        elif action[1] == -1 and location[1] > 0:  # left
+        elif action == 1 and location[0] < HEIGHT-1:  # down
+            base_action[1] += UNIT
+        elif action == 2 and location[1] > 0:  # left
             base_action[0] -= UNIT
+        elif action == 3 and location[1] < WIDTH-1:  # right
+            base_action[0] += UNIT
 
         self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
 
@@ -134,31 +134,31 @@ class GraphicDisplay(tk.Tk):
             self.is_moving = 1
             self.canvas.delete(self.rectangle)
             self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-            while len(self.agent.get_policy_table()[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
+            while len(self.agent.policy_table[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
                 self.after(100, self.rectangle_move(
                     self.agent.get_action([self.rectangle_location()[0], self.rectangle_location()[1]])))
             self.is_moving = 0
 
-    def draw_one_arrow(self, col, row, action):
-
+    def draw_one_arrow(self, col, row, policy):
         if col == 2 and row == 2:
             return
 
-        if action[0] > 0:  # up
+        if policy[0] > 0:  # up
             origin_x, origin_y = 50 + (UNIT * row), 10 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.up_image))
 
-        if action[1] > 0:  # down
+        if policy[1] > 0:  # down
             origin_x, origin_y = 50 + (UNIT * row), 90 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.down_image))
 
-        if action[2] > 0:  # left
+        if policy[2] > 0:  # left
             origin_x, origin_y = 10 + (UNIT * row), 50 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.left_image))
 
-        if action[3] > 0:  # right
+        if policy[3] > 0:  # right
             origin_x, origin_y = 90 + (UNIT * row), 50 + (UNIT * col)
             self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.right_image))
+
 
     def draw_from_policy(self, policy_table):
         for i in range(HEIGHT):
@@ -180,17 +180,17 @@ class GraphicDisplay(tk.Tk):
         for i in self.texts:
             self.canvas.delete(i)
         self.agent.policy_evaluation()
-        self.print_value_table(self.agent.get_value_table())
+        self.print_value_table(self.agent.value_table)
 
     def policy_improvement(self):
         self.improvement_count += 1
         for i in self.arrows:
             self.canvas.delete(i)
         self.agent.policy_improvement()
-        self.draw_from_policy(self.agent.get_policy_table())
+        self.draw_from_policy(self.agent.policy_table)
 
 
-class Util:
+class Env:
     def __init__(self):
         self.transition_probability = TRANSITION_PROB  # 상태 변환 확률
         self.width = WIDTH  # 그리드월드의 가로 길이
@@ -211,8 +211,10 @@ class Util:
         next_state = self.state_after_action(state, action)
         return self.reward[next_state[0]][next_state[1]]
 
-    def state_after_action(self, state, action):
+    def state_after_action(self, state, action_index):
+        action = ACTIONS[action_index]
         return self.check_boundary([state[0] + action[0], state[1] + action[1]])
+
 
     @staticmethod
     def check_boundary(state):

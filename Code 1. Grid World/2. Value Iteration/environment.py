@@ -116,16 +116,16 @@ class GraphicDisplay(tk.Tk):
         return self.canvas.create_text(x, y, fill="black", text=contents, font=font, anchor=anchor)
 
     def rectangle_move(self, action):
-
         base_action = np.array([0, 0])
+        location = self.rectangle_location()
         self.render()
-        if action == 0:  # up
+        if action == 0 and location[0] > 0:  # up
             base_action[1] -= UNIT
-        elif action == 1:  # down
+        elif action == 1 and location[0] < HEIGHT-1:  # down
             base_action[1] += UNIT
-        elif action == 2:  # left
+        elif action == 2 and location[1] > 0:  # left
             base_action[0] -= UNIT
-        elif action == 3:  # right
+        elif action == 3 and location[1] < WIDTH-1:  # right
             base_action[0] += UNIT
 
         self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
@@ -149,6 +149,9 @@ class GraphicDisplay(tk.Tk):
             self.is_moving = 0
 
     def draw_one_arrow(self, col, row, action):
+
+        if col == 2 and row == 2:
+            return
 
         if action == 0:  # up
             origin_x, origin_y = 50 + (UNIT * row), 10 + (UNIT * col)
@@ -221,8 +224,8 @@ class Env:
         next_state = self.state_after_action(state, action)
         return self.reward[next_state[0]][next_state[1]]
 
-    def state_after_action(self, state, action_num):
-        action = ACTIONS[action_num]
+    def state_after_action(self, state, action_index):
+        action = ACTIONS[action_index]
         return self.check_boundary([state[0] + action[0], state[1] + action[1]])
 
     def check_boundary(self, state):
