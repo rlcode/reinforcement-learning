@@ -6,7 +6,7 @@ if __name__ == "__main__":
     env = Env()
     agent = MCAgent(actions=list(range(env.n_actions)))
 
-    for episode in range(1000):
+    for episode in range(2000):
         # reset environment and initialize state
         state = env.reset()
 
