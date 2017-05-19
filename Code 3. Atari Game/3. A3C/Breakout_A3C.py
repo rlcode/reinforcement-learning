@@ -17,7 +17,8 @@ global episode
 episode = 0
 EPISODES = 8000000
 # In case of BreakoutDeterministic-v3, always skip 4 frames
-env_name = "BreakoutDeterministic-v3"
+# Deterministic-v4 version use 4 actions
+env_name = "BreakoutDeterministic-v4"
 
 # This is A3C(Asynchronous Advantage Actor Critic) agent(global) for the Cartpole
 # In this example, we use A3C algorithm
@@ -203,10 +204,10 @@ class Agent(threading.Thread):
                 observe = next_observe
                 # get action for the current history and go one step in environment
                 action, policy = self.get_action(history)
-
-                if action == 0: fake_action = 1
-                elif action == 1: fake_action = 4
-                else: fake_action = 5
+                # change action to real_action
+                if action == 0: real_action = 1
+                elif action == 1: real_action = 2
+                else: real_action = 3
 
                 next_observe, reward, done, info = env.step(fake_action)
                 # pre-process the observation --> history

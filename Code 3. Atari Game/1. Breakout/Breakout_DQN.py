@@ -166,10 +166,9 @@ def pre_processing(observe):
 
 if __name__ == "__main__":
     # In case of BreakoutDeterministic-v3, always skip 4 frames
-    env = gym.make('BreakoutDeterministic-v3')
-    # get size of action from environment
-    action_size = env.action_space.n
-    agent = DQNAgent(action_size)
+    # Deterministic-v4 version use 4 actions
+    env = gym.make('BreakoutDeterministic-v4')
+    agent = DQNAgent(action_size=3)
 
     scores, episodes, global_step = [], [], 0
 
@@ -198,7 +197,12 @@ if __name__ == "__main__":
 
             # get action for the current history and go one step in environment
             action = agent.get_action(history)
-            observe, reward, done, info = env.step(action)
+            # change action to real_action
+            if action == 0: real_action = 1
+            elif action == 1: real_action = 2
+            else: real_action = 3
+ 
+            observe, reward, done, info = env.step(real_action)
             # pre-process the observation --> history
             next_state = pre_processing(observe)
             next_state = np.reshape([next_state], (1, 84, 84, 1))
