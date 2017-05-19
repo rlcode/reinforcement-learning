@@ -37,11 +37,11 @@
 
 - [Deep Q Network](./Code%202.%20Cartpole/1.%20DQN)
 - [Double Deep Q Network](./Code%202.%20Cartpole/2.%20Double%20DQN)
-- [Dueling Deep Q Network](./Code%202.%20Cartpole/3.%20Dueling%20DQN)
 - [Policy Gradient](./Code%202.%20Cartpole/4.%20Policy%20Gradient)
 - [Actor Critic](./Code%202.%20Cartpole/5.%20Actor-Critic)
+- [A3C](https://github.com/rlcode/reinforcement-learning/tree/master/Code%202.%20Cartpole/5.%20A3C)
 
 **Code 3** - 딥러닝을 응용하여 좀더 복잡한 Atari게임을 마스터하는 에이전트 만들기
 
-- [벽돌깨기 (Breakout)](./Code%203.%20Atari%20Game/1.%20Breakout)
-- [퐁 (Pong)](./Code%203.%20Atari%20Game/2.%20Pong)
+- 벽돌깨기 (Breakout) - [DQN](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/1.%20Breakout), PG, [A3C](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/3.%20A3C)
+- 퐁 (Pong) - DQN, PG, A3C

@@ -12,7 +12,7 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 ## Dependencies
 1. Python 3.5
 2. Tensorflow 1.0.0
-3. Keras 
+3. Keras
 4. numpy
 5. pandas
 6. matplot
@@ -47,5 +47,5 @@ pip install -r requirements.txt
 
 **Code 3** - Mastering Atari games with Deep Reinforcement Learning
 
-- [Breakout](./Code%203.%20Atari%20Game/1.%20Breakout) - DQN, PG, A3C
+- [Breakout](./Code%203.%20Atari%20Game/1.%20Breakout) - [DQN](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/1.%20Breakout), PG, [A3C](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/3.%20A3C)
 - [Pong](./Code%203.%20Atari%20Game/2.%20Pong) - DQN, PG, A3C
