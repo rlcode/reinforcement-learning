@@ -34,7 +34,7 @@ $ python -V
 
    링크: [https://www.jetbrains.com/pycharm/download/#section=linux](https://www.jetbrains.com/pycharm/download/#section=linux)
 
-                                    <img src="./rlcode_image/pycharm_community.png"/>
+<p align="center"><img src="./rlcode_image/pycharm_community.png"/></p>
 
    ​
 
