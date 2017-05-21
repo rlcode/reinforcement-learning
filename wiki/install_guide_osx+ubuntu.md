@@ -41,7 +41,7 @@ $ python -V
 2. 다운받은 경로로 들어가서 다음 명령어로 압축파일을 풀어줍니다.
 
    ```shell
-   $tar xfz pycharm-community-2016.3.2.tar.gz
+   $ tar xfz pycharm-community-2016.3.2.tar.gz
    ```
 
 
@@ -50,14 +50,14 @@ $ python -V
 3. 압축을 푼 후 아래 경로(bin폴더)로 이동합니다.
 
    ```shell
-   $cd ~/pycharm-community-2016.3.2/bin
+   $ cd ~/pycharm-community-2016.3.2/bin
    ```
    ​
 
 4. 다음 명령어로 파이참을 실행합니다.
 
    ```shell
-   $sh pycharm.sh
+   $ sh pycharm.sh
    ```
    ​
 
