@@ -61,7 +61,7 @@
    ```
    ​
 
-   <img src="./install_image/sh_pycharm.sh.png"; />{.aligncenter}
+   <p align="center"><img src="./install_image/sh_pycharm.sh.png"/></p>
 
    ​
 
@@ -74,7 +74,7 @@
 
    ​
 
-   <img src="./install_image/default_config.png" style="zoom:70%">
+   <p align="center"><img src="./install_image/default_config.png" style="zoom:70%"></p>
 
    ​
 
@@ -85,7 +85,7 @@
 
 7. 초기설정이 완료된 후의 화면입니다. 여기서 프로젝트 생성을 해봅니다.
 
-   <img src="./install_image/pycharm_init.png" style="zoom:70%">
+   <p align="center"><img src="./install_image/pycharm_init.png" style="zoom:70%"></p>
 
    ​
 
@@ -95,14 +95,14 @@
 
    ​
 
-   <img src="./install_image/pycham_new_project.png" style="zoom:70%">
+   <p align="center"><img src="./install_image/pycham_new_project.png" style="zoom:70%"></p>
    ​
 
 9. rlcode_book 프로젝트가 생성되면 아래와 같은 화면이 나옵니다.
 
    ​
 
-   <img src="./install_image/rlcode_project.png" style="zoom:100%">
+   <p align="center"><img src="./install_image/rlcode_project.png" style="zoom:100%"></p>
 
    ​
 
@@ -111,13 +111,13 @@
 10. 파이참이 정상적으로 설치되었는지 확인하기 위해 파이썬 스크립트 파일을 생성해봅니다. 가장 간단한 예제인 `“Hello World”`를 실행하기 위해 다음과 같이 hello_world.py 파일을 생성합니다.
   ​
 
- <p align="center">><img src="./install_image/hello_world_ubuntu.png" style="zoom:100%"></p>
+   <p align="center">><img src="./install_image/hello_world_ubuntu.png" style="zoom:100%"></p>
  ​
 
 11. 생성한 파일에 마우스 커서를 놓고 오른쪽 버튼을 누르면 여러 항목이 나옵니다. 그 중에서 “Run ‘hello_world’” 버튼을 누르면 hello_world.py 파일을 실행할 수 있습니다. 
     ​
 
-    <p align="center"><img src="./install_image/run_hello_world.png" style="zoom:100%"></p>
+   <p align="center"><img src="./install_image/run_hello_world.png" style="zoom:100%"></p>
 
     ​
 
@@ -175,7 +175,7 @@
 
    ​
 
-   <img src="./install_image/terminal_rlcode_book.png" style="zoom:70%">
+   <p align="center"><img src="./install_image/terminal_rlcode_book.png" style="zoom:70%"></p>
 
    ​
 
@@ -292,7 +292,7 @@ for _ in range(1000):
 
    ​
 
-   <p align="center"><img src="./rlcode_image/rl_book_virtualenv.png" style="zoom:80%"></p>
+   <p align="center"><img src="./install_image/rl_book_virtualenv.png" style="zoom:80%"></p>
 
    ​
 
@@ -308,7 +308,7 @@ for _ in range(1000):
 
    ​
 
-   <p align="center"><img src="./rlcode_image/rl_book_project.png" style="zoom:80%"></p>
+   <p align="center"><img src="./install_image/rl_book_project.png" style="zoom:80%"></p>
 
    ​
 
@@ -318,7 +318,7 @@ for _ in range(1000):
 
    ​
 
-   <p align="center"><img src="./rlcode_image/rl_book_hello_world.png" style="zoom:80%"></p>
+   <p align="center"><img src="./install_image/rl_book_hello_world.png" style="zoom:80%"></p>
 
    ​
 
