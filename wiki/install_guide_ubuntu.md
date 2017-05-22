@@ -34,7 +34,7 @@
 
    링크: [https://www.jetbrains.com/pycharm/download/#section=linux](https://www.jetbrains.com/pycharm/download/#section=linux)
 
-<p align="center"><img src="./rlcode_image/pycharm_community.png"/></p>
+<p align="center"><img src="./install_image/pycharm_community.png"/></p>
 
    ​
 
@@ -61,7 +61,7 @@
    ```
    ​
 
-   <img src="./rlcode_image/sh_pycharm.sh.png"; />{.aligncenter}
+   <img src="./install_image/sh_pycharm.sh.png"; />{.aligncenter}
 
    ​
 
@@ -74,7 +74,7 @@
 
    ​
 
-   <img src="./rlcode_image/default_config.png" style="zoom:70%">
+   <img src="./install_image/default_config.png" style="zoom:70%">
 
    ​
 
@@ -85,7 +85,7 @@
 
 7. 초기설정이 완료된 후의 화면입니다. 여기서 프로젝트 생성을 해봅니다.
 
-   <img src="./rlcode_image/pycharm_init.png" style="zoom:70%">
+   <img src="./install_image/pycharm_init.png" style="zoom:70%">
 
    ​
 
@@ -95,14 +95,14 @@
 
    ​
 
-   <img src="./rlcode_image/pycham_new_project.png" style="zoom:70%">
+   <img src="./install_image/pycham_new_project.png" style="zoom:70%">
    ​
 
 9. rlcode_book 프로젝트가 생성되면 아래와 같은 화면이 나옵니다.
 
    ​
 
-   <img src="./rlcode_image/rlcode_project.png" style="zoom:100%">
+   <img src="./install_image/rlcode_project.png" style="zoom:100%">
 
    ​
 
@@ -111,13 +111,13 @@
 10. 파이참이 정상적으로 설치되었는지 확인하기 위해 파이썬 스크립트 파일을 생성해봅니다. 가장 간단한 예제인 `“Hello World”`를 실행하기 위해 다음과 같이 hello_world.py 파일을 생성합니다.
   ​
 
- <img src="./rlcode_image/hello_world_ubuntu.png" style="zoom:100%">
+ <img src="./install_image/hello_world_ubuntu.png" style="zoom:100%">
  ​
 
 11. 생성한 파일에 마우스 커서를 놓고 오른쪽 버튼을 누르면 여러 항목이 나옵니다. 그 중에서 “Run ‘hello_world’” 버튼을 누르면 hello_world.py 파일을 실행할 수 있습니다. 
     ​
 
-    <img src="./rlcode_image/run_hello_world.png" style="zoom:100%">
+    <img src="./install_image/run_hello_world.png" style="zoom:100%">
 
     ​
 
@@ -134,7 +134,7 @@
 
   ​
 
-  <img src="./rlcode_image/console_hello_world.png" style="zoom:70%">
+  <img src="./rinstall_image/console_hello_world.png" style="zoom:70%">
 
   ​
 
@@ -151,7 +151,7 @@
 
    ​
 
-   <img src="./rlcode_image/file_setting.png" style="zoom:70%">
+   <img src="./install_image/file_setting.png" style="zoom:70%">
 
    ​
 
@@ -159,7 +159,7 @@
 
    ​
 
-   <img src="./rlcode_image/project_interpreter.png" style="zoom:70%">
+   <img src="./install_image/project_interpreter.png" style="zoom:70%">
 
    ​
 
@@ -167,7 +167,7 @@
 
    ​
 
-   <img src="./rlcode_image/rlcode_book_directory.png" style="zoom:70%">
+   <img src="./install_image/rlcode_book_directory.png" style="zoom:70%">
 
    ​
 
@@ -175,7 +175,7 @@
 
    ​
 
-   <img src="./rlcode_image/terminal_rlcode_book.png" style="zoom:70%">
+   <img src="./install_image/terminal_rlcode_book.png" style="zoom:70%">
 
    ​
 
@@ -185,7 +185,7 @@
 
 오픈에이아이짐의 코드는 모두 오픈에이아이의 깃허브(Github)[[2\]](#_ftn1)에업로드되어있습니다.
 
-<img src="./rlcode_image/openai_github.png" style="zoom:80%">
+<img src="./install_image/openai_github.png" style="zoom:80%">
 
 
 
@@ -237,7 +237,7 @@ for _ in range(1000):
 
 
 
-<img src="./rlcode_image/cartpole_exam.png" style="zoom:80%">
+<p align="center"><img src="./install_image/cartpole_exam.png" style="zoom:80%"></p>
 
 
 
@@ -249,7 +249,7 @@ for _ in range(1000):
 
 파이썬다운로드 페이지[[3\]](#_ftnref3)로접속하면 다음과 같은 화면이 나옵니다.
 
-<img src="./rlcode_image/python_download.png" style="zoom:80%">
+   <p align="center"><img src="./install_image/python_download.png" style="zoom:80%"></p>
 
 
 
@@ -257,7 +257,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/python_installed.png" style="zoom:80%">
+   <p align="center"><img src="./install_image/python_installed.png" style="zoom:80%"></p>
 
    ​
 
@@ -265,7 +265,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/python3_terminal.jpg" style="zoom:100%">
+   <p alien="center"><img src="./rinstall_image/python3_terminal.jpg" style="zoom:100%"></p>
 
    ​
 
@@ -277,7 +277,7 @@ for _ in range(1000):
 
 2. 다운로드가 완료된 파일을 실행하고아래 그림에서 왼쪽 PyCharm CE 아이콘을 오른쪽 폴더 아이콘으로 드래그하면 설치가 완료됩니다.
 
-   <img src="./rlcode_image/pycharm_drag.png" style="zoom:80%">
+   <p align="center"><img src="./install_image/pycharm_drag.png" style="zoom:80%"></p>
 
 3. 처음 파이참을 실행하게 되면 설정화면이 나오는데 IDE theme을 통해 IDE의 색상과 스타일을 변경할 수 있습니다. Default는 우분투의 개발환경설정에서 봤던 Intellij 테마입니다. 이 책에서는 Default를 사용할 것입니다.
    ​
@@ -292,7 +292,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/rl_book_virtualenv.png" style="zoom:80%">
+   <p align="center"><img src="./rlcode_image/rl_book_virtualenv.png" style="zoom:80%"></p>
 
    ​
 
@@ -300,7 +300,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/rl_book_venv.png" style="zoom:80%">
+   <p align="center"><<img src="./rlcode_image/rl_book_venv.png" style="zoom:80%"></p>
 
    ​
 
@@ -308,7 +308,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/rl_book_project.png" style="zoom:80%">
+   <p align="center"><img src="./rlcode_image/rl_book_project.png" style="zoom:80%"></p>
 
    ​
 
@@ -318,7 +318,7 @@ for _ in range(1000):
 
    ​
 
-   <img src="./rlcode_image/rl_book_hello_world.png" style="zoom:80%">
+   <p align="center"><img src="./rlcode_image/rl_book_hello_world.png" style="zoom:80%"></p>
 
    ​
 
