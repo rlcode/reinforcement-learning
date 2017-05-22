@@ -111,7 +111,7 @@
 10. 파이참이 정상적으로 설치되었는지 확인하기 위해 파이썬 스크립트 파일을 생성해봅니다. 가장 간단한 예제인 `“Hello World”`를 실행하기 위해 다음과 같이 hello_world.py 파일을 생성합니다.
   ​
 
-   <p align="center">><img src="./install_image/hello_world_ubuntu.png" style="zoom:100%"></p>
+   <p align="center"><img src="./install_image/hello_world_ubuntu.png" style="zoom:100%"></p>
  ​
 
 11. 생성한 파일에 마우스 커서를 놓고 오른쪽 버튼을 누르면 여러 항목이 나옵니다. 그 중에서 “Run ‘hello_world’” 버튼을 누르면 hello_world.py 파일을 실행할 수 있습니다. 
@@ -300,7 +300,7 @@ for _ in range(1000):
 
    ​
 
-   <p align="center"><<img src="./rlcode_image/rl_book_venv.png" style="zoom:80%"></p>
+   <p align="center"><img src="./install_image/rl_book_venv.png" style="zoom:80%"></p>
 
    ​
 
