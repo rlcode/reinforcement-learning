@@ -6,7 +6,7 @@
 
 파이썬다운로드 페이지[[3\]](#_ftnref3)로접속하면 다음과 같은 화면이 나옵니다.
 
-<img src="./rlcode_image/python_download.png" style="zoom:80%">
+   <p align="center"><img src="./install_image/python_download.png" style="zoom:80%"></p>
 
 
 
@@ -22,7 +22,7 @@
 
    ​
 
-   <p align="center"><img src="./install_image/python3_terminal.jpg" style="zoom:100%"></p>
+   <p alien="center"><img src="./rinstall_image/python3_terminal.jpg" style="zoom:100%"></p>
 
    ​
 
@@ -90,3 +90,9 @@
 
 
 ------
+
+[[1\]](#_ftnref1) https://www.jetbrains.com/pycharm/
+
+[[2\]](#_ftnref2) https://github.com/openai/gym
+
+[[3\]](#_ftnref3) https://www.python.org/downloads/release/python-350/
