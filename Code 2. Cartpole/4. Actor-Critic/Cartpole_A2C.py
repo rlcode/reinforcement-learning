@@ -41,7 +41,6 @@ class A2CAgent:
         # make actor network
         actor = Sequential()
         actor.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        # actor.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         actor.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
         actor.summary()
         actor.compile(loss='categorical_crossentropy', optimizer=Adam(lr=self.critic_lr))
@@ -51,7 +50,6 @@ class A2CAgent:
         # make critic network
         critic = Sequential()
         critic.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        # critic.add(Dense(24, activation='relu', kernel_initializer='he_uniform'))
         critic.add(Dense(self.value_size, activation='linear', kernel_initializer='he_uniform'))
         critic.summary()
         critic.compile(loss="mse", optimizer=Adam(lr=self.critic_lr))
