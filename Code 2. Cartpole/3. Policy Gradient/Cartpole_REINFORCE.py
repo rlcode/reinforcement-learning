@@ -5,18 +5,17 @@ import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
-from keras import backend as K
 
 EPISODES = 1000
 
 
 # This is Policy Gradient agent for the Cartpole
 # In this example, we use REINFORCE algorithm which uses monte-carlo update rule
-class PGAgent:
+class REINFORCEAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
         self.render = False
-
+        self.load_model = False
         # get size of state and action
         self.state_size = state_size
         self.action_size = action_size
@@ -29,11 +28,11 @@ class PGAgent:
         # create model for policy network
         self.model = self.build_model()
 
-        # method for training the model
-        self.optimizer = self.optimizer()
-
         # lists for the states, actions and rewards
         self.states, self.actions, self.rewards = [], [], []
+
+        if self.load_model:
+            self.model.load_weights("./save_model/Cartpole_REINFORCE")
 
     # approximate policy using Neural Network
     # state is input and probability of each action is output of network
@@ -43,22 +42,8 @@ class PGAgent:
         model.add(Dense(self.hidden2, activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform'))
         model.summary()
+        model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=self.learning_rate))
         return model
-
-    # make loss function for the Policy Gradient
-    # [log(action probability) * return] will be input for the back prop
-    def optimizer(self):
-        action = K.placeholder(shape=[None, self.action_size])
-        discounted_rewards = K.placeholder(shape=[None, ])
-
-        good_prob = K.sum(action * self.model.output, axis=1)
-        eligibility = K.log(good_prob) * discounted_rewards
-        loss = -K.sum(eligibility)
-
-        optimizer = Adam(lr=self.learning_rate)
-        updates = optimizer.get_updates(self.model.trainable_weights, [], loss)
-        train = K.function([self.model.input, action, discounted_rewards], [], updates=updates)
-        return train
 
     # using the output of policy network, pick action stochastically
     def get_action(self, state):
@@ -76,29 +61,28 @@ class PGAgent:
         return discounted_rewards
 
     # save <s, a ,r> of each step
-    # this is used for calculating discounted rewards
-    def memory(self, state, action, reward):
-        self.states.append(state[0])
+    def append_sample(self, state, action, reward):
+        self.states.append(state)
         self.rewards.append(reward)
-        act = np.zeros(self.action_size)
-        act[action] = 1
-        self.actions.append(act)
+        self.actions.append(action)
 
-    # update policy network every episodes
-    def train_episodes(self):
+    # update policy network every episode
+    def train_model(self):
+        episode_length = len(self.states)
+
         discounted_rewards = self.discount_rewards(self.rewards)
         discounted_rewards -= np.mean(discounted_rewards)
         discounted_rewards /= np.std(discounted_rewards)
 
-        self.optimizer([self.states, self.actions, discounted_rewards])
+        update_inputs = np.zeros((episode_length, self.state_size))
+        advantages = np.zeros((episode_length, self.action_size))
+
+        for i in range(episode_length):
+            update_inputs[i] = self.states[i]
+            advantages[i][self.actions[i]] = discounted_rewards[i]
+
+        self.model.fit(update_inputs, advantages, epochs=1, verbose=0)
         self.states, self.actions, self.rewards = [], [], []
-
-    def load_model(self, name):
-        self.model.load_weights(name)
-
-    def save_model(self, name):
-        self.model.save_weights(name)
-
 
 if __name__ == "__main__":
     # In case of CartPole-v1, you can play until 500 time step
@@ -107,8 +91,8 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
-    # make Policy Gradient agent
-    agent = PGAgent(state_size, action_size)
+    # make REINFORCE agent
+    agent = REINFORCEAgent(state_size, action_size)
 
     scores, episodes = [], []
 
@@ -117,7 +101,6 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/Cartpole_PG.h5")
 
         while not done:
             if agent.render:
@@ -130,21 +113,21 @@ if __name__ == "__main__":
             reward = reward if not done or score == 499 else -100
 
             # save the sample <s, a, r> to the memory
-            agent.memory(state, action, reward)
+            agent.append_sample(state, action, reward)
 
             score += reward
             state = next_state
 
             if done:
                 # every episode, agent learns from sample returns
-                agent.train_episodes()
+                agent.train_model()
 
                 # every episode, plot the play time
                 score = score if score == 500 else score + 100
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_PG.png")
+                pylab.savefig("./save_graph/Cartpole_REINFORCE.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -154,4 +137,4 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_PG.h5")
+            agent.model.save_weights("./save_model/Cartpole_REINFORCE.h5")
