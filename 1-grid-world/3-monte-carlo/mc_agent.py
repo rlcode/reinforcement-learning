@@ -67,22 +67,18 @@ class MCAgent:
         next_state = [0.0, 0.0, 0.0, 0.0]
 
         if state_row != 0:
-            self.check_visited(str([state_col, state_row - 1]))
             next_state[0] = self.value_table[str([state_col, state_row - 1])]
         else:
             next_state[0] = self.value_table[str(state)]
         if state_row != self.height - 1:
-            self.check_visited(str([state_col, state_row + 1]))
             next_state[1] = self.value_table[str([state_col, state_row + 1])]
         else:
             next_state[1] = self.value_table[str(state)]
         if state_col != 0:
-            self.check_visited(str([state_col - 1, state_row]))
             next_state[2] = self.value_table[str([state_col - 1, state_row])]
         else:
             next_state[2] = self.value_table[str(state)]
         if state_col != self.width - 1:
-            self.check_visited(str([state_col + 1, state_row]))
             next_state[3] = self.value_table[str([state_col + 1, state_row])]
         else:
             next_state[3] = self.value_table[str(state)]

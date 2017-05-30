@@ -10,7 +10,7 @@ class QLearningAgent:
         self.learning_rate = 0.01
         self.discount_factor = 0.9
         self.epsilon = 0.9
-        self.q_table =  # default value of 0
+        self.q_table = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
 
     # update q function with sample <s, a, r, s'>
     def learn(self, state, action, reward, next_state):
