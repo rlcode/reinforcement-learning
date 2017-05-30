@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from collections import defualtdict
+from collections import defaultdict
 from environment import Env
 
 
@@ -11,7 +11,7 @@ class SARSAgent:
         self.learning_rate = 0.01
         self.discount_factor = 0.9
         self.epsilon = 0.9
-        self.q_table = defaultdict(int) # default value of 0
+        self.q_table = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
 
     # with sample <s, a, r, s', a'>, learns new q function
     def learn(self, state, action, reward, next_state, next_action):
