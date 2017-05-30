@@ -7,8 +7,8 @@ UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
 TRANSITION_PROB = 1
-POSSIBLE_ACTIONS = [0, 1, 2, 3]  # 가능한 모든 행동 순서대로 상,하, 좌 우
-ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 행동을 좌표로 나타낸 것
+POSSIBLE_ACTIONS = [0, 1, 2, 3]   # up, down, left, right
+ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # actions in coordinates
 REWARDS = []
 
 
@@ -149,7 +149,6 @@ class GraphicDisplay(tk.Tk):
             self.is_moving = 0
 
     def draw_one_arrow(self, col, row, action):
-
         if col == 2 and row == 2:
             return
 
@@ -205,14 +204,14 @@ class GraphicDisplay(tk.Tk):
 
 class Env:
     def __init__(self):
-        self.transition_probability = TRANSITION_PROB  # 상태 변환 확률
-        self.width = WIDTH  # 그리드월드의 가로 길이
-        self.height = HEIGHT  # 그리드 월드의 세로 길이
+        self.transition_probability = TRANSITION_PROB
+        self.width = WIDTH  # Width of Grid World
+        self.height = HEIGHT  # Height of GridWorld
         self.reward = [[0] * WIDTH for _ in range(HEIGHT)]
         self.possible_actions = POSSIBLE_ACTIONS
-        self.reward[2][2] = 1  # 물고기 자리에 보상 1
-        self.reward[1][2] = -1  # 불 자리에 보상 -1
-        self.reward[2][1] = -1  # 불 자리에 보상 -1
+        self.reward[2][2] = 1  # reward 1 for circle
+        self.reward[1][2] = -1  # reward -1 for triangle
+        self.reward[2][1] = -1  # reward -1 for triangle
         self.all_state = []
 
         for x in range(WIDTH):

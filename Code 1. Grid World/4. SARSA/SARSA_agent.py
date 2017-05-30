@@ -1,39 +1,29 @@
 import numpy as np
 import random
+from collections import defualtdict
 from environment import Env
 
 
-# this is SARSA agent for the grid world
-# it learns every time step from the sample <s, a, r, s', a'>
+# SARSA agent learns every time step from the sample <s, a, r, s', a'>
 class SARSAgent:
     def __init__(self, actions):
-        # actions = [0, 1, 2, 3]
         self.actions = actions
         self.learning_rate = 0.01
         self.discount_factor = 0.9
         self.epsilon = 0.9
-        self.q_table = {}
-
-        # check whether the state was visited
-        # if this is first visitation, then initialize the q function of the state
-
-    def check_state_exist(self, state):
-        if str(state) not in self.q_table.keys():
-            self.q_table[str(state)] = [0.0, 0.0, 0.0, 0.0]
+        self.q_table = defaultdict(int) # default value of 0
 
     # with sample <s, a, r, s', a'>, learns new q function
     def learn(self, state, action, reward, next_state, next_action):
-        self.check_state_exist(next_state)
-        self.q_table[state][action] = \
-            self.q_table[state][action] + self.learning_rate * \
-                                          (reward + self.discount_factor *
-                                           self.q_table[next_state][next_action] - self.q_table[state][action])
+        current_q = self.q_table[state][action]
+        next_state_q = self.q_table[next_state][next_action]
+        new_q = previous_q + self.learning_rate * \
+                (reward + self.discount_factor * next_state_q - current_q)
+        self.q_table[state][action] = new_q
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
-        self.check_state_exist(state)
-
         if np.random.rand() > self.epsilon:
             # take random action
             action = np.random.choice(self.actions)

@@ -1,13 +1,12 @@
 import numpy as np
 import random
+from collections import defualtdict
 from environment import Env
 
 
-# this is Monte-Carlo agent for the grid world
-# it learns every episodes from the sample(which is the difference with dynamic programming)
+# Monte Carlo Agent which learns every episodes from the sample
 class MCAgent:
     def __init__(self, actions):
-        # actions = [0, 1, 2, 3]
         self.width = 5
         self.height = 5
         self.actions = actions
@@ -15,13 +14,7 @@ class MCAgent:
         self.discount_factor = 0.9
         self.epsilon = 0.9
         self.samples = []
-        self.value_table = {}
-
-    # check whether the state was visited
-    # if this is first visitation, then initialize the q function of the state
-    def check_state_exist(self, state):
-        if str(state) not in self.value_table.keys():
-            self.value_table[str(state)] = 0.0
+        self.value_table = defaultdict(int) # default value of 0
 
     # append sample to memory(state, reward, done)
     def save_sample(self, state, reward, done):
@@ -36,15 +29,13 @@ class MCAgent:
             if state not in visit_state:
                 visit_state.append(state)
                 G_t = self.discount_factor * (reward[1] + G_t)
-                self.check_state_exist(state)
                 value = self.value_table[state]
-                self.value_table[state] = value + self.learning_rate * (G_t - value)
+                self.value_table[state] = value + self.learning_rate * \
+                                          (G_t - value)
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
-        self.check_state_exist(state)
-
         if np.random.rand() > self.epsilon:
             # take random action
             action = np.random.choice(self.actions)
@@ -76,22 +67,22 @@ class MCAgent:
         next_state = [0.0, 0.0, 0.0, 0.0]
 
         if state_row != 0:
-            self.check_state_exist(str([state_col, state_row - 1]))
+            self.check_visited(str([state_col, state_row - 1]))
             next_state[0] = self.value_table[str([state_col, state_row - 1])]
         else:
             next_state[0] = self.value_table[str(state)]
         if state_row != self.height - 1:
-            self.check_state_exist(str([state_col, state_row + 1]))
+            self.check_visited(str([state_col, state_row + 1]))
             next_state[1] = self.value_table[str([state_col, state_row + 1])]
         else:
             next_state[1] = self.value_table[str(state)]
         if state_col != 0:
-            self.check_state_exist(str([state_col - 1, state_row]))
+            self.check_visited(str([state_col - 1, state_row]))
             next_state[2] = self.value_table[str([state_col - 1, state_row])]
         else:
             next_state[2] = self.value_table[str(state)]
         if state_col != self.width - 1:
-            self.check_state_exist(str([state_col + 1, state_row]))
+            self.check_visited(str([state_col + 1, state_row]))
             next_state[3] = self.value_table[str([state_col + 1, state_row])]
         else:
             next_state[3] = self.value_table[str(state)]
@@ -105,26 +96,20 @@ if __name__ == "__main__":
     agent = MCAgent(actions=list(range(env.n_actions)))
 
     for episode in range(1000):
-        # reset environment and initialize state
         state = env.reset()
-
-        # take action and doing one step in the environment
         action = agent.get_action(state)
 
         while True:
             env.render()
 
-            # environment return next state, immediate reward and
-            # information about terminal of episode
-
+            # forward to next state. reward is number and done is boolean
             next_state, reward, done = env.step(action)
-
             agent.save_sample(next_state, reward, done)
 
-            # take action and doing one step in the environment
+            # get next action
             action = agent.get_action(next_state)
 
-            # at the end of episode, update the q function table
+            # at the end of each episode, update the q function table
             if done:
                 print("episode : ", episode)
                 agent.update()

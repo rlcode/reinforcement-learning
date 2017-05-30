@@ -7,8 +7,8 @@ UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
 TRANSITION_PROB = 1
-POSSIBLE_ACTIONS = [0, 1, 2, 3]  # 가능한 모든 행동 순서대로 상,하, 좌 우
-ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # 행동을 좌표로 나타낸 것
+POSSIBLE_ACTIONS = [0, 1, 2, 3]  # up, down, left, right
+ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # actions in coordinates
 REWARDS = []
 
 class GraphicDisplay(tk.Tk):
@@ -129,14 +129,15 @@ class GraphicDisplay(tk.Tk):
         return int(y), int(x)
 
     def move_by_policy(self):
-
         if self.improvement_count != 0 and self.is_moving != 1:
             self.is_moving = 1
             self.canvas.delete(self.rectangle)
-            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+            self.rectangle = self.canvas.create_image(50, 50,
+                                                      image=self.rectangle_image)
             while len(self.agent.policy_table[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
                 self.after(100, self.rectangle_move(
-                    self.agent.get_action([self.rectangle_location()[0], self.rectangle_location()[1]])))
+                    self.agent.get_action([self.rectangle_location()[0],
+                                           self.rectangle_location()[1]])))
             self.is_moving = 0
 
     def draw_one_arrow(self, col, row, policy):
@@ -145,19 +146,20 @@ class GraphicDisplay(tk.Tk):
 
         if policy[0] > 0:  # up
             origin_x, origin_y = 50 + (UNIT * row), 10 + (UNIT * col)
-            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.up_image))
-
+            self.arrows.append(self.canvas.create_image(origin_x, origin_y,
+                                                        image=self.up_image))
         if policy[1] > 0:  # down
             origin_x, origin_y = 50 + (UNIT * row), 90 + (UNIT * col)
-            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.down_image))
-
+            self.arrows.append(self.canvas.create_image(origin_x, origin_y,
+                                                        image=self.down_image))
         if policy[2] > 0:  # left
             origin_x, origin_y = 10 + (UNIT * row), 50 + (UNIT * col)
-            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.left_image))
-
+            self.arrows.append(self.canvas.create_image(origin_x, origin_y,
+                                                        image=self.left_image))
         if policy[3] > 0:  # right
             origin_x, origin_y = 90 + (UNIT * row), 50 + (UNIT * col)
-            self.arrows.append(self.canvas.create_image(origin_x, origin_y, image=self.right_image))
+            self.arrows.append(self.canvas.create_image(origin_x, origin_y,
+                                                        image=self.right_image))
 
 
     def draw_from_policy(self, policy_table):
@@ -192,14 +194,14 @@ class GraphicDisplay(tk.Tk):
 
 class Env:
     def __init__(self):
-        self.transition_probability = TRANSITION_PROB  # 상태 변환 확률
-        self.width = WIDTH  # 그리드월드의 가로 길이
-        self.height = HEIGHT  # 그리드 월드의 세로 길이
+        self.transition_probability = TRANSITION_PROB
+        self.width = WIDTH
+        self.height = HEIGHT
         self.reward = [[0] * WIDTH for _ in range(HEIGHT)]
         self.possible_actions = POSSIBLE_ACTIONS
-        self.reward[2][2] = 1  # 물고기 자리에 보상 1
-        self.reward[1][2] = -1  # 불 자리에 보상 -1
-        self.reward[2][1] = -1  # 불 자리에 보상 -1
+        self.reward[2][2] = 1  # reward 1 for circle
+        self.reward[1][2] = -1  # reward -1 for triangle
+        self.reward[2][1] = -1  # reward -1 for triangle
         self.all_state = []
 
         for x in range(WIDTH):
