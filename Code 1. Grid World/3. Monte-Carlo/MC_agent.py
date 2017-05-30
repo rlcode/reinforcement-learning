@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from collections import defualtdict
+from collections import defaultdict
 from environment import Env
 
 
@@ -14,7 +14,7 @@ class MCAgent:
         self.discount_factor = 0.9
         self.epsilon = 0.9
         self.samples = []
-        self.value_table = defaultdict(int) # default value of 0
+        self.value_table = defaultdict(float) # default value of 0
 
     # append sample to memory(state, reward, done)
     def save_sample(self, state, reward, done):

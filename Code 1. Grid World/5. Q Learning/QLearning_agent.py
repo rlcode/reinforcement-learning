@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from environment import Env
-from collections import defualtdict
+from collections import defaultdict
 
 class QLearningAgent:
     def __init__(self, actions):
@@ -10,7 +10,7 @@ class QLearningAgent:
         self.learning_rate = 0.01
         self.discount_factor = 0.9
         self.epsilon = 0.9
-        self.q_table = defaultdict(int) # default value of 0
+        self.q_table = defaultdict(float) # default value of 0
 
     # update q function with sample <s, a, r, s'>
     def learn(self, state, action, reward, next_state):
