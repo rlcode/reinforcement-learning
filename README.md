@@ -1,15 +1,17 @@
 <p align="center"><img width="90%" src="images/Reinforcement-Learning.png"></p>
 
 --------------------------------------------------------------------------------
+# Reinforcement Learning
 
 > Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [[한국어]](./README-kr.md)
 >
 > Maintainers - [Woongwon](https://github.com/dnddnjs), [Youngmoo](https://github.com/zzing0907), [Hyeokreal](https://github.com/Hyeokreal), [Uiryeong](https://github.com/wooridle), [Keon](https://github.com/keon)
 
-From the most basic algorithms to the more recent ones categorized as 'deep reinforcement learning', the examples are easy to read with comments.
+From the basics to deep reinforcement learning, this repo provides easy-to-read code examples. One file for each algorithm.
 Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcement-learning/pulls), or open an [issue](https://github.com/rlcode/reinforcement-learning/issues)!
 
 ## Dependencies
+
 1. Python 3.5
 2. Tensorflow 1.0.0
 3. Keras
@@ -21,6 +23,7 @@ Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcem
 9. h5py
 
 ### Install Requirements
+
 ```
 pip install -r requirements.txt
 ```
@@ -49,3 +52,6 @@ pip install -r requirements.txt
 
 - [Breakout](./Code%203.%20Atari%20Game/1.%20Breakout) - [DQN](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/1.%20Breakout), PG, [A3C](https://github.com/rlcode/reinforcement-learning/tree/master/Code%203.%20Atari%20Game/3.%20A3C)
 - [Pong](./Code%203.%20Atari%20Game/2.%20Pong) - DQN, PG, A3C
+
+
+**Code 4** - Mountain Car [WIP]
