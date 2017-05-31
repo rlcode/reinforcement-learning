@@ -59,12 +59,8 @@ if __name__ == "__main__":
         while True:
             env.render()
 
-            # take action and doing one step in the environment
-            # environment return next state, immediate reward and
-            # information about terminal of episode
+            # take action and proceed one step in the environment
             next_state, reward, done = env.step(action)
-
-            # get action of state from agent
             next_action = agent.get_action(str(next_state))
 
             # with sample <s,a,r,s',a'>, agent learns new q function

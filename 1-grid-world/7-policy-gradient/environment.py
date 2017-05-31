@@ -2,6 +2,7 @@ import time
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
+from PIL.ImageTK import PhotoImage
 
 UNIT = 50  # pixels
 HEIGHT = 10  # grid height
@@ -34,10 +35,12 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.rectangle_image = ImageTk.PhotoImage(
-            Image.open("../resources/rectangle.png").resize((30, 30), Image.ANTIALIAS))
-        self.fire_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((30, 30)))
-        self.fish_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((30, 30)))
+        self.rect_img = PhotoImage(
+            Image.open("../img/rect.png").resize((30, 30), Image.ANTIALIAS))
+        self.trig_img = PhotoImage(
+            Image.open("../img/trig.png").resize((30, 30)))
+        self.circ_img = PhotoImage(
+            Image.open("../img/circ.png").resize((30, 30)))
 
         self.rewards = list()
         self.goal = list()
@@ -53,13 +56,11 @@ class Env(tk.Tk):
         self.set_reward([8, 3], -1)
         self.set_reward([9, 1], -1)
 
-        #
-        #
         # #goal
         self.set_reward([9, 9], 5)
 
-        # add image to canvas
-        self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rectangle_image)
+        # add img to canvas
+        self.rect = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rect_img)
 
         # pack all`
         self.canvas.pack()
@@ -82,8 +83,6 @@ class Env(tk.Tk):
         self.set_reward([8, 3], -1)
         self.set_reward([9, 1], -1)
 
-        #
-        #
         # #goal
         self.set_reward([9, 9], 5)
 
@@ -92,15 +91,19 @@ class Env(tk.Tk):
         temp = {}
         if reward > 0:
             temp['reward'] = reward
-            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
-                                                      image=self.fish_image)
+            temp['figure'] = self.canvas.create_image(
+                UNIT * state[0] + UNIT/2,
+                UNIT * state[1] + UNIT/2,
+                image=self.circ_img)
             self.goal.append(temp['figure'])
 
 
         elif reward < 0:
             temp['reward'] = reward
-            temp['figure'] = self.canvas.create_image((UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
-                                                      image=self.fire_image)
+            temp['figure'] = self.canvas.create_image(
+                UNIT * state[0] + UNIT/2,
+                UNIT * state[1] + UNIT/2,
+                image=self.trig_img)
 
         temp['coords'] = self.canvas.coords(temp['figure'])
         temp['state'] = state
@@ -129,8 +132,8 @@ class Env(tk.Tk):
     def reset(self):
         self.update()
         time.sleep(0.5)
-        self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rectangle_image)
+        self.canvas.delete(self.rect)
+        self.rect = self.canvas.create_image(UNIT/2, UNIT/2, image=self.rect_img)
         # return observation
 
         self.reset_reward()
@@ -140,7 +143,7 @@ class Env(tk.Tk):
         self.counter += 1
         self.render()
 
-        next_coords = self.move(self.rectangle, action)
+        next_coords = self.move(self.rect, action)
 
         if self.counter % 2 == 1:
             self.rewards = self.move_rewards()
@@ -155,7 +158,7 @@ class Env(tk.Tk):
 
     def get_state(self):
 
-        agent_location = self.coords_to_state(self.canvas.coords(self.rectangle))
+        agent_location = self.coords_to_state(self.canvas.coords(self.rect))
         agent_x = agent_location[0]
         agent_y = agent_location[1]
 
@@ -184,7 +187,6 @@ class Env(tk.Tk):
 
     def move_const(self, target):
         s = self.canvas.coords(target)
-
         base_action = np.array([0, 0])
 
         if s[0] < (WIDTH - 1) * UNIT:
@@ -194,18 +196,15 @@ class Env(tk.Tk):
 
         # if action == 4 # move _none
 
-        if target is not self.rectangle and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
+        if target is not self.rect and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
             base_action = np.array([0, 0])
 
         self.canvas.move(target, base_action[0], base_action[1])
-
         s_ = self.canvas.coords(target)
-
         return s_
 
     def move(self, target, action):
         s = self.canvas.coords(target)
-
         base_action = np.array([0, 0])
 
         if action == 0:  # up
@@ -221,15 +220,11 @@ class Env(tk.Tk):
             if s[0] > UNIT:
                 base_action[0] -= UNIT
 
-        # if action == 4 # move _none
-
-        if target is not self.rectangle and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
+        if target is not self.rect and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
             base_action = np.array([0, 0])
 
         self.canvas.move(target, base_action[0], base_action[1])
-
         s_ = self.canvas.coords(target)
-
         return s_
 
     def render(self):

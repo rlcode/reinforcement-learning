@@ -21,7 +21,6 @@ class DQNAgent:
 
         # actions which agent can do
         self.action_space = [0, 1, 2, 3, 4]
-        # get size of state and action
         self.action_size = len(self.action_space)
         self.state_size = 20
         self.discount_factor = 0.99
@@ -45,9 +44,11 @@ class DQNAgent:
     # state is input and Q Value of each action is output of network
     def build_model(self):
         model = Sequential()
-        model.add(Dense(20, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(20, input_dim=self.state_size, activation='relu',
+                        kernel_initializer='he_uniform'))
         model.add(Dense(20, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
+        model.add(Dense(self.action_size, activation='linear',
+                        kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
         return model
@@ -103,7 +104,8 @@ class DQNAgent:
 
         # make minibatch which includes target q value and predicted q value
         # and do the model fit!
-        self.model.fit(update_input, update_target, batch_size=batch_size, epochs=1, verbose=0)
+        self.model.fit(update_input, update_target, batch_size=batch_size,
+                       epochs=1, verbose=0)
 
     # load the saved model
     def load_model(self, name):
@@ -147,8 +149,6 @@ if __name__ == "__main__":
             score += reward
 
             state = copy.deepcopy(next_state)
-            # if reward > 3:
-            #     print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.epsilon)
 
             # every 100 time steps update the target model to be same with model
             if global_step % 100 == 0:
@@ -159,8 +159,8 @@ if __name__ == "__main__":
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
                 # pylab.savefig("./save_graph/10by10.png")
-                print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
-                      "  epsilon:", agent.epsilon)
+                print("episode:", e, "  score:", score, "  memory length:",
+                      len(agent.memory), "  epsilon:", agent.epsilon)
 
         if e % 100 == 0:
             pass

@@ -2,6 +2,7 @@ import time
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
+from PIL.ImageTK import PhotoImage
 
 np.random.seed(1)
 
@@ -24,7 +25,6 @@ class Env(tk.Tk):
         self.canvas = tk.Canvas(self, bg='white',
                                 height=HEIGHT * UNIT,
                                 width=WIDTH * UNIT)
-
         # create grids
         for c in range(0, WIDTH * UNIT, UNIT):  # 0~400 by 80
             x0, y0, x1, y1 = c, 0, c, HEIGHT * UNIT
@@ -34,22 +34,24 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.rectangle_image = ImageTk.PhotoImage(
-            Image.open("../resources/rectangle.png").resize((65, 65), Image.ANTIALIAS))
-        self.triange_image = ImageTk.PhotoImage(Image.open("../resources/triangle.png").resize((65, 65)))
-        self.circle_image = ImageTk.PhotoImage(Image.open("../resources/circle.png").resize((65, 65)))
+        self.rect_img = PhotoImage(
+            Image.open("../img/rect.png").resize((65, 65), Image.ANTIALIAS))
+        self.trig_img = PhotoImage(
+            Image.open("../img/trig.png").resize((65, 65)))
+        self.circ_img = PhotoImage(
+            Image.open("../img/circ.png").resize((65, 65)))
 
-        # add image to canvas
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
-        self.triangle1 = self.canvas.create_image(250, 150, image=self.triange_image)
-        self.triangle2 = self.canvas.create_image(150, 250, image=self.triange_image)
-        self.circle = self.canvas.create_image(250, 250, image=self.circle_image)
+        # add img to canvas
+        self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
+        self.trig1 = self.canvas.create_image(250, 150, image=self.trig_img)
+        self.trig2 = self.canvas.create_image(150, 250, image=self.trig_img)
+        self.circ = self.canvas.create_image(250, 250, image=self.circ_img)
 
         # pack all
         self.canvas.pack()
 
-    def text_value(self, row, col, contents, action, font='Helvetica', size=10, style='normal', anchor="nw"):
-
+    def text_value(self, row, col, contents, action, font='Helvetica', size=10,
+                   style='normal', anchor="nw"):
         if action == 0:
             origin_x, origin_y = 7, 42
         elif action == 1:
@@ -61,7 +63,9 @@ class Env(tk.Tk):
 
         x, y = origin_y + (UNIT * col), origin_x + (UNIT * row)
         font = (font, str(size), style)
-        return self.texts.append(self.canvas.create_text(x, y, fill="black", text=contents, font=font, anchor=anchor))
+        text = self.canvas.create_text(x, y, fill="black", text=contents,
+                                       font=font, anchor=anchor)
+        return self.texts.append(text)
 
     def print_value_all(self, q_table):
         for i in self.texts:
@@ -88,14 +92,14 @@ class Env(tk.Tk):
     def reset(self):
         self.update()
         time.sleep(0.5)
-        self.canvas.delete(self.rectangle)
+        self.canvas.delete(self.rect)
         origin = np.array([UNIT / 2, UNIT / 2])
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_image)
+        self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
         # return observation
-        return self.coords_to_state(self.canvas.coords(self.rectangle))
+        return self.coords_to_state(self.canvas.coords(self.rect))
 
     def step(self, action):
-        state = self.canvas.coords(self.rectangle)
+        state = self.canvas.coords(self.rect)
         base_action = np.array([0, 0])
         self.render()
 
@@ -112,15 +116,16 @@ class Env(tk.Tk):
             if state[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
-        self.canvas.move(self.rectangle, base_action[0], base_action[1])  # move agent
+        self.canvas.move(self.rect, base_action[0], base_action[1]) # move agent
 
-        next_state = self.canvas.coords(self.rectangle)  # next state
+        next_state = self.canvas.coords(self.rect)  # next state
 
         # reward function
-        if next_state == self.canvas.coords(self.circle):
+        if next_state == self.canvas.coords(self.circ):
             reward = 100
             done = True
-        elif next_state in [self.canvas.coords(self.triangle1), self.canvas.coords(self.triangle2)]:
+        elif next_state in [self.canvas.coords(self.trig1),
+                            self.canvas.coords(self.trig2)]:
             reward = -100
             done = True
         else:
