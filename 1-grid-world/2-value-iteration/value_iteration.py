@@ -31,16 +31,18 @@ class ValueIteration:
         self.value_table = next_value_table
 
     # get action according to the current value function table
-    def get_action(self, state, random_pick=True):
+    def get_action(self, state):
+
         action_list = []
         max_value = -99999
 
         if state == [2, 2]:
             return []
 
-        # calculate q values for the all actions and
+        # calculating q values for the all actions and
         # append the action to action list which has maximum q value
         for action in self.env.possible_actions:
+
             next_state = self.env.state_after_action(state, action)
             reward = self.env.get_reward(state, action)
             next_value = self.get_value(next_state)
@@ -52,10 +54,6 @@ class ValueIteration:
                 max_value = value
             elif value == max_value:
                 action_list.append(action)
-
-        # pick one action from action_list which has same q value
-        if random_pick is True:
-            return random.sample(action_list, 1)[0]
 
         return action_list
 

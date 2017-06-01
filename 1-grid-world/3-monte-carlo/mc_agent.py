@@ -30,8 +30,8 @@ class MCAgent:
                 visit_state.append(state)
                 G_t = self.discount_factor * (reward[1] + G_t)
                 value = self.value_table[state]
-                self.value_table[state] = value + self.learning_rate * \
-                                          (G_t - value)
+                self.value_table[state] = (value +
+                                           self.learning_rate * (G_t - value))
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
@@ -61,25 +61,23 @@ class MCAgent:
 
     # get the possible next states
     def possible_next_state(self, state):
-        state_col = state[0]
-        state_row = state[1]
+        col, row = state
+        next_state = [0.0] * 4
 
-        next_state = [0.0, 0.0, 0.0, 0.0]
-
-        if state_row != 0:
-            next_state[0] = self.value_table[str([state_col, state_row - 1])]
+        if row != 0:
+            next_state[0] = self.value_table[str([col, row - 1])]
         else:
             next_state[0] = self.value_table[str(state)]
-        if state_row != self.height - 1:
-            next_state[1] = self.value_table[str([state_col, state_row + 1])]
+        if row != self.height - 1:
+            next_state[1] = self.value_table[str([col, row + 1])]
         else:
             next_state[1] = self.value_table[str(state)]
-        if state_col != 0:
-            next_state[2] = self.value_table[str([state_col - 1, state_row])]
+        if col != 0:
+            next_state[2] = self.value_table[str([col - 1, row])]
         else:
             next_state[2] = self.value_table[str(state)]
-        if state_col != self.width - 1:
-            next_state[3] = self.value_table[str([state_col + 1, state_row])]
+        if col != self.width - 1:
+            next_state[3] = self.value_table[str([col + 1, row])]
         else:
             next_state[3] = self.value_table[str(state)]
 

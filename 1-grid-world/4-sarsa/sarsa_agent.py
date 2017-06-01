@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import time
 from collections import defaultdict
 from environment import Env
 
@@ -52,6 +53,7 @@ if __name__ == "__main__":
 
     for episode in range(1000):
         # reset environment and initialize state
+
         state = env.reset()
         # get action of state from agent
         action = agent.get_action(str(state))
@@ -75,3 +77,4 @@ if __name__ == "__main__":
             # if episode ends, then break
             if done:
                 break
+

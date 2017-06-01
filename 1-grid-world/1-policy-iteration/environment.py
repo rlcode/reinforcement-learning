@@ -4,6 +4,7 @@ import time
 import numpy as np
 from PIL import ImageTk, Image
 
+PhotoImage = ImageTk.PhotoImage
 UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
@@ -77,7 +78,6 @@ class GraphicDisplay(tk.Tk):
     # (rectangle, triangle1, triangle2, circle)
 
     def load_images(self):
-        PhotoImage = ImageTk.PhotoImage
         up = PhotoImage(Image.open("../img/up.png").resize((13, 13)))
         right = PhotoImage(Image.open("../img/right.png").resize((13, 13)))
         left = PhotoImage(Image.open("../img/left.png").resize((13, 13)))
@@ -100,9 +100,8 @@ class GraphicDisplay(tk.Tk):
             self.agent.policy_table = ([[[0.25, 0.25, 0.25, 0.25]] * WIDTH
                                         for _ in range(HEIGHT)])
             self.policy_table[2][2] = []
-            coords = self.canvas.coords(self.rectangle)
-            self.canvas.move(self.rectangle, UNIT / 2 - coords[0],
-                             UNIT / 2 - coords[1])
+            x, y = self.canvas.coords(self.rectangle)
+            self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
 
     def text_value(self, row, col, contents, font='Helvetica', size=10,
                    style='normal', anchor="nw"):
@@ -146,9 +145,10 @@ class GraphicDisplay(tk.Tk):
     def move_by_policy(self):
         if self.improvement_count != 0 and self.is_moving != 1:
             self.is_moving = 1
-            coords = self.canvas.coords(self.rectangle)
-            self.canvas.move(self.rectangle,
-                             UNIT / 2 - coords[0], UNIT / 2 - coords[1])
+
+            x, y = self.canvas.coords(self.rectangle)
+            self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
+
             x, y = self.find_rectangle()
             while len(self.agent.policy_table[x][y]) != 0:
                 self.after(100,

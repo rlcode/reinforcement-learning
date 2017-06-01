@@ -2,10 +2,9 @@ import time
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
-from PIL.ImageTK import PhotoImage
 
 np.random.seed(1)
-
+PhotoImage = ImageTk.PhotoImage
 UNIT = 100  # pixels
 HEIGHT = 5  # grid height
 WIDTH = 5  # grid width
@@ -97,6 +96,7 @@ class Env(tk.Tk):
         self.canvas.delete(self.rectangle)
         origin = np.array([UNIT / 2, UNIT / 2])
         self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
+
         # return observation
         return self.coords_to_state(self.canvas.coords(self.rectangle))
 
