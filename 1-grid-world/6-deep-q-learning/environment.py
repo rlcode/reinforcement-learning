@@ -35,11 +35,12 @@ class Env(tk.Tk):
 
         # image_load
         self.rectangle_img = PhotoImage(
-                Image.open("../img/rectangle.png").resize((30, 30), Image.ANTIALIAS))
+            Image.open("../img/rectangle.png").resize((30, 30),
+                                                      Image.ANTIALIAS))
         self.triangle_img = PhotoImage(
-                Image.open("../img/triangle.png").resize((30, 30)))
+            Image.open("../img/triangle.png").resize((30, 30)))
         self.circle_img = PhotoImage(
-                Image.open("../img/circle.png").resize((30, 30)))
+            Image.open("../img/circle.png").resize((30, 30)))
 
         self.rewards = list()
         self.goal = list()
@@ -59,7 +60,7 @@ class Env(tk.Tk):
         self.set_reward([9, 9], 5)
 
         # add img to canvas
-        self.rectangle = self.canvas.create_image(UNIT/2, UNIT/2,
+        self.rectangle = self.canvas.create_image(UNIT / 2, UNIT / 2,
                                                   image=self.rectangle_img)
 
         # pack all`
@@ -92,16 +93,16 @@ class Env(tk.Tk):
         if reward > 0:
             temp['reward'] = reward
             temp['figure'] = self.canvas.create_image(
-                    (UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
-                    image=self.circle_img)
+                (UNIT * state[0]) + UNIT / 2, (UNIT * state[1]) + UNIT / 2,
+                image=self.circle_img)
             self.goal.append(temp['figure'])
 
 
         elif reward < 0:
             temp['reward'] = reward
             temp['figure'] = self.canvas.create_image(
-                    (UNIT * state[0]) + UNIT/2, (UNIT * state[1]) + UNIT/2,
-                    image=self.triangle_img)
+                (UNIT * state[0]) + UNIT / 2, (UNIT * state[1]) + UNIT / 2,
+                image=self.triangle_img)
 
         temp['coords'] = self.canvas.coords(temp['figure'])
         temp['state'] = state
@@ -124,8 +125,8 @@ class Env(tk.Tk):
         return check_list
 
     def coords_to_state(self, coords):
-        x = int((coords[0] - UNIT/2) / UNIT)
-        y = int((coords[1] - UNIT/2) / UNIT)
+        x = int((coords[0] - UNIT / 2) / UNIT)
+        y = int((coords[1] - UNIT / 2) / UNIT)
         return [x, y]
 
     def reset(self):
@@ -134,7 +135,7 @@ class Env(tk.Tk):
         self.canvas.delete(self.rectangle)
         origin = np.array([UNIT / 2, UNIT / 2])
         self.rectangle = self.canvas.create_image(
-                UNIT/2, UNIT/2, image=self.rectangle_img)
+            UNIT / 2, UNIT / 2, image=self.rectangle_img)
 
         # return observation
         self.reset_reward()
@@ -156,7 +157,8 @@ class Env(tk.Tk):
         return s_, reward, done
 
     def get_state(self):
-        agent_location = self.coords_to_state(self.canvas.coords(self.rectangle))
+        agent_location = self.coords_to_state(
+            self.canvas.coords(self.rectangle))
         agent_x = agent_location[0]
         agent_y = agent_location[1]
 
@@ -191,7 +193,9 @@ class Env(tk.Tk):
         else:
             base_action[0] = -(WIDTH - 1) * UNIT
 
-        if target is not self.rectangle and s == [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]:
+        # prevent triangle from reaching goal
+        goal = [(WIDTH - 1) * UNIT, (HEIGHT - 1) * UNIT]
+        if target is not self.rectangle and s == goal:
             base_action = np.array([0, 0])
 
         self.canvas.move(target, base_action[0], base_action[1])

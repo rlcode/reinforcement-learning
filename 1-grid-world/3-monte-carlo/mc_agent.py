@@ -14,7 +14,7 @@ class MCAgent:
         self.discount_factor = 0.9
         self.epsilon = 0.9
         self.samples = []
-        self.value_table = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
+        self.value_table = defaultdict(float)
 
     # append sample to memory(state, reward, done)
     def save_sample(self, state, reward, done):

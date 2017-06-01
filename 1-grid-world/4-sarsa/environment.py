@@ -2,7 +2,6 @@ import time
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
-from PIL.ImageTK import PhotoImage
 
 np.random.seed(1)
 
@@ -33,6 +32,7 @@ class Env(tk.Tk):
             x0, y0, x1, y1 = 0, r, HEIGHT * UNIT, r
             self.canvas.create_line(x0, y0, x1, y1)
 
+        PhotoImage = ImageTk.PhotoImage
         # image_load
         self.rectangle_img = PhotoImage(
             Image.open("../img/rectangle.png").resize((65, 65), Image.ANTIALIAS))

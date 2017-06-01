@@ -157,7 +157,6 @@ class Env(tk.Tk):
         return s_, reward, done
 
     def get_state(self):
-
         agent_location = self.coords_to_state(self.canvas.coords(self.rectangle))
         agent_x = agent_location[0]
         agent_y = agent_location[1]
