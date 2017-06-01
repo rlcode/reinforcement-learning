@@ -35,18 +35,18 @@ class Env(tk.Tk):
             self.canvas.create_line(x0, y0, x1, y1)
 
         # image_load
-        self.rect_img = PhotoImage(
-            Image.open("../img/rect.png").resize((65, 65), Image.ANTIALIAS))
-        self.trig_img = PhotoImage(
-            Image.open("../img/trig.png").resize((65, 65)))
-        self.circ_img = PhotoImage(
-            Image.open("../img/circ.png").resize((65, 65)))
+        self.rectangle_img = PhotoImage(
+            Image.open("../img/rectangle.png").resize((65, 65), Image.ANTIALIAS))
+        self.triangle_img = PhotoImage(
+            Image.open("../img/triangle.png").resize((65, 65)))
+        self.circle_img = PhotoImage(
+            Image.open("../img/circle.png").resize((65, 65)))
 
         # add img to canvas
-        self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
-        self.trig1 = self.canvas.create_image(250, 150, image=self.trig_img)
-        self.trig2 = self.canvas.create_image(150, 250, image=self.trig_img)
-        self.circ = self.canvas.create_image(250, 250, image=self.circ_img)
+        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
+        self.triangle1 = self.canvas.create_image(250, 150, image=self.triangle_img)
+        self.triangle2 = self.canvas.create_image(150, 250, image=self.triangle_img)
+        self.circle = self.canvas.create_image(250, 250, image=self.circle_img)
 
         # pack all
         self.canvas.pack()
@@ -94,14 +94,14 @@ class Env(tk.Tk):
     def reset(self):
         self.update()
         time.sleep(0.5)
-        self.canvas.delete(self.rect)
+        self.canvas.delete(self.rectangle)
         origin = np.array([UNIT / 2, UNIT / 2])
-        self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
+        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
         # return observation
-        return self.coords_to_state(self.canvas.coords(self.rect))
+        return self.coords_to_state(self.canvas.coords(self.rectangle))
 
     def step(self, action):
-        state = self.canvas.coords(self.rect)
+        state = self.canvas.coords(self.rectangle)
         base_action = np.array([0, 0])
         self.render()
 
@@ -118,15 +118,15 @@ class Env(tk.Tk):
             if state[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
-        self.canvas.move(self.rect, base_action[0], base_action[1]) # move agent
-        next_state = self.canvas.coords(self.rect)  # next state
+        self.canvas.move(self.rectangle, base_action[0], base_action[1]) # move agent
+        next_state = self.canvas.coords(self.rectangle)  # next state
 
         # reward function
-        if next_state == self.canvas.coords(self.circ):
+        if next_state == self.canvas.coords(self.circle):
             reward = 100
             done = True
-        elif next_state in [self.canvas.coords(self.trig1),
-                            self.canvas.coords(self.trig2)]:
+        elif next_state in [self.canvas.coords(self.triangle1),
+                            self.canvas.coords(self.triangle2)]:
             reward = -100
             done = True
         else:

@@ -33,24 +33,24 @@ class GraphicDisplay(tk.Tk):
                                 height=HEIGHT * UNIT,
                                 width=WIDTH * UNIT)
         # buttons
-        iteration_btn = Button(self, text="Evaluation",
+        iteration_button = Button(self, text="Evaluation",
                                command=self.policy_evaluation)
-        iteration_btn.configure(width=10, activebackground="#33B5E5")
+        iteration_button.configure(width=10, activebackground="#33B5E5")
         self.canvas.create_window(WIDTH * UNIT * 0.13, HEIGHT * UNIT + 10,
-                                  window=iteration_btn)
-        policy_btn = Button(self, text="Improvement",
+                                  window=iteration_button)
+        policy_button = Button(self, text="Improvement",
                                command=self.policy_improvement)
-        policy_btn.configure(width=10, activebackground="#33B5E5")
+        policy_button.configure(width=10, activebackground="#33B5E5")
         self.canvas.create_window(WIDTH * UNIT * 0.37, HEIGHT * UNIT + 10,
-                                  window=policy_btn)
-        policy_btn = Button(self, text="move", command=self.move_by_policy)
-        policy_btn.configure(width=10, activebackground="#33B5E5")
+                                  window=policy_button)
+        policy_button = Button(self, text="move", command=self.move_by_policy)
+        policy_button.configure(width=10, activebackground="#33B5E5")
         self.canvas.create_window(WIDTH * UNIT * 0.62, HEIGHT * UNIT + 10,
-                                  window=policy_btn)
-        policy_btn = Button(self, text="clear", command=self.clear)
-        policy_btn.configure(width=10, activebackground="#33B5E5")
+                                  window=policy_button)
+        policy_button = Button(self, text="clear", command=self.clear)
+        policy_button.configure(width=10, activebackground="#33B5E5")
         self.canvas.create_window(WIDTH * UNIT * 0.87, HEIGHT * UNIT + 10,
-                                  window=policy_btn)
+                                  window=policy_button)
 
         # create grids
         for col in range(0, WIDTH * UNIT, UNIT):  # 0~400 by 80
@@ -69,18 +69,18 @@ class GraphicDisplay(tk.Tk):
             Image.open("../img/left.png").resize((13, 13)))
         self.down_img = PhotoImage(
             Image.open("../img/down.png").resize((13, 13)))
-        self.rect_img = PhotoImage(
-            Image.open("../img/rect.png").resize((65, 65), Image.ANTIALIAS))
-        self.trig_img = PhotoImage(
-            Image.open("../img/trig.png").resize((65, 65)))
-        self.circ_img = PhotoImage(
-            Image.open("../img/circ.png").resize((65, 65)))
+        self.rectangle_img = PhotoImage(
+            Image.open("../img/rectangle.png").resize((65, 65), Image.ANTIALIAS))
+        self.triangle_img = PhotoImage(
+            Image.open("../img/triangle.png").resize((65, 65)))
+        self.circle_img = PhotoImage(
+            Image.open("../img/circle.png").resize((65, 65)))
 
         # add img to canvas
-        self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
-        self.trig1 = self.canvas.create_image(250, 150, image=self.trig_img)
-        self.trig2 = self.canvas.create_image(150, 250, image=self.trig_img)
-        self.circ = self.canvas.create_image(250, 250, image=self.circ_img)
+        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
+        self.triangle1 = self.canvas.create_image(250, 150, image=self.triangle_img)
+        self.triangle2 = self.canvas.create_image(150, 250, image=self.triangle_img)
+        self.circle = self.canvas.create_image(250, 250, image=self.circle_img)
 
         # add reward text
         self.text_reward(2, 2, "R : 1.0")
@@ -100,8 +100,8 @@ class GraphicDisplay(tk.Tk):
             for i in self.arrows:
                 self.canvas.delete(i)
 
-            self.canvas.delete(self.rect)
-            self.rect = self.canvas.create_image(50, 50, image=self.rect_img)
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
             self.agent = PolicyIteration(self.util)
 
     def text_value(self, row, col, contents,font='Helvetica', size=10,
@@ -122,9 +122,9 @@ class GraphicDisplay(tk.Tk):
                                        font=font, anchor=anchor)
         return self.texts.append()
 
-    def rect_move(self, action):
+    def rectangle_move(self, action):
         base_action = np.array([0, 0])
-        location = self.rect_location()
+        location = self.rectangle_location()
         self.render()
         if action == 0 and location[0] > 0:  # up
             base_action[1] -= UNIT
@@ -134,11 +134,11 @@ class GraphicDisplay(tk.Tk):
             base_action[0] -= UNIT
         elif action == 3 and location[1] < WIDTH-1:  # right
             base_action[0] += UNIT
+        # move agent
+        self.canvas.move(self.rectangle, base_action[0], base_action[1])
 
-        self.canvas.move(self.rect, base_action[0], base_action[1])  # move agent
-
-    def rect_location(self):
-        temp = self.canvas.coords(self.rect)
+    def rectangle_location(self):
+        temp = self.canvas.coords(self.rectangle)
         x = (temp[0] / 100) - 0.5
         y = (temp[1] / 100) - 0.5
         return int(y), int(x)
@@ -146,13 +146,13 @@ class GraphicDisplay(tk.Tk):
     def move_by_policy(self):
         if self.improvement_count != 0 and self.is_moving != 1:
             self.is_moving = 1
-            self.canvas.delete(self.rect)
-            self.rect = self.canvas.create_image(50, 50,
-                                                      image=self.rect_img)
-            while len(self.agent.policy_table[self.rect_location()[0]][self.rect_location()[1]]) != 0:
-                self.after(100, self.rect_move(
-                    self.agent.get_action([self.rect_location()[0],
-                                           self.rect_location()[1]])))
+            self.canvas.delete(self.rectangle)
+            self.rectangle = self.canvas.create_image(50, 50,
+                                                      image=self.rectangle_img)
+            while len(self.agent.policy_table[self.rectangle_location()[0]][self.rectangle_location()[1]]) != 0:
+                self.after(100, self.rectangle_move(
+                    self.agent.get_action([self.rectangle_location()[0],
+                                           self.rectangle_location()[1]])))
             self.is_moving = 0
 
     def draw_one_arrow(self, col, row, policy):
@@ -188,7 +188,7 @@ class GraphicDisplay(tk.Tk):
 
     def render(self):
         time.sleep(0.1)
-        self.canvas.tag_raise(self.rect)
+        self.canvas.tag_raise(self.rectangle)
         self.update()
 
     def policy_evaluation(self):
@@ -213,9 +213,9 @@ class Env:
         self.height = HEIGHT
         self.reward = [[0] * WIDTH for _ in range(HEIGHT)]
         self.possible_actions = POSSIBLE_ACTIONS
-        self.reward[2][2] = 1  # reward 1 for circ
-        self.reward[1][2] = -1  # reward -1 for trig
-        self.reward[2][1] = -1  # reward -1 for trig
+        self.reward[2][2] = 1  # reward 1 for circle
+        self.reward[1][2] = -1  # reward -1 for triangle
+        self.reward[2][1] = -1  # reward -1 for triangle
         self.all_state = []
 
         for x in range(WIDTH):
