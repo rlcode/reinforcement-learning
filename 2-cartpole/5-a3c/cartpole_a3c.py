@@ -34,7 +34,7 @@ class A3CAgent:
         self.hidden1, self.hidden2 = 24, 24
         self.threads = 8
 
-        # create model for actor and critic network 
+        # create model for actor and critic network
         self.actor, self.critic = self.build_model()
 
         # method for training actor and critic network
@@ -103,10 +103,10 @@ class A3CAgent:
         updates = optimizer.get_updates(self.critic.trainable_weights, [], loss)
         train = K.function([self.critic.input, discounted_reward], [], updates=updates)
         return train
-    
-    # make agents(local) and start training 
+
+    # make agents(local) and start training
     def train(self):
-        # self.load_model('./save_model/Cartpole_A3C')
+        # self.load_model('./save_model/cartpole_a3c.h5')
         agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
                         self.action_size, self.state_size) for i in range(self.threads)]
 
@@ -118,9 +118,9 @@ class A3CAgent:
 
             plot = scores[:]
             pylab.plot(range(len(plot)), plot, 'b')
-            pylab.savefig("./save_graph/Cartpole_A3C.png")
+            pylab.savefig("./save_graph/cartpole_a3c.png")
 
-            self.save_model('./save_model/Cartpole_A3C')
+            self.save_model('./save_model/cartpole_a3c.h5')
 
     def save_model(self, name):
         self.actor.save_weights(name + "_actor.h5")
@@ -147,7 +147,7 @@ class Agent(threading.Thread):
         self.discount_factor = discount_factor
         self.action_size = action_size
         self.state_size = state_size
-   
+
     # Thread interactive with environment
     def run(self):
         global episode

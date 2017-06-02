@@ -92,7 +92,7 @@ if __name__ == "__main__":
     state_size = 80 * 80
     action_size = env.action_space.n
     agent = PGAgent(state_size, action_size)
-    agent.load('pong.h5')
+    agent.load('./save_model/pong_reinforce.h5')
     while True:
         env.render()
 
@@ -113,4 +113,4 @@ if __name__ == "__main__":
             state = env.reset()
             prev_x = None
             if episode > 1 and episode % 10 == 0:
-                agent.save('pong.h5')
+                agent.save('./save_model/pong_reinforce.h5')

@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ## Table of Contents
 
-**Basics** - Mastering the basics of reinforcement learning in the simplified world called "Grid World"
+**Grid World** - Mastering the basics of reinforcement learning in the simplified world called "Grid World"
 
 - [Policy Iteration](./1-grid-world/1-policy-iteration)
 - [Value Iteration](./1-grid-world/2-value-iteration)
@@ -35,21 +35,21 @@ pip install -r requirements.txt
 - [SARSA](./1-grid-world/4-sarsa)
 - [Q-Learning](./1-grid-world/5-q-learning)
 - [Deep Q Network](./1-grid-world/6-deep-q-learning)
-- [Policy Gradient](./1-grid-world/7-policy-gradient)
+- [Policy Gradient](./1-grid-world/7-reinforce)
 
-**Intermediate** - Applying deep reinforcement learning on basic Cartpole game.
+**CartPole** - Applying deep reinforcement learning on basic Cartpole game.
 
 - [Deep Q Network](./2-cartpole/1-dqn)
 - [Double Deep Q Network](./2-cartpole/2-double-dqn)
-- [Policy Gradient](./2-cartpole/3-policy-gradient)
-- [Actor Critic (A2C)](./2-cartpole/4-actor-critic)
+- [Policy Gradient](./2-cartpole/3-reinforce)
+- [Actor Critic (A2C)](./2-cartpole/4-a2c)
 - [Asynchronous Advantage Actor Critic (A3C)](./2-cartpole/5-a3c)
 
-**Advanced** - Mastering Atari games with Deep Reinforcement Learning
+**Atari** - Mastering Atari games with Deep Reinforcement Learning
 
 - **Breakout** - [DQN](./3-atari/1-breakout/breakout_dqn.py), [DDQN](./3-atari/1-breakout/breakout_ddqn.py) [Dueling DDQN](./3-atari/1-breakout/breakout_ddqn.py) [A3C](./3-atari/1-breakout/breakout_a3c.py)
-- **Pong** - [Policy Gradient](./3-atari/2-pong/pong_pg.py), [A3C](./3-atari/2-pong/pong-a3c.py)
+- **Pong** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py), [A3C](./3-atari/2-pong/pong-a3c.py)
 
-**ETC** - [WIP]
+**OpenAI GYM** - [WIP]
 
-- Mountain Car - [DQN]()
+- Mountain Car - [DQN](./4-gym/1-mountaincar)

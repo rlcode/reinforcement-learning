@@ -43,7 +43,7 @@ class DQNAgent:
 
         self.avg_q_max, self.avg_loss = 0, 0
         self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/Breakout_Dueling_DDQN', self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter('summary/breakout_dueling_ddqn', self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
     # if the error is in the interval [-1, 1], then the cost is quadratic to the error
@@ -70,14 +70,14 @@ class DQNAgent:
 
     # approximate Q function using Convolution Neural Network
     # state is input and Q Value of each action is output of network
-    # dueling network's Q Value is sum of advantages and state value 
+    # dueling network's Q Value is sum of advantages and state value
     def build_model(self):
         input = Input(shape=self.state_size)
         shared = Conv2D(32, (8, 8), strides=(4, 4), activation='relu')(input)
         shared = Conv2D(64, (4, 4), strides=(2, 2), activation='relu')(shared)
         shared = Conv2D(64, (3, 3), strides=(1, 1), activation='relu')(shared)
         flatten = Flatten()(shared)
-	
+
         # network separate state value and advantages
         advantage_fc = Dense(512, activation='relu')(flatten)
         advantage = Dense(self.action_size)(advantage_fc)
@@ -87,7 +87,7 @@ class DQNAgent:
         value_fc = Dense(512, activation='relu')(flatten)
         value =  Dense(1)(value_fc)
         value = Lambda(lambda s: K.expand_dims(s[:, 0], -1), output_shape=(self.action_size,))(value)
-	
+
         # network merged and make Q Value
         q_value = merge([value, advantage], mode='sum')
         model = Model(inputs=input, outputs=q_value)
@@ -135,7 +135,7 @@ class DQNAgent:
 
         value = self.model.predict(history)
         target_value = self.target_model.predict(next_history)
-        
+
         # like Q Learning, get maximum Q value at s'
         # But from target model
         for i in range(self.batch_size):
@@ -268,4 +268,4 @@ if __name__ == "__main__":
                 agent.avg_q_max, agent.avg_loss = 0, 0
 
         if e % 1000 == 0:
-            agent.save_model("./save_model/Breakout_Dueling_DDQN.h5")
+            agent.save_model("./save_model/breakout_dueling_ddqn.h5")

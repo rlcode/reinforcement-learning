@@ -31,8 +31,8 @@ class A2CAgent:
         self.critic = self.build_critic()
 
         if self.load_model:
-            self.actor.load_weights("./save_model/Cartpole_actor.h5")
-            self.critic.load_weights("./save_model/Cartpole_critic.h5")
+            self.actor.load_weights("./save_model/cartpole_actor.h5")
+            self.critic.load_weights("./save_model/cartpole_critic.h5")
 
     # approximate policy and value using Neural Network
     # actor -> state is input and probability of each action is output of network
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_A2C.png")
+                pylab.savefig("./save_graph/cartpole_a2c.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -128,5 +128,5 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.actor.save_weights("./save_model/Cartpole_actor.h5")
-            agent.critic.save_weights("./save_model/Cartpole_critic.h5")
+            agent.actor.save_weights("./save_model/cartpole_actor.h5")
+            agent.critic.save_weights("./save_model/cartpole_critic.h5")

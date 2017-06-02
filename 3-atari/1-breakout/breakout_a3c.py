@@ -36,7 +36,7 @@ class A3CAgent:
         self.critic_lr = 2.5e-4
         self.threads = 8
 
-        # create model for actor and critic network 
+        # create model for actor and critic network
         self.actor, self.critic = self.build_model()
 
         # method for training actor and critic network
@@ -47,10 +47,10 @@ class A3CAgent:
         self.sess.run(tf.global_variables_initializer())
 
         self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/Breakout_A3C', self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter('summary/breakout_a3c', self.sess.graph)
 
     def train(self):
-        # self.load_model("./save_model/Breakout_A3C")
+        # self.load_model("./save_model/breakout_a3c")
         agents = [Agent(self.action_size, self.state_size, [self.actor, self.critic], self.sess, self.optimizer,
                         self.discount_factor, [self.summary_op, self.summary_placeholders,
                         self.update_ops, self.summary_writer]) for _ in range(self.threads)]
@@ -61,7 +61,7 @@ class A3CAgent:
 
         while True:
             time.sleep(60*5)
-            self.save_model("./save_model/Breakout_A3C")
+            self.save_model("./save_model/breakout_a3c")
 
     # approximate policy and value using Neural Network
     # actor -> state is input and probability of each action is output of network
@@ -110,7 +110,7 @@ class A3CAgent:
         train = K.function([self.actor.input, action, advantages], [loss], updates=updates)
 
         return train
-    
+
     # make loss function for Value approximation
     def critic_optimizer(self):
         discounted_reward = K.placeholder(shape=(None, ))
@@ -135,13 +135,13 @@ class A3CAgent:
     # make summary operators for tensorboard
     def setup_summary(self):
         episode_total_reward = tf.Variable(0.)
-        episode_avg_max_q = tf.Variable(0.)        
+        episode_avg_max_q = tf.Variable(0.)
         episode_duration = tf.Variable(0.)
 
-        tf.summary.scalar('Total Reward/Episode', episode_total_reward)        
-        tf.summary.scalar('Average Max Prob/Episode', episode_avg_max_q)        
+        tf.summary.scalar('Total Reward/Episode', episode_total_reward)
+        tf.summary.scalar('Average Max Prob/Episode', episode_avg_max_q)
         tf.summary.scalar('Duration/Episode', episode_duration)
-        
+
         summary_vars = [episode_total_reward, episode_avg_max_q, episode_duration]
         summary_placeholders = [tf.placeholder(tf.float32) for _ in range(len(summary_vars))]
         update_ops = [summary_vars[i].assign(summary_placeholders[i]) for i in range(len(summary_vars))]
@@ -165,14 +165,14 @@ class Agent(threading.Thread):
 
         self.avg_p_max = 0
         self.avg_loss = 0
-        
+
         # t_max -> max batch size for training
         self.t_max = 20
         self.t = 0
 
     # Thread interactive with environment
     def run(self):
-        # self.load_model('./save_model/Breakout_A3C')
+        # self.load_model('./save_model/breakout_a3c')
         global episode
 
         env = gym.make(env_name)
@@ -235,8 +235,8 @@ class Agent(threading.Thread):
                     dead = False
                 else:
                     history = next_history
-                
-                # 
+
+                #
                 if self.t >= self.t_max or done:
                     self.train_t(done)
                     self.t = 0

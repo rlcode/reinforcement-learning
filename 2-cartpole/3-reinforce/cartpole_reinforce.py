@@ -32,7 +32,7 @@ class REINFORCEAgent:
         self.states, self.actions, self.rewards = [], [], []
 
         if self.load_model:
-            self.model.load_weights("./save_model/Cartpole_REINFORCE")
+            self.model.load_weights("./save_model/cartpole_reinforce.h5")
 
     # approximate policy using Neural Network
     # state is input and probability of each action is output of network
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_REINFORCE.png")
+                pylab.savefig("./save_graph/cartpole_reinforce.png")
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -137,4 +137,4 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.model.save_weights("./save_model/Cartpole_REINFORCE.h5")
+            agent.model.save_weights("./save_model/cartpole_reinforce.h5")

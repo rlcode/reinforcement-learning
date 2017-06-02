@@ -43,7 +43,7 @@ class DQNAgent:
 
         self.avg_q_max, self.avg_loss = 0, 0
         self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/Breakout_DDQN', self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter('summary/breakout_ddqn', self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
     # if the error is in the interval [-1, 1], then the cost is quadratic to the error
@@ -122,7 +122,7 @@ class DQNAgent:
 
         value = self.model.predict(history)
         target_value = self.target_model.predict(next_history)
-        
+
         # like Q Learning, get maximum Q value at s'
         # But from target model
         for i in range(self.batch_size):
@@ -256,4 +256,4 @@ if __name__ == "__main__":
                 agent.avg_q_max, agent.avg_loss = 0, 0
 
         if e % 1000 == 0:
-            agent.save_model("./save_model/Breakout_DDQN.h5")
+            agent.save_model("./save_model/breakout_ddqn.h5")

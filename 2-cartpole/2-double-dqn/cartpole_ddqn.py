@@ -132,7 +132,7 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/Cartpole_DoubleDQN.h5")
+        # agent.load_model("./save_model/cartpole_ddqn.h5")
 
         while not done:
             if agent.render:
@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/Cartpole_DoubleDQN.png")
+                pylab.savefig("./save_graph/cartpole_ddqn.png")
                 print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
                       "  epsilon:", agent.epsilon)
 
@@ -172,4 +172,4 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.save_model("./save_model/Cartpole_DoubleDQN.h5")
+            agent.save_model("./save_model/cartpole_ddqn.h5")
