@@ -17,38 +17,42 @@ class Env(tk.Tk):
         self.n_actions = len(self.action_space)
         self.title('Q Learning')
         self.geometry('{0}x{1}'.format(HEIGHT * UNIT, HEIGHT * UNIT))
-        self.buildGraphic()
+        self.shapes = self.load_images()
+        self.canvas = self._build_canvas()
         self.texts = []
 
-    def buildGraphic(self):
-        self.canvas = tk.Canvas(self, bg='white',
-                                height=HEIGHT * UNIT,
-                                width=WIDTH * UNIT)
-
+    def _build_canvas(self):
+        canvas = tk.Canvas(self, bg='white',
+                           height=HEIGHT * UNIT,
+                           width=WIDTH * UNIT)
         # create grids
         for c in range(0, WIDTH * UNIT, UNIT):  # 0~400 by 80
             x0, y0, x1, y1 = c, 0, c, HEIGHT * UNIT
-            self.canvas.create_line(x0, y0, x1, y1)
+            canvas.create_line(x0, y0, x1, y1)
         for r in range(0, HEIGHT * UNIT, UNIT):  # 0~400 by 80
             x0, y0, x1, y1 = 0, r, HEIGHT * UNIT, r
-            self.canvas.create_line(x0, y0, x1, y1)
-
-        # image_load
-        self.rectangle_img = PhotoImage(
-            Image.open("../img/rectangle.png").resize((65, 65), Image.ANTIALIAS))
-        self.triangle_img = PhotoImage(
-            Image.open("../img/triangle.png").resize((65, 65)))
-        self.circle_img = PhotoImage(
-            Image.open("../img/circle.png").resize((65, 65)))
+            canvas.create_line(x0, y0, x1, y1)
 
         # add img to canvas
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
-        self.triangle1 = self.canvas.create_image(250, 150, image=self.triangle_img)
-        self.triangle2 = self.canvas.create_image(150, 250, image=self.triangle_img)
-        self.circle = self.canvas.create_image(250, 250, image=self.circle_img)
+        self.rectangle = canvas.create_image(50, 50, image=self.shapes[0])
+        self.triangle1 = canvas.create_image(250, 150, image=self.shapes[1])
+        self.triangle2 = canvas.create_image(150, 250, image=self.shapes[1])
+        self.circle = canvas.create_image(250, 250, image=self.shapes[2])
 
         # pack all
-        self.canvas.pack()
+        canvas.pack()
+
+        return canvas
+
+    def load_images(self):
+        rectangle = PhotoImage(
+            Image.open("../img/rectangle.png").resize((65, 65)))
+        triangle = PhotoImage(
+            Image.open("../img/triangle.png").resize((65, 65)))
+        circle = PhotoImage(
+            Image.open("../img/circle.png").resize((65, 65)))
+
+        return rectangle, triangle, circle
 
     def text_value(self, row, col, contents, action, font='Helvetica', size=10,
                    style='normal', anchor="nw"):
@@ -93,12 +97,12 @@ class Env(tk.Tk):
     def reset(self):
         self.update()
         time.sleep(0.5)
-        self.canvas.delete(self.rectangle)
-        origin = np.array([UNIT / 2, UNIT / 2])
-        self.rectangle = self.canvas.create_image(50, 50, image=self.rectangle_img)
-
+        x, y = self.canvas.coords(self.rectangle)
+        self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
+        self.render()
         # return observation
         return self.coords_to_state(self.canvas.coords(self.rectangle))
+
 
     def step(self, action):
         state = self.canvas.coords(self.rectangle)
@@ -118,8 +122,11 @@ class Env(tk.Tk):
             if state[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
-        self.canvas.move(self.rectangle, base_action[0], base_action[1]) # move agent
-        next_state = self.canvas.coords(self.rectangle)  # next state
+        # move agent
+        self.canvas.move(self.rectangle, base_action[0], base_action[1])
+        # move rectangle to top level of canvas
+        self.canvas.tag_raise(self.rectangle)
+        next_state = self.canvas.coords(self.rectangle)
 
         # reward function
         if next_state == self.canvas.coords(self.circle):

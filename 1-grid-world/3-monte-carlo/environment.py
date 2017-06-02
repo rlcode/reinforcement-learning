@@ -87,6 +87,8 @@ class Env(tk.Tk):
                 base_action[0] += UNIT
         # move agent
         self.canvas.move(self.rectangle, base_action[0], base_action[1])
+        # move rectangle to top level of canvas
+        self.canvas.tag_raise(self.rectangle)
 
         next_state = self.canvas.coords(self.rectangle)
 

@@ -90,6 +90,7 @@ class Env(tk.Tk):
 
     def reset(self):
         self.update()
+        time.sleep(0.5)
         x, y = self.canvas.coords(self.rectangle)
         self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
         self.render()
@@ -114,25 +115,27 @@ class Env(tk.Tk):
             if state[0] < (WIDTH - 1) * UNIT:
                 base_action[0] += UNIT
 
-        self.canvas.move(self.rectangle, base_action[0], base_action[1]) # move agent
-
-        next_state = self.canvas.coords(self.rectangle)  # next state
+        # move agent
+        self.canvas.move(self.rectangle, base_action[0], base_action[1])
+        # move rectangle to top level of canvas
+        self.canvas.tag_raise(self.rectangle)
+        next_state = self.canvas.coords(self.rectangle)
 
         # reward function
         if next_state == self.canvas.coords(self.circle):
             reward = 100
-            time.sleep(0.5)
             done = True
         elif next_state in [self.canvas.coords(self.triangle1),
                             self.canvas.coords(self.triangle2)]:
             reward = -100
-            time.sleep(0.5)
             done = True
         else:
             reward = 0
             done = False
 
         next_state = self.coords_to_state(next_state)
+
+
 
         return next_state, reward, done
 
