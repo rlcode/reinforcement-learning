@@ -17,13 +17,16 @@ EPISODES = 50000
 class DQNAgent:
     def __init__(self, action_size):
         self.render = False
+        self.load_model = False
         # environment settings
         self.state_size = (84, 84, 4)
         self.action_size = action_size
         # parameters about epsilon
         self.epsilon = 1.
         self.epsilon_start, self.epsilon_end = 1.0, 0.1
-        self.epsilon_decay_step = (self.epsilon_start - self.epsilon_end) / 1000000.
+        self.exploration_steps = 1000000.
+        self.epsilon_decay_step = (self.epsilon_start - self.epsilon_end) \
+                                  / self.exploration_steps
         # parameters about training
         self.batch_size = 32
         self.train_start = 50000
@@ -42,15 +45,20 @@ class DQNAgent:
         K.set_session(self.sess)
 
         self.avg_q_max, self.avg_loss = 0, 0
-        self.summary_placeholders, self.update_ops, self.summary_op = self.setup_summary()
-        self.summary_writer = tf.summary.FileWriter('summary/breakout_dqn', self.sess.graph)
+        self.summary_placeholders, self.update_ops, self.summary_op = \
+            self.setup_summary()
+        self.summary_writer = tf.summary.FileWriter(
+            'summary/breakout_dqn', self.sess.graph)
         self.sess.run(tf.global_variables_initializer())
 
-    # if the error is in the interval [-1, 1], then the cost is quadratic to the error
+        if self.load_model:
+            self.model.load_weights("./save_model/breakout_dqb.h5")
+
+    # if the error is in [-1, 1], then the cost is quadratic to the error
     # But outside the interval, the cost is linear to the error
     def optimizer(self):
-        a = K.placeholder(shape=(None, ), dtype='int32')
-        y = K.placeholder(shape=(None, ), dtype='float32')
+        a = K.placeholder(shape=(None,), dtype='int32')
+        y = K.placeholder(shape=(None,), dtype='float32')
 
         py_x = self.model.output
 
@@ -72,7 +80,8 @@ class DQNAgent:
     # state is input and Q Value of each action is output of network
     def build_model(self):
         model = Sequential()
-        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu', input_shape=self.state_size))
+        model.add(Conv2D(32, (8, 8), strides=(4, 4), activation='relu',
+                         input_shape=self.state_size))
         model.add(Conv2D(64, (4, 4), strides=(2, 2), activation='relu'))
         model.add(Conv2D(64, (3, 3), strides=(1, 1), activation='relu'))
         model.add(Flatten())
@@ -107,9 +116,11 @@ class DQNAgent:
 
         mini_batch = random.sample(self.memory, self.batch_size)
 
-        history = np.zeros((self.batch_size, self.state_size[0], self.state_size[1], self.state_size[2]))
-        next_history = np.zeros((self.batch_size, self.state_size[0], self.state_size[1], self.state_size[2]))
-        target = np.zeros((self.batch_size, ))
+        history = np.zeros((self.batch_size, self.state_size[0],
+                            self.state_size[1], self.state_size[2]))
+        next_history = np.zeros((self.batch_size, self.state_size[0],
+                                 self.state_size[1], self.state_size[2]))
+        target = np.zeros((self.batch_size,))
         action, reward, dead = [], [], []
 
         for i in range(self.batch_size):
@@ -127,13 +138,11 @@ class DQNAgent:
             if dead[i]:
                 target[i] = reward[i]
             else:
-                target[i] = reward[i] + self.discount_factor * np.amax(target_value[i])
+                target[i] = reward[i] + self.discount_factor * \
+                                        np.amax(target_value[i])
 
         loss = self.optimizer([history, action, target])
         self.avg_loss += loss[0]
-
-    def load_model(self, name):
-        self.model.load_weights(name)
 
     def save_model(self, name):
         self.model.save_weights(name)
@@ -150,9 +159,12 @@ class DQNAgent:
         tf.summary.scalar('Duration/Episode', episode_duration)
         tf.summary.scalar('Average Loss/Episode', episode_avg_loss)
 
-        summary_vars = [episode_total_reward, episode_avg_max_q, episode_duration, episode_avg_loss]
-        summary_placeholders = [tf.placeholder(tf.float32) for _ in range(len(summary_vars))]
-        update_ops = [summary_vars[i].assign(summary_placeholders[i]) for i in range(len(summary_vars))]
+        summary_vars = [episode_total_reward, episode_avg_max_q,
+                        episode_duration, episode_avg_loss]
+        summary_placeholders = [tf.placeholder(tf.float32) for _ in
+                                range(len(summary_vars))]
+        update_ops = [summary_vars[i].assign(summary_placeholders[i]) for i in
+                      range(len(summary_vars))]
         summary_op = tf.summary.merge_all()
         return summary_placeholders, update_ops, summary_op
 
@@ -160,7 +172,8 @@ class DQNAgent:
 # 210*160*3(color) --> 84*84(mono)
 # float --> integer (to reduce the size of replay memory)
 def pre_processing(observe):
-    processed_observe = np.uint8(resize(rgb2gray(observe), (84, 84), mode='constant') * 255)
+    processed_observe = np.uint8(
+        resize(rgb2gray(observe), (84, 84), mode='constant') * 255)
     return processed_observe
 
 
@@ -184,7 +197,8 @@ if __name__ == "__main__":
         for _ in range(random.randint(1, agent.no_op_steps)):
             observe, _, _, _ = env.step(1)
 
-        # At start of episode, there is no preceding frame. So just copy initial states to make history
+        # At start of episode, there is no preceding frame
+        # So just copy initial states to make history
         state = pre_processing(observe)
         history = np.stack((state, state, state, state), axis=2)
         history = np.reshape([history], (1, 84, 84, 4))
@@ -198,9 +212,12 @@ if __name__ == "__main__":
             # get action for the current history and go one step in environment
             action = agent.get_action(history)
             # change action to real_action
-            if action == 0: real_action = 1
-            elif action == 1: real_action = 2
-            else: real_action = 3
+            if action == 0:
+                real_action = 1
+            elif action == 1:
+                real_action = 2
+            else:
+                real_action = 3
 
             observe, reward, done, info = env.step(real_action)
             # pre-process the observation --> history
@@ -208,9 +225,10 @@ if __name__ == "__main__":
             next_state = np.reshape([next_state], (1, 84, 84, 1))
             next_history = np.append(next_state, history[:, :, :, :3], axis=3)
 
-            agent.avg_q_max += np.amax(agent.model.predict(np.float32(history / 255.))[0])
+            agent.avg_q_max += np.amax(
+                agent.model.predict(np.float32(history / 255.))[0])
 
-            # if the ball is fall, then the agent is dead --> episode is not over
+            # if the agent missed ball, agent is dead --> episode is not over
             if start_life > info['ale.lives']:
                 dead = True
                 start_life = info['ale.lives']
@@ -236,7 +254,8 @@ if __name__ == "__main__":
             # if done, plot the score over episodes
             if done:
                 if global_step > agent.train_start:
-                    stats = [score, agent.avg_q_max / float(step), step, agent.avg_loss / float(step)]
+                    stats = [score, agent.avg_q_max / float(step), step,
+                             agent.avg_loss / float(step)]
                     for i in range(len(stats)):
                         agent.sess.run(agent.update_ops[i], feed_dict={
                             agent.summary_placeholders[i]: float(stats[i])
@@ -244,11 +263,13 @@ if __name__ == "__main__":
                     summary_str = agent.sess.run(agent.summary_op)
                     agent.summary_writer.add_summary(summary_str, e + 1)
 
-                print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
-                      "  epsilon:", agent.epsilon, "  global_step:", global_step, "  average_q:", agent.avg_q_max/float(step),
-                      "  average loss:", agent.avg_loss/float(step))
+                print("episode:", e, "  score:", score, "  memory length:",
+                      len(agent.memory), "  epsilon:", agent.epsilon,
+                      "  global_step:", global_step, "  average_q:",
+                      agent.avg_q_max / float(step), "  average loss:",
+                      agent.avg_loss / float(step))
 
                 agent.avg_q_max, agent.avg_loss = 0, 0
 
         if e % 1000 == 0:
-            agent.save_model("./save_model/breakout_dqn.h5")
+            agent.model.save_weights("./save_model/breakout_dqn.h5")
