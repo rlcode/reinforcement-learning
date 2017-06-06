@@ -52,7 +52,7 @@ class DQNAgent:
         self.sess.run(tf.global_variables_initializer())
 
         if self.load_model:
-            self.model.load_weights("./save_model/breakout_dqb.h5")
+            self.model.load_weights("./save_model/breakout_dqn.h5")
 
     # if the error is in [-1, 1], then the cost is quadratic to the error
     # But outside the interval, the cost is linear to the error

@@ -14,7 +14,7 @@ from keras import backend as K
 EPISODES = 50000
 
 
-class DQNAgent:
+class DuelingDDQNAgent:
     def __init__(self, action_size):
         self.render = False
         self.load_model = False
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     # In case of BreakoutDeterministic-v3, always skip 4 frames
     # Deterministic-v4 version use 4 actions
     env = gym.make('BreakoutDeterministic-v4')
-    agent = DQNAgent(action_size=3)
+    agent = DuelingDDQNAgent(action_size=3)
 
     scores, episodes, global_step = [], [], 0
 
