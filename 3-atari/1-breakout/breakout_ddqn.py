@@ -131,7 +131,7 @@ class DDQNAgent:
             reward.append(mini_batch[i][2])
             dead.append(mini_batch[i][4])
 
-        value = self.model.predict(history)
+        value = self.model.predict(next_history)
         target_value = self.target_model.predict(next_history)
 
         # like Q Learning, get maximum Q value at s'
