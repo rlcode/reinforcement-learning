@@ -72,13 +72,13 @@ class DQNAgent:
             return np.argmax(q_value[0])
 
     # save sample <s,a,r,s'> to the replay memory
-    def replay_memory(self, state, action, reward, next_state, done):
+    def append_sample(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
     # pick samples randomly from replay memory (with batch_size)
-    def train_replay(self):
+    def train_model(self):
         if len(self.memory) < self.train_start:
             return
         batch_size = min(self.batch_size, len(self.memory))
@@ -140,9 +140,9 @@ if __name__ == "__main__":
             reward = reward if not done or score == 499 else -100
 
             # save the sample <s, a, r, s'> to the replay memory
-            agent.replay_memory(state, action, reward, next_state, done)
+            agent.append_sample(state, action, reward, next_state, done)
             # every time step do the training
-            agent.train_replay()
+            agent.train_model()
             score += reward
             state = next_state
 
