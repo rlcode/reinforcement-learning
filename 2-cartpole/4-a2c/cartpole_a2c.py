@@ -9,8 +9,7 @@ from keras.optimizers import Adam
 EPISODES = 1000
 
 
-# This is Policy Gradient agent for the Cartpole
-# In this example, we use REINFORCE algorithm which uses monte-carlo update rule
+# A2C(Advantage Actor-Critic) agent for the Cartpole
 class A2CAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
@@ -35,22 +34,25 @@ class A2CAgent:
             self.critic.load_weights("./save_model/cartpole_critic.h5")
 
     # approximate policy and value using Neural Network
-    # actor -> state is input and probability of each action is output of network
-    # critic -> state is input and value of state is output of network
+    # actor: state is input and probability of each action is output of model
     def build_actor(self):
-        # make actor network
         actor = Sequential()
-        actor.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        actor.add(Dense(self.action_size, activation='softmax', kernel_initializer='he_uniform'))
+        actor.add(Dense(24, input_dim=self.state_size, activation='relu',
+                        kernel_initializer='he_uniform'))
+        actor.add(Dense(self.action_size, activation='softmax',
+                        kernel_initializer='he_uniform'))
         actor.summary()
-        actor.compile(loss='categorical_crossentropy', optimizer=Adam(lr=self.critic_lr))
+        actor.compile(loss='categorical_crossentropy',
+                      optimizer=Adam(lr=self.critic_lr))
         return actor
 
+    # critic: state is input and value of state is output of model
     def build_critic(self):
-        # make critic network
         critic = Sequential()
-        critic.add(Dense(24, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        critic.add(Dense(self.value_size, activation='linear', kernel_initializer='he_uniform'))
+        critic.add(Dense(24, input_dim=self.state_size, activation='relu',
+                         kernel_initializer='he_uniform'))
+        critic.add(Dense(self.value_size, activation='linear',
+                         kernel_initializer='he_uniform'))
         critic.summary()
         critic.compile(loss="mse", optimizer=Adam(lr=self.critic_lr))
         return critic
@@ -72,7 +74,8 @@ class A2CAgent:
             advantages[0][action] = reward - value
             target[0][0] = reward
         else:
-            advantages[0][action] = reward + self.discount_factor * next_value - value
+            advantages[0][action] = reward + self.discount_factor * (
+                next_value - value)
             target[0][0] = reward + self.discount_factor * next_value
 
         self.actor.fit(state, advantages, epochs=1, verbose=0)
@@ -80,13 +83,13 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
-    # In case of CartPole-v1, you can play until 500 time step
+    # In case of CartPole-v1, maximum length of episode is 500
     env = gym.make('CartPole-v1')
     # get size of state and action from environment
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
-    # make Policy Gradient agent
+    # make A2C agent
     agent = A2CAgent(state_size, action_size)
 
     scores, episodes = [], []
