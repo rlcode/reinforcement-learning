@@ -30,7 +30,8 @@ class DeepSARSAgent:
         self.model = self.build_model()
 
         if self.load_model:
-            self.model.load_weights('./save_model/deep_sarsa.h5')
+            self.epsilon = 0.05
+            self.model.load_weights('./save_model/deep_sarsa_trained.h5')
 
     # approximate Q function using Neural Network
     # state is input and Q Value of each action is output of network
@@ -74,14 +75,6 @@ class DeepSARSAgent:
         # and do the model fit!
         self.model.fit(state, target, epochs=1, verbose=0)
 
-    # load the saved model
-    def load_model(self, name):
-        self.model.load_weights(name)
-
-    # save the model which is under training
-    def save_model(self, name):
-        self.model.save_weights(name)
-
 
 if __name__ == "__main__":
     env = Env()
@@ -123,8 +116,9 @@ if __name__ == "__main__":
                 print("episode:", e, "  score:", score, "global_step",
                       global_step, "  epsilon:", agent.epsilon)
 
-        if e % 500 == 0:
-            save = "./save_model/deep_sarsa_"
-            save += str(e)
-            save += ".h5"
-            agent.save_model(save)
+        if e % 100 == 0:
+            agent.model.save_weights("./save_model/deep_sarsa.h5")
+
+    # end of game
+    print('game over')
+    env.destroy()

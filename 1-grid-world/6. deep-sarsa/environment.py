@@ -1,5 +1,4 @@
 import time
-import random
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
