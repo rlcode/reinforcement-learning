@@ -112,7 +112,7 @@ class Env(tk.Tk):
         for reward in self.rewards:
             if reward['state'] == state:
                 rewards += reward['reward']
-                if reward['reward'] == 1:
+                if reward['reward'] > 0:
                     check_list['if_goal'] = True
 
         check_list['rewards'] = rewards
@@ -126,7 +126,6 @@ class Env(tk.Tk):
 
     def reset(self):
         self.update()
-        time.sleep(0.5)
         x, y = self.canvas.coords(self.rectangle)
         self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
         # return observation
@@ -144,7 +143,7 @@ class Env(tk.Tk):
         check = self.check_if_reward(self.coords_to_state(next_coords))
         done = check['if_goal']
         reward = check['rewards']
-
+        reward -= 0.1
         self.canvas.tag_raise(self.rectangle)
 
         s_ = self.get_state()
@@ -177,7 +176,7 @@ class Env(tk.Tk):
     def move_rewards(self):
         new_rewards = []
         for temp in self.rewards:
-            if temp['reward'] == 1:
+            if temp['reward'] > 0:
                 new_rewards.append(temp)
                 continue
             temp['coords'] = self.move_const(temp)
@@ -236,5 +235,6 @@ class Env(tk.Tk):
         return s_
 
     def render(self):
-        time.sleep(0.05)
+        # time.sleep(0.1)
+        time.sleep(0.01)
         self.update()

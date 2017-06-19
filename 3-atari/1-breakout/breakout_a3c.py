@@ -60,7 +60,7 @@ class A3CAgent:
             agent.start()
 
         while True:
-            time.sleep(60*5)
+            time.sleep(60*10)
             self.save_model("./save_model/breakout_a3c")
 
     # approximate policy and value using Neural Network
@@ -71,7 +71,6 @@ class A3CAgent:
         input = Input(shape=self.state_size)
         conv = Conv2D(16, (8, 8), strides=(4, 4), activation='relu')(input)
         conv = Conv2D(32, (4, 4), strides=(2, 2), activation='relu')(conv)
-        conv = Conv2D(32, (3, 3), strides=(1, 1), activation='relu')(conv)
         conv = Flatten()(conv)
         fc = Dense(256, activation='relu')(conv)
         policy = Dense(self.action_size, activation='softmax')(fc)
@@ -80,8 +79,8 @@ class A3CAgent:
         actor = Model(inputs=input, outputs=policy)
         critic = Model(inputs=input, outputs=value)
 
-        actor.predict(np.random.rand(1, 84, 84, 4))
-        critic.predict(np.random.rand(1, 84, 84, 4))
+        actor._make_predict_function()
+        critic._make_predict_function()
 
         actor.summary()
         critic.summary()
@@ -163,6 +162,8 @@ class Agent(threading.Thread):
 
         self.states, self.actions, self.rewards = [],[],[]
 
+        self.local_actor, self.local_critic = self.build_localmodel()
+
         self.avg_p_max = 0
         self.avg_loss = 0
 
@@ -209,6 +210,11 @@ class Agent(threading.Thread):
                 elif action == 1: real_action = 2
                 else: real_action = 3
 
+                if dead:
+                    action = 0
+                    real_action = 1
+                    dead = False
+
                 next_observe, reward, done, info = env.step(real_action)
                 # pre-process the observation --> history
                 next_state = pre_processing(next_observe, observe)
@@ -232,13 +238,13 @@ class Agent(threading.Thread):
                 if dead:
                     history = np.stack((next_state, next_state, next_state, next_state), axis=2)
                     history = np.reshape([history], (1, 84, 84, 4))
-                    dead = False
                 else:
                     history = next_history
 
                 #
                 if self.t >= self.t_max or done:
-                    self.train_t(done)
+                    self.train_model(done)
+                    self.update_localmodel()
                     self.t = 0
 
                 # if done, plot the score over episodes
@@ -271,7 +277,7 @@ class Agent(threading.Thread):
         return discounted_rewards
 
     # update policy network and value network every episode
-    def train_t(self, done):
+    def train_model(self, done):
         discounted_rewards = self.discount_rewards(self.rewards, done)
 
         states = np.zeros((len(self.states), 84, 84, 4))
@@ -289,9 +295,36 @@ class Agent(threading.Thread):
         self.optimizer[1]([states, discounted_rewards])
         self.states, self.actions, self.rewards = [], [], []
 
+    def build_localmodel(self):
+        input = Input(shape=self.state_size)
+        conv = Conv2D(16, (8, 8), strides=(4, 4), activation='relu')(input)
+        conv = Conv2D(32, (4, 4), strides=(2, 2), activation='relu')(conv)
+        conv = Flatten()(conv)
+        fc = Dense(256, activation='relu')(conv)
+        policy = Dense(self.action_size, activation='softmax')(fc)
+        value = Dense(1, activation='linear')(fc)
+
+        actor = Model(inputs=input, outputs=policy)
+        critic = Model(inputs=input, outputs=value)
+
+        actor._make_predict_function()
+        critic._make_predict_function()
+
+        actor.set_weights(self.actor.get_weights())
+        critic.set_weights(self.critic.get_weights())
+
+        actor.summary()
+        critic.summary()
+
+        return actor, critic
+
+    def update_localmodel(self):
+        self.local_actor.set_weights(self.actor.get_weights())
+        self.local_critic.set_weights(self.critic.get_weights())
+
     def get_action(self, history):
         history = np.float32(history / 255.)
-        policy = self.actor.predict(history)[0]
+        policy = self.local_actor.predict(history)[0]
 
         policy = policy - np.finfo(np.float32).epsneg
 
