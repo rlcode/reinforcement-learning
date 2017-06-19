@@ -42,13 +42,9 @@ class ReinforceAgent:
         eligibility = K.log(good_prob) * K.stop_gradient(discounted_rewards)
         loss = -K.sum(eligibility)
 
-        entropy = K.sum(action * K.log(action + 1e-10), axis = 1)
-
-        agent_loss = loss + 0.01 * entropy
-
         optimizer = Adam(lr=self.learning_rate)
         updates = optimizer.get_updates(self.model.trainable_weights,[],
-                                        agent_loss)
+                                        loss)
         train = K.function([self.model.input, action, discounted_rewards], [],
                            updates=updates)
 
