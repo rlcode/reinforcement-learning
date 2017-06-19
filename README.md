@@ -34,7 +34,7 @@ pip install -r requirements.txt
 - [Monte Carlo](./1-grid-world/3-monte-carlo)
 - [SARSA](./1-grid-world/4-sarsa)
 - [Q-Learning](./1-grid-world/5-q-learning)
-- [Deep Q Network](./1-grid-world/6-deep-sarsa)
+- [Deep SARSA](./1-grid-world/6-deep-sarsa)
 - [REINFORCE](./1-grid-world/7-reinforce)
 
 **CartPole** - Applying deep reinforcement learning on basic Cartpole game.

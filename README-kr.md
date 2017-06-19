@@ -36,7 +36,7 @@ pip install -r requirements.txt
 - [몬테카를로 (Monte Carlo)](./1-grid-world/3-monte-carlo)
 - [살사 (SARSA)](./1-grid-world/4-sarsa)
 - [큐러닝 (Q-Learning)](./1-grid-world/5-q-learning)
-- [Deep Q Network](./1-grid-world/6-deep-sarsa)
+- [Deep SARSA](./1-grid-world/6-deep-sarsa)
 - [REINFORCE](./1-grid-world/7-reinforce)
 
 **CartPole** - 카트폴 예제를 이용하여 여러가지 딥러닝을 강화학습에 응용한 알고리즘들을 적용해보기
