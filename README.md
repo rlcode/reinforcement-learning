@@ -34,15 +34,15 @@ pip install -r requirements.txt
 - [Monte Carlo](./1-grid-world/3-monte-carlo)
 - [SARSA](./1-grid-world/4-sarsa)
 - [Q-Learning](./1-grid-world/5-q-learning)
-- [Deep Q Network](./1-grid-world/6-deep-q-learning)
-- [Policy Gradient](./1-grid-world/7-reinforce)
+- [Deep Q Network](./1-grid-world/6-deep-sarsa)
+- [REINFORCE](./1-grid-world/7-reinforce)
 
 **CartPole** - Applying deep reinforcement learning on basic Cartpole game.
 
 - [Deep Q Network](./2-cartpole/1-dqn)
 - [Double Deep Q Network](./2-cartpole/2-double-dqn)
 - [Policy Gradient](./2-cartpole/3-reinforce)
-- [Actor Critic (A2C)](./2-cartpole/4-a2c)
+- [Actor Critic (A2C)](./2-cartpole/4-actor-critic)
 - [Asynchronous Advantage Actor Critic (A3C)](./2-cartpole/5-a3c)
 
 **Atari** - Mastering Atari games with Deep Reinforcement Learning
