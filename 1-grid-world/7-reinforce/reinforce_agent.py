@@ -7,7 +7,7 @@ from keras.optimizers import Adam
 from keras.models import Sequential
 from keras import backend as K
 
-EPISODES = 1000
+EPISODES = 2500
 
 
 class ReinforceAgent:
@@ -42,8 +42,13 @@ class ReinforceAgent:
         eligibility = K.log(good_prob) * K.stop_gradient(discounted_rewards)
         loss = -K.sum(eligibility)
 
+        entropy = K.sum(action * K.log(action + 1e-10), axis = 1)
+
+        agent_loss = loss + 0.01 * entropy
+
         optimizer = Adam(lr=self.learning_rate)
-        updates = optimizer.get_updates(self.model.trainable_weights, [], loss)
+        updates = optimizer.get_updates(self.model.trainable_weights,[],
+                                        agent_loss)
         train = K.function([self.model.input, action, discounted_rewards], [],
                            updates=updates)
 
@@ -91,34 +96,33 @@ if __name__ == "__main__":
         state = np.reshape(state, [1, 15])
 
         while not done:
-            # fresh env
             if agent.render:
                 env.render()
             global_step += 1
 
-            # RL choose action based on observation and go one step
             action = agent.get_action(state)
             next_state, reward, done = env.step(action)
             next_state = np.reshape(next_state, [1, 15])
 
             agent.remember_episode(state, action, reward)
-            # every time step we do train from the replay memory
             score += reward
-            # swap observation
             state = copy.deepcopy(next_state)
 
             if done:
                 agent.train_model()
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/reinforce.png")
+                score = round(score,2)
                 print("episode:", e, "  score:", score, "  time_step:",
                       global_step)
 
         if e % 100 == 0:
+            pylab.plot(episodes, scores, 'b')
+            pylab.savefig("./save_graph/reinforce.png")
             agent.model.save_weights("./save_model/reinforce.h5")
 
-    # end of game
+        if e == 501:
+            break
+
     print('game over')
     env.destroy()

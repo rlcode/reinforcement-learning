@@ -7,7 +7,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras.models import Sequential
 
-EPISODES = 2500
+EPISODES = 1000
 
 
 # this is DeepSARSA Agent for the GridWorld
@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/deep-sarsa.png")
+                pylab.savefig("./save_graph/deep_sarsa_.png")
                 print("episode:", e, "  score:", score, "global_step",
                       global_step, "  epsilon:", agent.epsilon)
 
