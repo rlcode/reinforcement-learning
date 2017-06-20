@@ -134,7 +134,7 @@
 
   ​
 
-  <p align="center"><img src="./rinstall_image/console_hello_world.png" style="zoom:70%"></p>
+  <p align="center"><img src="./install_image/console_hello_world.png" style="zoom:70%"></p>
 
   ​
 
