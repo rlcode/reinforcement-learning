@@ -8,4 +8,10 @@
 - 리눅스(우분투) [[link]](./install_guide_ubuntu.md)
 - 맥(osx) [[link]](./install_guide_osx.md)
 
+### IDE
+
+공통적으로 파이참(pycharm)을 IDE(interface Development environment)로 사용하고 있습니다.
+
+윈도우는 파이썬 패키지 관리자로 Anaconda를 사용
+
 해당 링크를 누르면 환경 설치 가이드를 보실 수 있습니다.
