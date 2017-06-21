@@ -12,7 +12,7 @@
 
 공통적으로 파이참(pycharm)[[link]](https://www.jetbrains.com/pycharm/)을 IDE로 사용하고 있습니다.
 
-### 파이썬 패키지 관리자
+### 파이썬 패키지 관리자(package manager)
 
 - 윈도우는 파이썬 패키지 관리자로 Anaconda를 사용합니다.
 
