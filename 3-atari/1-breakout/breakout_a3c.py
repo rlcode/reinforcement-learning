@@ -325,11 +325,7 @@ class Agent(threading.Thread):
     def get_action(self, history):
         history = np.float32(history / 255.)
         policy = self.local_actor.predict(history)[0]
-
-        policy = policy - np.finfo(np.float32).epsneg
-
-        histogram = np.random.multinomial(1, policy)
-        action_index = int(np.nonzero(histogram)[0])
+        action_index = np.random.choice(self.action_size, 1, p=policy)[0]
         return action_index, policy
 
     # save <s, a ,r> of each step
