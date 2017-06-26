@@ -43,7 +43,7 @@ class A2CAgent:
                         kernel_initializer='he_uniform'))
         actor.summary()
         actor.compile(loss='categorical_crossentropy',
-                      optimizer=Adam(lr=self.critic_lr))
+                      optimizer=Adam(lr=self.actor_lr))
         return actor
 
     # critic: state is input and value of state is output of model
