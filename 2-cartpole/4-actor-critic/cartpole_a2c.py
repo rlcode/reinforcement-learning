@@ -74,8 +74,7 @@ class A2CAgent:
             advantages[0][action] = reward - value
             target[0][0] = reward
         else:
-            advantages[0][action] = reward + self.discount_factor * (
-                next_value - value)
+            advantages[0][action] = reward + self.discount_factor * (next_value) - value
             target[0][0] = reward + self.discount_factor * next_value
 
         self.actor.fit(state, advantages, epochs=1, verbose=0)
