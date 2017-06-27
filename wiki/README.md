@@ -12,9 +12,8 @@
 
 > #### 윈도우는 Openai에서 공식적인 설치 가이드를 제공하고 있지 않습니다. 
 > #### 그래서 Openai gym 버전에 따라 설치가 안될 수 있습니다. 그리고 다른 환경과 달리 설치방법이 다소 까다롭습니다. 
-> 현재 윈도우 환경 설치는 아래 링크를 참조하여 작성하였습니다.
-
-> [openai gym window support issue](https://github.com/openai/gym/issues/11)
+> 현재 윈도우 환경 설치는 다음 링크를 참조하여 작성하였습니다.
+> [[link : openai gym window support issue]](https://github.com/openai/gym/issues/11)
 
 ### IDE(interface Development environment)
 
