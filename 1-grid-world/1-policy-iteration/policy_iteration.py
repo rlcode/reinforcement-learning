@@ -2,8 +2,6 @@
 import random
 from environment import GraphicDisplay, Env
 
-DISCOUNT_FACTOR = 0.9
-
 
 class PolicyIteration:
     def __init__(self, env):
@@ -15,6 +13,7 @@ class PolicyIteration:
                                     for _ in range(env.height)]
         # setting terminal state
         self.policy_table[2][2] = []
+        self.discount_factor = 0.9
 
     def policy_evaluation(self):
         next_value_table = [[0.00] * self.env.width
@@ -32,8 +31,8 @@ class PolicyIteration:
                 next_state = self.env.state_after_action(state, action)
                 reward = self.env.get_reward(state, action)
                 next_value = self.get_value(next_state)
-                value += self.get_policy(state, action) * \
-                        (reward + DISCOUNT_FACTOR * next_value)
+                value += (self.get_policy(state)[action] *
+                          (reward + self.discount_factor * next_value))
 
             next_value_table[state[0]][state[1]] = round(value, 2)
 
@@ -46,7 +45,7 @@ class PolicyIteration:
                 continue
             value = -99999
             max_index = []
-            result = [0.0, 0.0, 0.0, 0.0] # initialize the policy
+            result = [0.0, 0.0, 0.0, 0.0]  # initialize the policy
 
             # for every actions, calculate
             # [reward + (discount factor) * (next state value function)]
@@ -54,7 +53,7 @@ class PolicyIteration:
                 next_state = self.env.state_after_action(state, action)
                 reward = self.env.get_reward(state, action)
                 next_value = self.get_value(next_state)
-                temp = reward + DISCOUNT_FACTOR * next_value
+                temp = reward + self.discount_factor * next_value
 
                 # We normally can't pick multiple actions in greedy policy.
                 # but here we allow multiple actions with same max values
@@ -75,6 +74,7 @@ class PolicyIteration:
 
         self.policy_table = next_policy
 
+    # get action according to the current policy
     def get_action(self, state):
         random_pick = random.randrange(100) / 100
 
@@ -84,20 +84,16 @@ class PolicyIteration:
         for index, value in enumerate(policy):
             policy_sum += value
             if random_pick < policy_sum:
-                return self.env.possible_actions[index]
+                return index
 
-    def get_policy(self, state, action=None):
-        # if no action is given, then return the probabilities of all actions
-        if action is None:
-            return self.policy_table[state[0]][state[1]]
+    # get policy of specific state
+    def get_policy(self, state):
         if state == [2, 2]:
             return 0.0
-        action_index = self.env.possible_actions.index(action)
-        return self.policy_table[state[0]][state[1]][action_index]
+        return self.policy_table[state[0]][state[1]]
 
     def get_value(self, state):
         return round(self.value_table[state[0]][state[1]], 2)
-
 
 if __name__ == "__main__":
     env = Env()

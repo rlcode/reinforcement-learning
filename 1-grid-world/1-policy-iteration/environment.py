@@ -75,8 +75,6 @@ class GraphicDisplay(tk.Tk):
 
         return canvas
 
-    # (rectangle, triangle1, triangle2, circle)
-
     def load_images(self):
         up = PhotoImage(Image.open("../img/up.png").resize((13, 13)))
         right = PhotoImage(Image.open("../img/right.png").resize((13, 13)))
@@ -99,7 +97,7 @@ class GraphicDisplay(tk.Tk):
             self.agent.value_table = [[0.0] * WIDTH for _ in range(HEIGHT)]
             self.agent.policy_table = ([[[0.25, 0.25, 0.25, 0.25]] * WIDTH
                                         for _ in range(HEIGHT)])
-            self.policy_table[2][2] = []
+            self.agent.policy_table[2][2] = []
             x, y = self.canvas.coords(self.rectangle)
             self.canvas.move(self.rectangle, UNIT / 2 - x, UNIT / 2 - y)
 

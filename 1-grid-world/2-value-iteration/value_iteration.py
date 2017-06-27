@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
-import random
 from environment import GraphicDisplay, Env
-
-DISCOUNT_FACTOR = 0.9
-
 
 class ValueIteration:
     def __init__(self, env):
         self.env = env
         # 2-d list for the value function
         self.value_table = [[0.0] * env.width for _ in range(env.height)]
+        self.discount_factor = 0.9
 
     # get next value function table from the current value function table
     def value_iteration(self):
-        next_value_table = [[0.0] * \
-                            self.env.width for _ in range(self.env.height)]
+        next_value_table = [[0.0] * self.env.width for _ in
+                            range(self.env.height)]
         for state in self.env.get_all_states():
             if state == [2, 2]:
                 next_value_table[state[0]][state[1]] = 0.0
@@ -25,14 +22,13 @@ class ValueIteration:
                 next_state = self.env.state_after_action(state, action)
                 reward = self.env.get_reward(state, action)
                 next_value = self.get_value(next_state)
-                value_list.append((reward + DISCOUNT_FACTOR * next_value))
+                value_list.append((reward + self.discount_factor * next_value))
             # return the maximum value(it is the optimality equation!!)
             next_value_table[state[0]][state[1]] = round(max(value_list), 2)
         self.value_table = next_value_table
 
     # get action according to the current value function table
     def get_action(self, state):
-
         action_list = []
         max_value = -99999
 
@@ -46,7 +42,7 @@ class ValueIteration:
             next_state = self.env.state_after_action(state, action)
             reward = self.env.get_reward(state, action)
             next_value = self.get_value(next_state)
-            value = (reward + DISCOUNT_FACTOR * next_value)
+            value = (reward + self.discount_factor * next_value)
 
             if value > max_value:
                 action_list.clear()
