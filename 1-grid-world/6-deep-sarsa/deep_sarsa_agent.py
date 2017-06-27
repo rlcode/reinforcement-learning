@@ -115,7 +115,3 @@ if __name__ == "__main__":
 
         if e % 100 == 0:
             agent.model.save_weights("./save_model/deep_sarsa.h5")
-
-    # end of game
-    print('game over')
-    env.destroy()

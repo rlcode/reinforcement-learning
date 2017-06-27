@@ -135,8 +135,6 @@ class Env(tk.Tk):
 
         next_state = self.coords_to_state(next_state)
 
-
-
         return next_state, reward, done
 
     def render(self):
