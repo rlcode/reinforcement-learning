@@ -12,7 +12,6 @@ EPISODES = 2500
 
 class ReinforceAgent:
     def __init__(self):
-        self.render = False
         self.load_model = False
         self.action_space = [0, 1, 2, 3, 4]
         self.action_size = len(self.action_space)
@@ -92,8 +91,6 @@ if __name__ == "__main__":
         state = np.reshape(state, [1, 15])
 
         while not done:
-            if agent.render:
-                env.render()
             global_step += 1
 
             action = agent.get_action(state)
@@ -108,7 +105,7 @@ if __name__ == "__main__":
                 agent.train_model()
                 scores.append(score)
                 episodes.append(e)
-                score = round(score,2)
+                score = round(score, 2)
                 print("episode:", e, "  score:", score, "  time_step:",
                       global_step)
 
@@ -116,9 +113,6 @@ if __name__ == "__main__":
             pylab.plot(episodes, scores, 'b')
             pylab.savefig("./save_graph/reinforce.png")
             agent.model.save_weights("./save_model/reinforce.h5")
-
-        if e == 501:
-            break
 
     print('game over')
     env.destroy()
