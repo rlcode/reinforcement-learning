@@ -22,7 +22,7 @@ class QLearningAgent:
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
-        if np.random.rand() > self.epsilon:
+        if np.random.rand() < self.epsilon:
             # take random action
             action = np.random.choice(self.actions)
         else:
