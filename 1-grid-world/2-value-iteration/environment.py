@@ -80,8 +80,6 @@ class GraphicDisplay(tk.Tk):
 
         return canvas
 
-    # (rectangle, triangle1, triangle2, circle)
-
     def load_images(self):
         PhotoImage = ImageTk.PhotoImage
         up = PhotoImage(Image.open("../img/up.png").resize((13, 13)))
@@ -115,9 +113,6 @@ class GraphicDisplay(tk.Tk):
         self.update()
         time.sleep(0.5)
         self.canvas.delete(self.rectangle)
-        self.rectangle = self.canvas.create_image(50, 50,
-                                                  image=self.rectangle_img)
-        # return observation
         return self.canvas.coords(self.rectangle)
 
     def text_value(self, row, col, contents, font='Helvetica', size=12,

@@ -1,6 +1,5 @@
 import numpy as np
 import random
-import time
 from collections import defaultdict
 from environment import Env
 
@@ -11,7 +10,7 @@ class SARSAgent:
         self.actions = actions
         self.learning_rate = 0.01
         self.discount_factor = 0.9
-        self.epsilon = 0.9
+        self.epsilon = 0.1
         self.q_table = defaultdict(lambda: [0.0, 0.0, 0.0, 0.0])
 
     # with sample <s, a, r, s', a'>, learns new q function
@@ -25,7 +24,7 @@ class SARSAgent:
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
-        if np.random.rand() > self.epsilon:
+        if np.random.rand() < self.epsilon:
             # take random action
             action = np.random.choice(self.actions)
         else:

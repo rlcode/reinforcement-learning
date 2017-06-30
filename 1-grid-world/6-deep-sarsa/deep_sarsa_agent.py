@@ -14,7 +14,6 @@ EPISODES = 1000
 # Utilize Neural Network as q function approximator
 class DeepSARSAgent:
     def __init__(self):
-        self.render = False
         self.load_model = False
         # actions which agent can do
         self.action_space = [0, 1, 2, 3, 4]
@@ -91,8 +90,6 @@ if __name__ == "__main__":
 
         while not done:
             # fresh env
-            if agent.render:
-                env.render()
             global_step += 1
 
             # get action for the current state and go one step in environment
@@ -118,7 +115,3 @@ if __name__ == "__main__":
 
         if e % 100 == 0:
             agent.model.save_weights("./save_model/deep_sarsa.h5")
-
-    # end of game
-    print('game over')
-    env.destroy()

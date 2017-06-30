@@ -12,7 +12,7 @@ class MCAgent:
         self.actions = actions
         self.learning_rate = 0.01
         self.discount_factor = 0.9
-        self.epsilon = 0.9
+        self.epsilon = 0.1
         self.samples = []
         self.value_table = defaultdict(float)
 
@@ -36,7 +36,7 @@ class MCAgent:
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
     def get_action(self, state):
-        if np.random.rand() > self.epsilon:
+        if np.random.rand() < self.epsilon:
             # take random action
             action = np.random.choice(self.actions)
         else:

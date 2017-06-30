@@ -50,7 +50,7 @@ pip install -r requirements.txt
 **Atari** - 딥러닝을 응용하여 좀더 복잡한 Atari게임을 마스터하는 에이전트 만들기
 
 - **벽돌깨기(Breakout)** - [DQN](./3-atari/1-breakout/breakout_dqn.py), [DDQN](./3-atari/1-breakout/breakout_ddqn.py) [Dueling DDQN](./3-atari/1-breakout/breakout_ddqn.py) [A3C](./3-atari/1-breakout/breakout_a3c.py)
-- **퐁(Pong)** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py), [A3C](./3-atari/2-pong/pong-a3c.py)
+- **퐁(Pong)** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py)
 
 **OpenAI GYM** - [WIP]
 
