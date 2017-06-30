@@ -48,7 +48,7 @@ pip install -r requirements.txt
 **Atari** - Mastering Atari games with Deep Reinforcement Learning
 
 - **Breakout** - [DQN](./3-atari/1-breakout/breakout_dqn.py), [DDQN](./3-atari/1-breakout/breakout_ddqn.py) [Dueling DDQN](./3-atari/1-breakout/breakout_ddqn.py) [A3C](./3-atari/1-breakout/breakout_a3c.py)
-- **Pong** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py), [A3C](./3-atari/2-pong/pong-a3c.py)
+- **Pong** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py)
 
 **OpenAI GYM** - [WIP]
 
