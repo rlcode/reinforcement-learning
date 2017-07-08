@@ -17,7 +17,7 @@ class QLearningAgent:
         current_q = self.q_table[state][action]
         # using Bellman Optimality Equation to update q function
         new_q = reward + self.discount_factor * max(self.q_table[next_state])
-        self.q_table[state][action] += self.learning_rate * (current_q - new_q)
+        self.q_table[state][action] += self.learning_rate * (new_q - current_q)
 
     # get action for the state according to the q function table
     # agent pick action of epsilon-greedy policy
