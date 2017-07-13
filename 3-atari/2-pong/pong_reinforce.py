@@ -29,6 +29,7 @@ class PGAgent:
         model.add(Dense(32, activation='relu', init='he_uniform'))
         model.add(Dense(self.action_size, activation='softmax'))
         opt = Adam(lr=self.learning_rate)
+        # See note regarding crossentropy in cartpole_reinforce.py
         model.compile(loss='categorical_crossentropy', optimizer=opt)
         return model
 
