@@ -42,6 +42,7 @@ class A2CAgent:
         actor.add(Dense(self.action_size, activation='softmax',
                         kernel_initializer='he_uniform'))
         actor.summary()
+        # See note regarding crossentropy in cartpole_reinforce.py
         actor.compile(loss='categorical_crossentropy',
                       optimizer=Adam(lr=self.actor_lr))
         return actor

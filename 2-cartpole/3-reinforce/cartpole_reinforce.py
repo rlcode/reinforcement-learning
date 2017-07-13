@@ -42,6 +42,12 @@ class REINFORCEAgent:
         model.add(Dense(self.hidden2, activation='relu', kernel_initializer='glorot_uniform'))
         model.add(Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform'))
         model.summary()
+        # Using categorical crossentropy as a loss is a trick to easily
+        # implement the policy gradient. Categorical cross entropy is defined
+        # H(p, q) = sum(p_i * log(q_i)). For the action taken, a, you set 
+        # p_a = advantage. q_a is the output of the policy network, which is
+        # the probability of taking the action a, i.e. policy(s, a). 
+        # All other p_i are zero, thus we have H(p, q) = A * log(policy(s, a))
         model.compile(loss="categorical_crossentropy", optimizer=Adam(lr=self.learning_rate))
         return model
 
