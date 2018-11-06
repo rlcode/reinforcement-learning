@@ -1,4 +1,3 @@
-import sys
 import gym
 import pylab
 import random
@@ -121,12 +120,15 @@ if __name__ == "__main__":
     agent = DQNAgent(state_size, action_size)
 
     scores, episodes = [], []
+    complete = False
 
     for e in range(EPISODES):
         done = False
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
+
+        if complete: break
 
         while not done:
             if agent.render:
@@ -162,7 +164,7 @@ if __name__ == "__main__":
                 # if the mean of scores of last 10 episode is bigger than 490
                 # stop training
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    sys.exit()
+                    complete = True
 
         # save the model
         if e % 50 == 0:
