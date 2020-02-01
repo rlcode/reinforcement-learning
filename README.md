@@ -2,7 +2,7 @@
 
 > Creators - [Woongwon](https://github.com/dnddnjs), [Youngmoo](https://github.com/zzing0907), [Hyeokreal](https://github.com/Hyeokreal), [Uiryeong](https://github.com/wooridle), [Keon](https://github.com/keon)
 
-Maintainer - [Julien_Look](https://github.com/juice1000)
+> Maintainer - [Julien Look](https://github.com/juice1000)
 
 ## Dependencies
 1. Python 3.5
