@@ -9,11 +9,16 @@ from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
 
+import time
+timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
+
 # We do a for in range, that's why we need 1001 instead of 1000
-EPISODES = 1001
+EPISODES = 10
 
 # Code pulled from https://github.com/rlcode/reinforcement-learning/tree/master/2-cartpole/4-actor-critic
 # A2C(Advantage Actor-Critic) agent for the Cartpole
+
+
 class A2CAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
@@ -125,7 +130,7 @@ if __name__ == "__main__":
                 scores.append(score)
                 episodes.append(e)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/cartpole_a2c.png")
+                pylab.savefig("./save_graph/a2c_cart_%s.png" % timestr)
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -135,6 +140,7 @@ if __name__ == "__main__":
 
         # save the model
         if e % 50 == 0:
-            agent.actor.save_weights("./save_model/cartpole_actor.h5")
-            agent.critic.save_weights("./save_model/cartpole_critic.h5")
+            agent.actor.save_weights("./save_model/a2c_cart_actor.h5")
+            agent.critic.save_weights("./save_model/a2c_cart_critic.h5")
+            
     sys.exit()
