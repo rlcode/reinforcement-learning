@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# This code is made for windows os and works on a virtual environment which has the tensorflow API installed
+
 import sys
 import gym
-import pylab
+import matplotlib
+from matplotlib import rcParams, pyplot as plt
 import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
-import trina
+
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
@@ -103,6 +106,12 @@ if __name__ == "__main__":
 
     scores, episodes = [], []
 
+    # create plotter for windows os
+    rcParams.update({'figure.autolayout': True})
+    fig, fft_plot = plt.subplots()
+    matplotlib.rc('xtick', labelsize=18)
+    matplotlib.rc('ytick', labelsize=18)
+
     for e in range(EPISODES):
         done = False
         score = 0
@@ -129,8 +138,11 @@ if __name__ == "__main__":
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/a2c_cart_%s.png" % timestr)
+
+                # plot e on x-axis and the score on y-axis
+                fft_plot.set_xlabel("Episodes", fontsize=18)
+                fft_plot.set_ylabel("Score", fontsize=18)
+
                 print("episode:", e, "  score:", score)
 
                 # if the mean of scores of last 10 episode is bigger than 490
@@ -142,5 +154,8 @@ if __name__ == "__main__":
         if e % 50 == 0:
             agent.actor.save_weights("./save_model/a2c_cart_actor.h5")
             agent.critic.save_weights("./save_model/a2c_cart_critic.h5")
-            
+
+    # plot the results before exit
+    plt.plot(episodes, scores, color='blue')
+    plt.show()
     sys.exit()
