@@ -8,23 +8,31 @@ import numpy as np
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
-import trina
-import time
 
+import argparse
+import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
 # We do a for in range, that's why we need 1001 instead of 1000
 EPISODES = 10
 
-
 # Code pulled from https://github.com/rlcode/reinforcement-learning/tree/master/2-cartpole/4-actor-critic
 # A2C(Advantage Actor-Critic) agent for the Cartpole
 
 
+def handleArguments():
+    """Handles CLI arguments and saves them globally"""
+    # TODO: enable train-mode and test-mode (or else not necessary because we don't need to enforce exploration for stochastic policy)
+    parser = argparse.ArgumentParser(
+        description="Switch between modes in A2C or loading models from previous games")
+    parser.add_argument("--demo_mode", "-d", help="Renders the gym environment", action="store_true")
+    parser.add_argument("--load_model", "-l", help="Loads the model of previously gained training data", action="store_true")
+    global args
+    args = parser.parse_args()
+
 class A2CAgent:
     def __init__(self, state_size, action_size):
-        # if you want to see Cartpole learning, then change to True
-        self.render = False
+
         self.load_model = False
         # get size of state and action
         self.state_size = state_size
@@ -40,7 +48,7 @@ class A2CAgent:
         self.actor = self.build_actor()
         self.critic = self.build_critic()
 
-        if self.load_model:
+        if self.load_model or args.load_model:
             self.actor.load_weights("./save_model/cartpole_actor.h5")
             self.critic.load_weights("./save_model/cartpole_critic.h5")
 
@@ -94,7 +102,8 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
-    # In case of CartPole-v1, maximum length of episode is 500
+    handleArguments()
+    # In case of CartPole-v1, maximum length of episode is 500 steps
     env = gym.make('CartPole-v1')
     # get size of state and action from environment
     state_size = env.observation_space.shape[0]
@@ -104,45 +113,57 @@ if __name__ == "__main__":
     agent = A2CAgent(state_size, action_size)
 
     scores, episodes = [], []
+    #steps = []
 
     for e in range(EPISODES):
         done = False
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
+        #step = 0
 
         while not done:
-            if agent.render:
+            if args.demo_mode:
                 env.render()
 
             action = agent.get_action(state)
             next_state, reward, done, info = env.step(action)
             next_state = np.reshape(next_state, [1, state_size])
-            # if an action make the episode end, then gives penalty of -100
+            # if an action make the episode end, then gives penalty of -100 (discourage bad actions)
             reward = reward if not done or score == 499 else -100
 
             agent.train_model(state, action, reward, next_state, done)
 
             score += reward
             state = next_state
+            #step += 1
 
             if done:
                 # every episode, plot the play time
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
+                #steps.append(step)
+
+                # plot score per episode
+                pylab.figure(1)
                 pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/a2c_cart_%s.png" % timestr)
+                pylab.savefig("./save_graph_ep-rev/a2c_cart_ep-rew_%s.png" % timestr)
                 print("episode:", e, "  score:", score)
 
+                # plot steps per episode (not necessary in cartpole, but for other environments)
+                # for reference: https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py
+                #pylab.figure(2)
+                #pylab.plot(episodes, steps, 'b')
+                #pylab.savefig("./save_graph_ep-step/a2c_cart__ep-step%s.png" % timestr)
                 # if the mean of scores of last 10 episode is bigger than 490
                 # stop training
-                # if np.mean(scores[-min(10, len(scores)):]) > 490:
+                #if np.mean(scores[-min(10, len(scores)):]) > 490:
                 #    sys.exit()
 
-        # save the model
-        if e % 50 == 0:
+        # save the model after each 1000 episodes
+        if e % 1000 == 0:
             agent.actor.save_weights("./save_model/a2c_cart_actor.h5")
             agent.critic.save_weights("./save_model/a2c_cart_critic.h5")
-
+            
     sys.exit()
