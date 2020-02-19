@@ -14,7 +14,7 @@ import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
 # We do a for in range, that's why we need 1001 instead of 1000
-EPISODES = 10
+EPISODES = 1001
 
 # Code pulled from https://github.com/rlcode/reinforcement-learning/tree/master/2-cartpole/4-actor-critic
 # A2C(Advantage Actor-Critic) agent for the Cartpole
@@ -49,8 +49,8 @@ class A2CAgent:
         self.critic = self.build_critic()
 
         if self.load_model or args.load_model:
-            self.actor.load_weights("./save_model/cartpole_actor.h5")
-            self.critic.load_weights("./save_model/cartpole_critic.h5")
+            self.actor.load_weights("./save_model/a2c_cart_actor.h5")
+            self.critic.load_weights("./save_model/a2c_cart_critic.h5")
 
     # approximate policy and value using Neural Network
     # actor: state is input and probability of each action is output of model
@@ -120,7 +120,6 @@ if __name__ == "__main__":
         score = 0
         state = env.reset()
         state = np.reshape(state, [1, state_size])
-        #step = 0
 
         while not done:
             if args.demo_mode:
@@ -136,14 +135,12 @@ if __name__ == "__main__":
 
             score += reward
             state = next_state
-            #step += 1
 
             if done:
                 # every episode, plot the play time
                 score = score if score == 500.0 else score + 100
                 scores.append(score)
                 episodes.append(e)
-                #steps.append(step)
 
                 # plot score per episode
                 pylab.figure(1)
