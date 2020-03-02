@@ -32,7 +32,6 @@ def handleArguments():
 
 class A2CAgent:
     def __init__(self, state_size, action_size):
-
         self.load_model = False
         # get size of state and action
         self.state_size = state_size
@@ -113,7 +112,6 @@ if __name__ == "__main__":
     agent = A2CAgent(state_size, action_size)
 
     scores, episodes = [], []
-    #steps = []
 
     for e in range(EPISODES):
         done = False

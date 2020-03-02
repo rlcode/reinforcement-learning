@@ -12,6 +12,7 @@ from keras.layers import Dense
 from keras.models import Sequential
 from keras.optimizers import Adam
 
+import argparse
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
@@ -21,11 +22,19 @@ EPISODES = 10
 # Code pulled from https://github.com/rlcode/reinforcement-learning/tree/master/2-cartpole/4-actor-critic
 # A2C(Advantage Actor-Critic) agent for the Cartpole
 
+def handleArguments():
+    """Handles CLI arguments and saves them globally"""
+    # TODO: enable train-mode and test-mode (or else not necessary because we don't need to enforce exploration for stochastic policy)
+    parser = argparse.ArgumentParser(
+        description="Switch between modes in A2C or loading models from previous games")
+    parser.add_argument("--demo_mode", "-d", help="Renders the gym environment", action="store_true")
+    parser.add_argument("--load_model", "-l", help="Loads the model of previously gained training data", action="store_true")
+    global args
+    args = parser.parse_args()
 
 class A2CAgent:
     def __init__(self, state_size, action_size):
         # if you want to see Cartpole learning, then change to True
-        self.render = False
         self.load_model = False
         # get size of state and action
         self.state_size = state_size
@@ -41,9 +50,9 @@ class A2CAgent:
         self.actor = self.build_actor()
         self.critic = self.build_critic()
 
-        if self.load_model:
-            self.actor.load_weights("./save_model/cartpole_actor.h5")
-            self.critic.load_weights("./save_model/cartpole_critic.h5")
+        if self.load_model or args.load_model:
+            self.actor.load_weights("./save_model/a2c_cart_actor.h5")
+            self.critic.load_weights("./save_model/a2c_cart_critic.h5")
 
     # approximate policy and value using Neural Network
     # actor: state is input and probability of each action is output of model
@@ -95,6 +104,7 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
+    handleArguments()
     # In case of CartPole-v1, maximum length of episode is 500
     env = gym.make('CartPole-v1')
     # get size of state and action from environment
@@ -119,7 +129,7 @@ if __name__ == "__main__":
         state = np.reshape(state, [1, state_size])
 
         while not done:
-            if agent.render:
+            if args.demo_mode:
                 env.render()
 
             action = agent.get_action(state)
