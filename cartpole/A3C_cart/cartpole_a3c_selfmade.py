@@ -11,9 +11,13 @@ from keras.models import Model, Sequential
 from keras.optimizers import Adam
 import sys
 
+import matplotlib
+from matplotlib import rcParams, pyplot as plt
 import argparse
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
+
+# TODO: We have a problem with the predict functions at actor and critic!
 
 # global variables for threading
 episode = 0
@@ -22,7 +26,7 @@ scores = []
 EPISODES = 10
 
 # Code pulled from https://github.com/rlcode/reinforcement-learning/tree/master/2-cartpole/4-actor-critic
-# A2C(Advantage Actor-Critic) agent for the Cartpole
+# A3C agent for Cartpole (Windows OS)
 
 
 def handleArguments():
@@ -53,7 +57,7 @@ class A3CAgent:
         self.critic_lr = 0.001
 
         self.hidden1, self.hidden2 = 24, 24
-        self.threads = 8
+        self.threads = 4
 
         # create model for policy network
         self.actor = self.build_actor()
@@ -94,21 +98,17 @@ class A3CAgent:
         return np.random.choice(self.action_size, 1, p=policy)[0]
 
     # update policy network every episode
-    def train_model(self, state, action, reward, next_state, done):
+    def train_model(self):
         agents = [Agent(i, self.actor, self.critic, self.env_name, self.discount_factor,
                         self.action_size, self.state_size) for i in range(self.threads)]
 
         for agent in agents:
             agent.start()
 
-        while True:
-            time.sleep(20)
+        time.sleep(5)
+        self.actor.save_weights("./save_model/a2c_cart_actor.h5")
+        self.critic.save_weights("./save_model/a2c_cart_critic.h5")
 
-            plot = scores[:]
-            pylab.plot(range(len(plot)), plot, 'b')
-            pylab.savefig("./save_graph/cartpole_a3c.png")
-            self.actor.save_weights("./save_model/a2c_cart_actor.h5")
-            self.critic.save_weights("./save_model/a2c_cart_critic.h5")
 
 
 # This is Agent(local) class for threading
@@ -131,6 +131,7 @@ class Agent(threading.Thread):
     # Thread interactive with environment
     def run(self):
         global episode
+        print(threading.current_thread())
         env = gym.make(self.env_name)
         while episode < EPISODES:
             state = env.reset()
@@ -147,6 +148,7 @@ class Agent(threading.Thread):
                 if done:
                     episode += 1
                     print("episode: ", episode, "/ score : ", score)
+                    scores.append(score)
                     scores.append(score)
                     self.train_episode(score != 500)
                     break
@@ -175,17 +177,18 @@ class Agent(threading.Thread):
     # update policy network and value network every episode
     def train_episode(self, done):
         discounted_rewards = self.discount_rewards(self.rewards, done)
+# TODO: We have a problem with the predict functions at actor and critic!
+        #values = self.critic.predict(np.array(self.states))
+        #values = np.reshape(values, len(values))
 
-        values = self.critic.predict(np.array(self.states))
-        values = np.reshape(values, len(values))
-
-        advantages = discounted_rewards - values
+        #advantages = discounted_rewards - values
 
         self.states, self.actions, self.rewards = [], [], []
 
     def get_action(self, state):
-        policy = self.actor.predict(np.reshape(state, [1, self.state_size]))[0]
-        return np.random.choice(self.action_size, 1, p=policy)[0]
+        # TODO: We have a problem with the predict functions at actor and critic!
+        #policy = self.actor.predict(np.reshape(state, [1, self.state_size]))[0]
+        return np.random.choice(self.action_size, 1)[0]
 
 
 
@@ -196,15 +199,21 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
-    global_agent = A3CAgent(state_size, action_size, env_name)
+    # create plotter for windows os
+    rcParams.update({'figure.autolayout': True})
+    fig, fft_plot = plt.subplots()
+    matplotlib.rc('xtick', labelsize=18)
+    matplotlib.rc('ytick', labelsize=18)
 
-    state = env.reset()
-    action = global_agent.get_action(state)
-    reward = 0
-    next_state, reward, done, info = env.step(action)
-    next_state = np.reshape(next_state, [1, state_size])
-    done = False
-    
-    global_agent.train_model(state, action, reward, next_state, done)
-            
+    global_agent = A3CAgent(state_size, action_size, env_name)
+    global_agent.train_model()
+
+    # plot episodes on x-axis and the score on y-axis
+    fft_plot.set_xlabel("Episodes", fontsize=18)
+    fft_plot.set_ylabel("Score", fontsize=18)
+    plot = scores[:]
+    pylab.plot(range(len(plot)), plot, 'b')
+    pylab.show()
+
     sys.exit()
+
