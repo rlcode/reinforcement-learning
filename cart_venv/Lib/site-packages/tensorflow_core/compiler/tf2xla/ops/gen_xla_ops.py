@@ -1,0 +1,2930 @@
+"""Python wrappers around TensorFlow ops.
+
+This file is MACHINE GENERATED! Do not edit.
+"""
+
+import collections as _collections
+import six as _six
+
+from tensorflow.python import pywrap_tensorflow as _pywrap_tensorflow
+from tensorflow.python.eager import context as _context
+from tensorflow.python.eager import core as _core
+from tensorflow.python.eager import execute as _execute
+from tensorflow.python.framework import dtypes as _dtypes
+from tensorflow.python.framework import errors as _errors
+from tensorflow.python.framework import tensor_shape as _tensor_shape
+
+from tensorflow.core.framework import op_def_pb2 as _op_def_pb2
+# Needed to trigger the call to _set_call_cpp_shape_fn.
+from tensorflow.python.framework import common_shapes as _common_shapes
+from tensorflow.python.framework import op_def_registry as _op_def_registry
+from tensorflow.python.framework import ops as _ops
+from tensorflow.python.framework import op_def_library as _op_def_library
+from tensorflow.python.util.deprecation import deprecated_endpoints
+from tensorflow.python.util import dispatch as _dispatch
+from tensorflow.python.util.tf_export import tf_export
+from tensorflow.python.util.tf_export import kwarg_only as _kwarg_only
+from tensorflow.tools.docs import doc_controls as _doc_controls
+
+
+_xla_broadcast_helper_outputs = ["lhs_output", "rhs_output"]
+_XlaBroadcastHelperOutput = _collections.namedtuple(
+    "XlaBroadcastHelper", _xla_broadcast_helper_outputs)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_broadcast_helper')
+def xla_broadcast_helper(lhs, rhs, broadcast_dims, name=None):
+  r"""Helper operator for performing XLA-style broadcasts
+
+  Broadcasts `lhs` and `rhs` to the same rank, by adding size 1 dimensions to
+  whichever of `lhs` and `rhs` has the lower rank, using XLA's broadcasting rules
+  for binary operators.
+
+  Args:
+    lhs: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the LHS input tensor
+    rhs: A `Tensor`. Must have the same type as `lhs`. the RHS input tensor
+    broadcast_dims: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      an XLA-style broadcast dimension specification
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (lhs_output, rhs_output).
+
+    lhs_output: A `Tensor`. Has the same type as `lhs`. the broadcasted LHS tensor
+    rhs_output: A `Tensor`. Has the same type as `lhs`. the broadcasted RHS tensor
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaBroadcastHelper", name, _ctx.post_execution_callbacks, lhs, rhs,
+        broadcast_dims)
+      _result = _XlaBroadcastHelperOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_broadcast_helper_eager_fallback(
+            lhs, rhs, broadcast_dims, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_broadcast_helper, lhs=lhs, rhs=rhs,
+                                    broadcast_dims=broadcast_dims, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaBroadcastHelper", lhs=lhs, rhs=rhs, broadcast_dims=broadcast_dims,
+                              name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_broadcast_helper, lhs=lhs, rhs=rhs,
+                                broadcast_dims=broadcast_dims, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"))
+  _execute.record_gradient(
+      "XlaBroadcastHelper", _inputs_flat, _attrs, _result, name)
+  _result = _XlaBroadcastHelperOutput._make(_result)
+  return _result
+
+def XlaBroadcastHelper(lhs, rhs, broadcast_dims, name=None):
+  return xla_broadcast_helper(lhs=lhs, rhs=rhs, broadcast_dims=broadcast_dims, name=name)
+XlaBroadcastHelper.__doc__ = xla_broadcast_helper.__doc__
+XlaBroadcastHelper = _doc_controls.do_not_generate_docs(_kwarg_only(XlaBroadcastHelper))
+tf_export("raw_ops.XlaBroadcastHelper")(XlaBroadcastHelper)
+
+
+def xla_broadcast_helper_eager_fallback(lhs, rhs, broadcast_dims, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_broadcast_helper
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([lhs, rhs], _ctx)
+  (lhs, rhs) = _inputs_T
+  _attr_Tindices, (broadcast_dims,) = _execute.args_to_matching_eager([broadcast_dims], _ctx)
+  _inputs_flat = [lhs, rhs, broadcast_dims]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices)
+  _result = _execute.execute(b"XlaBroadcastHelper", 2, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaBroadcastHelper", _inputs_flat, _attrs, _result, name)
+  _result = _XlaBroadcastHelperOutput._make(_result)
+  return _result
+
+_ops.RegisterShape("XlaBroadcastHelper")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_conv')
+def xla_conv(lhs, rhs, window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count, dimension_numbers, precision_config, name=None):
+  r"""Wraps the XLA ConvGeneralDilated operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#conv_convolution
+  .
+
+  Args:
+    lhs: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor
+    rhs: A `Tensor`. Must have the same type as `lhs`. the kernel tensor
+    window_strides: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      the inter-window strides
+    padding: A `Tensor`. Must have the same type as `window_strides`.
+      the padding to apply at the start and end of each input dimensions
+    lhs_dilation: A `Tensor`. Must have the same type as `window_strides`.
+      dilation to apply between input elements
+    rhs_dilation: A `Tensor`. Must have the same type as `window_strides`.
+      dilation to apply between kernel elements
+    feature_group_count: A `Tensor`. Must have the same type as `window_strides`.
+      number of feature groups for grouped convolution.
+    dimension_numbers: A `string`.
+      a serialized xla::ConvolutionDimensionNumbers proto.
+    precision_config: A `string`. a serialized xla::PrecisionConfig proto.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `lhs`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaConv",
+        name, _ctx.post_execution_callbacks, lhs, rhs, window_strides,
+        padding, lhs_dilation, rhs_dilation, feature_group_count,
+        "dimension_numbers", dimension_numbers, "precision_config",
+        precision_config)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_conv_eager_fallback(
+            lhs, rhs, window_strides, padding, lhs_dilation, rhs_dilation,
+            feature_group_count, dimension_numbers=dimension_numbers,
+            precision_config=precision_config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_conv, lhs=lhs, rhs=rhs, window_strides=window_strides,
+                        padding=padding, lhs_dilation=lhs_dilation,
+                        rhs_dilation=rhs_dilation,
+                        feature_group_count=feature_group_count,
+                        dimension_numbers=dimension_numbers,
+                        precision_config=precision_config, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  dimension_numbers = _execute.make_str(dimension_numbers, "dimension_numbers")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaConv", lhs=lhs, rhs=rhs, window_strides=window_strides,
+                   padding=padding, lhs_dilation=lhs_dilation,
+                   rhs_dilation=rhs_dilation,
+                   feature_group_count=feature_group_count,
+                   dimension_numbers=dimension_numbers,
+                   precision_config=precision_config, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_conv, lhs=lhs, rhs=rhs, window_strides=window_strides,
+                    padding=padding, lhs_dilation=lhs_dilation,
+                    rhs_dilation=rhs_dilation,
+                    feature_group_count=feature_group_count,
+                    dimension_numbers=dimension_numbers,
+                    precision_config=precision_config, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"), "dimension_numbers",
+            _op.get_attr("dimension_numbers"), "precision_config",
+            _op.get_attr("precision_config"))
+  _execute.record_gradient(
+      "XlaConv", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaConv(lhs, rhs, window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count, dimension_numbers, precision_config, name=None):
+  return xla_conv(lhs=lhs, rhs=rhs, window_strides=window_strides, padding=padding, lhs_dilation=lhs_dilation, rhs_dilation=rhs_dilation, feature_group_count=feature_group_count, dimension_numbers=dimension_numbers, precision_config=precision_config, name=name)
+XlaConv.__doc__ = xla_conv.__doc__
+XlaConv = _doc_controls.do_not_generate_docs(_kwarg_only(XlaConv))
+tf_export("raw_ops.XlaConv")(XlaConv)
+
+
+def xla_conv_eager_fallback(lhs, rhs, window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count, dimension_numbers, precision_config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_conv
+  """
+  _ctx = ctx if ctx else _context.context()
+  dimension_numbers = _execute.make_str(dimension_numbers, "dimension_numbers")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([lhs, rhs], _ctx)
+  (lhs, rhs) = _inputs_T
+  _attr_Tindices, _inputs_Tindices = _execute.args_to_matching_eager([window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count], _ctx)
+  (window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count) = _inputs_Tindices
+  _inputs_flat = [lhs, rhs, window_strides, padding, lhs_dilation, rhs_dilation, feature_group_count]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices, "dimension_numbers",
+  dimension_numbers, "precision_config", precision_config)
+  _result = _execute.execute(b"XlaConv", 1, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaConv", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaConv")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_dequantize')
+def xla_dequantize(input, min_range, max_range, mode, transpose_output, name=None):
+  r"""Takes the packed uint32 input and unpacks the input to uint8 to do
+
+  Dequantization on deivce.
+
+  Args:
+    input: A `Tensor` of type `uint32`.
+      Input tensors whose types is uint32, shape is [d0, ..., dn].
+    min_range: A `float`.
+      The minimum scalar value possibly produced for the input.
+    max_range: A `float`.
+      The maximum scalar value possibly produced for the input.
+    mode: A `string`.
+      String to determine the dequantize mode in {"MIN_COMBINED", "MIN_FIRST", "SCALED"}.
+    transpose_output: A `bool`.
+      Boolean to determine if output is transposed. transpose_output
+      is faster when input is large and rank of input is higher than 1.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `bfloat16`.
+    Output tensors whose types is bloat16. If transpose_output is true,
+    output shape is [dn * 4, dn-1, ..., d1, d0]. If transpose_output
+    is false, output shape is [d0,..., dn * 4].
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaDequantize", name, _ctx.post_execution_callbacks, input,
+        "min_range", min_range, "max_range", max_range, "mode", mode,
+        "transpose_output", transpose_output)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_dequantize_eager_fallback(
+            input, min_range=min_range, max_range=max_range, mode=mode,
+            transpose_output=transpose_output, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_dequantize, input=input, min_range=min_range,
+                              max_range=max_range, mode=mode,
+                              transpose_output=transpose_output, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  min_range = _execute.make_float(min_range, "min_range")
+  max_range = _execute.make_float(max_range, "max_range")
+  mode = _execute.make_str(mode, "mode")
+  transpose_output = _execute.make_bool(transpose_output, "transpose_output")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaDequantize", input=input, min_range=min_range,
+                         max_range=max_range, mode=mode,
+                         transpose_output=transpose_output, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_dequantize, input=input, min_range=min_range,
+                          max_range=max_range, mode=mode,
+                          transpose_output=transpose_output, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("min_range", _op.get_attr("min_range"), "max_range",
+            _op.get_attr("max_range"), "mode", _op.get_attr("mode"),
+            "transpose_output", _op.get_attr("transpose_output"))
+  _execute.record_gradient(
+      "XlaDequantize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaDequantize(input, min_range, max_range, mode, transpose_output, name=None):
+  return xla_dequantize(input=input, min_range=min_range, max_range=max_range, mode=mode, transpose_output=transpose_output, name=name)
+XlaDequantize.__doc__ = xla_dequantize.__doc__
+XlaDequantize = _doc_controls.do_not_generate_docs(_kwarg_only(XlaDequantize))
+tf_export("raw_ops.XlaDequantize")(XlaDequantize)
+
+
+def xla_dequantize_eager_fallback(input, min_range, max_range, mode, transpose_output, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_dequantize
+  """
+  _ctx = ctx if ctx else _context.context()
+  min_range = _execute.make_float(min_range, "min_range")
+  max_range = _execute.make_float(max_range, "max_range")
+  mode = _execute.make_str(mode, "mode")
+  transpose_output = _execute.make_bool(transpose_output, "transpose_output")
+  input = _ops.convert_to_tensor(input, _dtypes.uint32)
+  _inputs_flat = [input]
+  _attrs = ("min_range", min_range, "max_range", max_range, "mode", mode,
+  "transpose_output", transpose_output)
+  _result = _execute.execute(b"XlaDequantize", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaDequantize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaDequantize")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_dot')
+def xla_dot(lhs, rhs, dimension_numbers, precision_config, name=None):
+  r"""Wraps the XLA DotGeneral operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#dotgeneral
+  .
+
+  Args:
+    lhs: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the LHS tensor
+    rhs: A `Tensor`. Must have the same type as `lhs`. the RHS tensor
+    dimension_numbers: A `string`.
+      a serialized xla::DotDimensionNumbers proto.
+    precision_config: A `string`. a serialized xla::PrecisionConfig proto.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `lhs`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaDot",
+        name, _ctx.post_execution_callbacks, lhs, rhs, "dimension_numbers",
+        dimension_numbers, "precision_config", precision_config)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_dot_eager_fallback(
+            lhs, rhs, dimension_numbers=dimension_numbers,
+            precision_config=precision_config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_dot, lhs=lhs, rhs=rhs, dimension_numbers=dimension_numbers,
+                       precision_config=precision_config, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  dimension_numbers = _execute.make_str(dimension_numbers, "dimension_numbers")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaDot", lhs=lhs, rhs=rhs, dimension_numbers=dimension_numbers,
+                  precision_config=precision_config, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_dot, lhs=lhs, rhs=rhs, dimension_numbers=dimension_numbers,
+                   precision_config=precision_config, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "dimension_numbers",
+            _op.get_attr("dimension_numbers"), "precision_config",
+            _op.get_attr("precision_config"))
+  _execute.record_gradient(
+      "XlaDot", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaDot(lhs, rhs, dimension_numbers, precision_config, name=None):
+  return xla_dot(lhs=lhs, rhs=rhs, dimension_numbers=dimension_numbers, precision_config=precision_config, name=name)
+XlaDot.__doc__ = xla_dot.__doc__
+XlaDot = _doc_controls.do_not_generate_docs(_kwarg_only(XlaDot))
+tf_export("raw_ops.XlaDot")(XlaDot)
+
+
+def xla_dot_eager_fallback(lhs, rhs, dimension_numbers, precision_config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_dot
+  """
+  _ctx = ctx if ctx else _context.context()
+  dimension_numbers = _execute.make_str(dimension_numbers, "dimension_numbers")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([lhs, rhs], _ctx)
+  (lhs, rhs) = _inputs_T
+  _inputs_flat = [lhs, rhs]
+  _attrs = ("T", _attr_T, "dimension_numbers", dimension_numbers,
+  "precision_config", precision_config)
+  _result = _execute.execute(b"XlaDot", 1, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaDot", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaDot")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_dynamic_slice')
+def xla_dynamic_slice(input, start_indices, size_indices, name=None):
+  r"""Wraps the XLA DynamicSlice operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#dynamicslice
+  .
+
+  DynamicSlice extracts a sub-array from the input array at dynamic
+  start_indices. The size of the slice in each dimension is passed in
+  size_indices, which specify the end point of exclusive slice intervals in each
+  dimension -- [start, start + size). The shape of start_indices must have rank 1,
+  with dimension size equal to the rank of operand.
+
+  Args:
+    input: A `Tensor`. A `Tensor` of type T.
+    start_indices: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      List of N integers containing the slice size for each
+      dimension. Each value must be strictly greater than zero, and start + size
+      must be less than or equal to the size of the dimension to avoid
+      implementation defined behavior.
+    size_indices: A `Tensor`. Must have the same type as `start_indices`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaDynamicSlice", name, _ctx.post_execution_callbacks, input,
+        start_indices, size_indices)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_dynamic_slice_eager_fallback(
+            input, start_indices, size_indices, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_dynamic_slice, input=input, start_indices=start_indices,
+                                 size_indices=size_indices, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaDynamicSlice", input=input, start_indices=start_indices,
+                           size_indices=size_indices, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_dynamic_slice, input=input, start_indices=start_indices,
+                             size_indices=size_indices, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"))
+  _execute.record_gradient(
+      "XlaDynamicSlice", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaDynamicSlice(input, start_indices, size_indices, name=None):
+  return xla_dynamic_slice(input=input, start_indices=start_indices, size_indices=size_indices, name=name)
+XlaDynamicSlice.__doc__ = xla_dynamic_slice.__doc__
+XlaDynamicSlice = _doc_controls.do_not_generate_docs(_kwarg_only(XlaDynamicSlice))
+tf_export("raw_ops.XlaDynamicSlice")(XlaDynamicSlice)
+
+
+def xla_dynamic_slice_eager_fallback(input, start_indices, size_indices, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_dynamic_slice
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _attr_Tindices, _inputs_Tindices = _execute.args_to_matching_eager([start_indices, size_indices], _ctx)
+  (start_indices, size_indices) = _inputs_Tindices
+  _inputs_flat = [input, start_indices, size_indices]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices)
+  _result = _execute.execute(b"XlaDynamicSlice", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaDynamicSlice", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaDynamicSlice")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_dynamic_update_slice')
+def xla_dynamic_update_slice(input, update, indices, name=None):
+  r"""Wraps the XLA DynamicUpdateSlice operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#dynamicupdateslice
+  .
+
+  XlaDynamicUpdateSlice generates a result which is the value of the `input`
+  operand, with a slice update overwritten at `indices`. The shape of `update`
+  determines the shape of the sub-array of the result which is updated. The shape
+  of indices must be rank == 1, with dimension size equal to the rank of `input`.
+
+  Handling of out-of-bounds slice indices is implementation-defined.
+
+  Args:
+    input: A `Tensor`. A `Tensor` of type T.
+    update: A `Tensor`. Must have the same type as `input`.
+      A `Tensor` of type T. Same rank as `input`.
+    indices: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      A vector of indices into `input`. Must have length equal to the rank of
+      `input`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`. A `Tensor` of type T.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaDynamicUpdateSlice", name, _ctx.post_execution_callbacks, input,
+        update, indices)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_dynamic_update_slice_eager_fallback(
+            input, update, indices, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_dynamic_update_slice, input=input, update=update,
+                                        indices=indices, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaDynamicUpdateSlice", input=input, update=update, indices=indices,
+                                 name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_dynamic_update_slice, input=input, update=update,
+                                    indices=indices, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"))
+  _execute.record_gradient(
+      "XlaDynamicUpdateSlice", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaDynamicUpdateSlice(input, update, indices, name=None):
+  return xla_dynamic_update_slice(input=input, update=update, indices=indices, name=name)
+XlaDynamicUpdateSlice.__doc__ = xla_dynamic_update_slice.__doc__
+XlaDynamicUpdateSlice = _doc_controls.do_not_generate_docs(_kwarg_only(XlaDynamicUpdateSlice))
+tf_export("raw_ops.XlaDynamicUpdateSlice")(XlaDynamicUpdateSlice)
+
+
+def xla_dynamic_update_slice_eager_fallback(input, update, indices, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_dynamic_update_slice
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, update], _ctx)
+  (input, update) = _inputs_T
+  _attr_Tindices, (indices,) = _execute.args_to_matching_eager([indices], _ctx)
+  _inputs_flat = [input, update, indices]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices)
+  _result = _execute.execute(b"XlaDynamicUpdateSlice", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaDynamicUpdateSlice", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaDynamicUpdateSlice")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_einsum')
+def xla_einsum(a, b, equation, name=None):
+  r"""An op which supports basic einsum op with 2 inputs and 1 output.
+
+  This op has better TPU performnce since it doesn't have explicitly reshape and
+  transpose operations as tf.einsum does.
+
+  Args:
+    a: A `Tensor`. Must be one of the following types: `bfloat16`, `float32`.
+    b: A `Tensor`. Must have the same type as `a`.
+    equation: A `string`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `a`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaEinsum", name, _ctx.post_execution_callbacks, a, b, "equation",
+        equation)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_einsum_eager_fallback(
+            a, b, equation=equation, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_einsum, a=a, b=b, equation=equation, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  equation = _execute.make_str(equation, "equation")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaEinsum", a=a, b=b, equation=equation, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_einsum, a=a, b=b, equation=equation, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("equation", _op.get_attr("equation"), "T",
+            _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "XlaEinsum", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaEinsum(a, b, equation, name=None):
+  return xla_einsum(a=a, b=b, equation=equation, name=name)
+XlaEinsum.__doc__ = xla_einsum.__doc__
+XlaEinsum = _doc_controls.do_not_generate_docs(_kwarg_only(XlaEinsum))
+tf_export("raw_ops.XlaEinsum")(XlaEinsum)
+
+
+def xla_einsum_eager_fallback(a, b, equation, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_einsum
+  """
+  _ctx = ctx if ctx else _context.context()
+  equation = _execute.make_str(equation, "equation")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([a, b], _ctx)
+  (a, b) = _inputs_T
+  _inputs_flat = [a, b]
+  _attrs = ("equation", equation, "T", _attr_T)
+  _result = _execute.execute(b"XlaEinsum", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaEinsum", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaEinsum")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_if')
+def xla_if(cond, inputs, then_branch, else_branch, Tout, name=None):
+  r"""output = cond ? then_branch(inputs) : else_branch(inputs).
+
+  Args:
+    cond: A `Tensor`. A boolean scalar.
+    inputs: A list of `Tensor` objects. A list of input tensors.
+    then_branch: A function decorated with @Defun.
+      A function takes 'inputs' and returns a list of tensors,
+      whose types are the same as what else_branch returns.
+    else_branch: A function decorated with @Defun.
+      A function takes 'inputs' and returns a list of tensors.
+      whose types are the same as what then_branch returns.
+    Tout: A list of `tf.DTypes`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `Tensor` objects of type `Tout`.
+    A list of tensors returned by either then_branch(inputs) or
+    else_branch(inputs). The input shapes of the then_branch and
+    else_branch must match.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaIf",
+        name, _ctx.post_execution_callbacks, cond, inputs, "then_branch",
+        then_branch, "else_branch", else_branch, "Tout", Tout)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_if_eager_fallback(
+            cond, inputs, then_branch=then_branch, else_branch=else_branch,
+            Tout=Tout, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_if, cond=cond, inputs=inputs, then_branch=then_branch,
+                      else_branch=else_branch, Tout=Tout, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(Tout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'Tout' argument to "
+        "'xla_if' Op, not %r." % Tout)
+  Tout = [_execute.make_type(_t, "Tout") for _t in Tout]
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaIf", cond=cond, inputs=inputs, then_branch=then_branch,
+                 else_branch=else_branch, Tout=Tout, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_if, cond=cond, inputs=inputs, then_branch=then_branch,
+                  else_branch=else_branch, Tout=Tout, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  if not _result:
+    return _op
+  _inputs_flat = _op.inputs
+  _attrs = ("Tcond", _op._get_attr_type("Tcond"), "then_branch",
+            _op.get_attr("then_branch"), "else_branch",
+            _op.get_attr("else_branch"), "Tin", _op.get_attr("Tin"), "Tout",
+            _op.get_attr("Tout"))
+  _execute.record_gradient(
+      "XlaIf", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def XlaIf(cond, inputs, then_branch, else_branch, Tout, name=None):
+  return xla_if(cond=cond, inputs=inputs, then_branch=then_branch, else_branch=else_branch, Tout=Tout, name=name)
+XlaIf.__doc__ = xla_if.__doc__
+XlaIf = _doc_controls.do_not_generate_docs(_kwarg_only(XlaIf))
+tf_export("raw_ops.XlaIf")(XlaIf)
+
+
+def xla_if_eager_fallback(cond, inputs, then_branch, else_branch, Tout, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_if
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(Tout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'Tout' argument to "
+        "'xla_if' Op, not %r." % Tout)
+  Tout = [_execute.make_type(_t, "Tout") for _t in Tout]
+  _attr_Tcond, (cond,) = _execute.args_to_matching_eager([cond], _ctx)
+  _attr_Tin, inputs = _execute.convert_to_mixed_eager_tensors(inputs, _ctx)
+  _inputs_flat = [cond] + list(inputs)
+  _attrs = ("Tcond", _attr_Tcond, "then_branch", then_branch, "else_branch",
+  else_branch, "Tin", _attr_Tin, "Tout", Tout)
+  _result = _execute.execute(b"XlaIf", len(Tout), inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaIf", _inputs_flat, _attrs, _result, name)
+  return _result
+
+_ops.RegisterShape("XlaIf")(None)
+
+
+_xla_key_value_sort_outputs = ["sorted_keys", "sorted_values"]
+_XlaKeyValueSortOutput = _collections.namedtuple(
+    "XlaKeyValueSort", _xla_key_value_sort_outputs)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_key_value_sort')
+def xla_key_value_sort(keys, values, name=None):
+  r"""Wraps the XLA Sort operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#sort
+  .
+
+  Sorts a tensor. Currently only sorts in ascending order are supported.
+
+  Args:
+    keys: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`.
+      A `Tensor` of type K.
+    values: A `Tensor`. A `Tensor` of type V.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (sorted_keys, sorted_values).
+
+    sorted_keys: A `Tensor`. Has the same type as `keys`. A `Tensor` of type K.
+    sorted_values: A `Tensor`. Has the same type as `values`. A `Tensor` of type V.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaKeyValueSort", name, _ctx.post_execution_callbacks, keys, values)
+      _result = _XlaKeyValueSortOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_key_value_sort_eager_fallback(
+            keys, values, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_key_value_sort, keys=keys, values=values, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaKeyValueSort", keys=keys, values=values, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_key_value_sort, keys=keys, values=values, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("K", _op._get_attr_type("K"), "V", _op._get_attr_type("V"))
+  _execute.record_gradient(
+      "XlaKeyValueSort", _inputs_flat, _attrs, _result, name)
+  _result = _XlaKeyValueSortOutput._make(_result)
+  return _result
+
+def XlaKeyValueSort(keys, values, name=None):
+  return xla_key_value_sort(keys=keys, values=values, name=name)
+XlaKeyValueSort.__doc__ = xla_key_value_sort.__doc__
+XlaKeyValueSort = _doc_controls.do_not_generate_docs(_kwarg_only(XlaKeyValueSort))
+tf_export("raw_ops.XlaKeyValueSort")(XlaKeyValueSort)
+
+
+def xla_key_value_sort_eager_fallback(keys, values, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_key_value_sort
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_K, (keys,) = _execute.args_to_matching_eager([keys], _ctx)
+  _attr_V, (values,) = _execute.args_to_matching_eager([values], _ctx)
+  _inputs_flat = [keys, values]
+  _attrs = ("K", _attr_K, "V", _attr_V)
+  _result = _execute.execute(b"XlaKeyValueSort", 2, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaKeyValueSort", _inputs_flat, _attrs, _result, name)
+  _result = _XlaKeyValueSortOutput._make(_result)
+  return _result
+
+_ops.RegisterShape("XlaKeyValueSort")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_pad')
+def xla_pad(input, padding_value, padding_low, padding_high, padding_interior, name=None):
+  r"""Wraps the XLA Pad operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#pad
+  .
+
+  Args:
+    input: A `Tensor`. A `Tensor` of type T.
+    padding_value: A `Tensor`. Must have the same type as `input`.
+      A scalar `Tensor` of type T.
+    padding_low: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      the padding to apply at the start of each input dimensions
+    padding_high: A `Tensor`. Must have the same type as `padding_low`.
+      the padding to apply at the end of each input dimension.
+    padding_interior: A `Tensor`. Must have the same type as `padding_low`.
+      the padding to apply between each input element.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`. A `Tensor` of type T.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaPad",
+        name, _ctx.post_execution_callbacks, input, padding_value,
+        padding_low, padding_high, padding_interior)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_pad_eager_fallback(
+            input, padding_value, padding_low, padding_high, padding_interior,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_pad, input=input, padding_value=padding_value,
+                       padding_low=padding_low, padding_high=padding_high,
+                       padding_interior=padding_interior, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaPad", input=input, padding_value=padding_value,
+                  padding_low=padding_low, padding_high=padding_high,
+                  padding_interior=padding_interior, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_pad, input=input, padding_value=padding_value,
+                   padding_low=padding_low, padding_high=padding_high,
+                   padding_interior=padding_interior, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"))
+  _execute.record_gradient(
+      "XlaPad", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaPad(input, padding_value, padding_low, padding_high, padding_interior, name=None):
+  return xla_pad(input=input, padding_value=padding_value, padding_low=padding_low, padding_high=padding_high, padding_interior=padding_interior, name=name)
+XlaPad.__doc__ = xla_pad.__doc__
+XlaPad = _doc_controls.do_not_generate_docs(_kwarg_only(XlaPad))
+tf_export("raw_ops.XlaPad")(XlaPad)
+
+
+def xla_pad_eager_fallback(input, padding_value, padding_low, padding_high, padding_interior, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_pad
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, padding_value], _ctx)
+  (input, padding_value) = _inputs_T
+  _attr_Tindices, _inputs_Tindices = _execute.args_to_matching_eager([padding_low, padding_high, padding_interior], _ctx)
+  (padding_low, padding_high, padding_interior) = _inputs_Tindices
+  _inputs_flat = [input, padding_value, padding_low, padding_high, padding_interior]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices)
+  _result = _execute.execute(b"XlaPad", 1, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaPad", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaPad")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_recv')
+def xla_recv(dtype, tensor_name, shape, name=None):
+  r"""Receives the named tensor from another XLA computation. Wraps the XLA Recv
+
+  operator documented at
+   https://www.tensorflow.org/performance/xla/operation_semantics#recv .
+
+  Args:
+    dtype: A `tf.DType`. The type of the tensor.
+    tensor_name: A `string`. A string key that identifies the channel.
+    shape: A `tf.TensorShape` or list of `ints`. The shape of the tensor.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `dtype`. The tensor to receive.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaRecv",
+        name, _ctx.post_execution_callbacks, "dtype", dtype, "tensor_name",
+        tensor_name, "shape", shape)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_recv_eager_fallback(
+            dtype=dtype, tensor_name=tensor_name, shape=shape, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_recv, dtype=dtype, tensor_name=tensor_name, shape=shape,
+                        name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  dtype = _execute.make_type(dtype, "dtype")
+  tensor_name = _execute.make_str(tensor_name, "tensor_name")
+  shape = _execute.make_shape(shape, "shape")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaRecv", dtype=dtype, tensor_name=tensor_name, shape=shape,
+                   name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_recv, dtype=dtype, tensor_name=tensor_name, shape=shape,
+                    name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("dtype", _op._get_attr_type("dtype"), "tensor_name",
+            _op.get_attr("tensor_name"), "shape", _op.get_attr("shape"))
+  _execute.record_gradient(
+      "XlaRecv", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaRecv(dtype, tensor_name, shape, name=None):
+  return xla_recv(dtype=dtype, tensor_name=tensor_name, shape=shape, name=name)
+XlaRecv.__doc__ = xla_recv.__doc__
+XlaRecv = _doc_controls.do_not_generate_docs(_kwarg_only(XlaRecv))
+tf_export("raw_ops.XlaRecv")(XlaRecv)
+
+
+def xla_recv_eager_fallback(dtype, tensor_name, shape, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_recv
+  """
+  _ctx = ctx if ctx else _context.context()
+  dtype = _execute.make_type(dtype, "dtype")
+  tensor_name = _execute.make_str(tensor_name, "tensor_name")
+  shape = _execute.make_shape(shape, "shape")
+  _inputs_flat = []
+  _attrs = ("dtype", dtype, "tensor_name", tensor_name, "shape", shape)
+  _result = _execute.execute(b"XlaRecv", 1, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaRecv", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaRecv")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_reduce')
+def xla_reduce(input, init_value, dimensions_to_reduce, reducer, name=None):
+  r"""Wraps the XLA Reduce operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#reduce .
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor
+    init_value: A `Tensor`. Must have the same type as `input`.
+      a scalar representing the initial value for the reduction
+    dimensions_to_reduce: A list of `ints`.
+      dimension numbers over which to reduce
+    reducer: A function decorated with @Defun. a reducer function to apply
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaReduce", name, _ctx.post_execution_callbacks, input, init_value,
+        "dimensions_to_reduce", dimensions_to_reduce, "reducer", reducer)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_reduce_eager_fallback(
+            input, init_value, dimensions_to_reduce=dimensions_to_reduce,
+            reducer=reducer, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_reduce, input=input, init_value=init_value,
+                          dimensions_to_reduce=dimensions_to_reduce,
+                          reducer=reducer, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(dimensions_to_reduce, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dimensions_to_reduce' argument to "
+        "'xla_reduce' Op, not %r." % dimensions_to_reduce)
+  dimensions_to_reduce = [_execute.make_int(_i, "dimensions_to_reduce") for _i in dimensions_to_reduce]
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaReduce", input=input, init_value=init_value,
+                     dimensions_to_reduce=dimensions_to_reduce,
+                     reducer=reducer, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_reduce, input=input, init_value=init_value,
+                      dimensions_to_reduce=dimensions_to_reduce,
+                      reducer=reducer, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "dimensions_to_reduce",
+            _op.get_attr("dimensions_to_reduce"), "reducer",
+            _op.get_attr("reducer"))
+  _execute.record_gradient(
+      "XlaReduce", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaReduce(input, init_value, dimensions_to_reduce, reducer, name=None):
+  return xla_reduce(input=input, init_value=init_value, dimensions_to_reduce=dimensions_to_reduce, reducer=reducer, name=name)
+XlaReduce.__doc__ = xla_reduce.__doc__
+XlaReduce = _doc_controls.do_not_generate_docs(_kwarg_only(XlaReduce))
+tf_export("raw_ops.XlaReduce")(XlaReduce)
+
+
+def xla_reduce_eager_fallback(input, init_value, dimensions_to_reduce, reducer, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_reduce
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(dimensions_to_reduce, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dimensions_to_reduce' argument to "
+        "'xla_reduce' Op, not %r." % dimensions_to_reduce)
+  dimensions_to_reduce = [_execute.make_int(_i, "dimensions_to_reduce") for _i in dimensions_to_reduce]
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, init_value], _ctx)
+  (input, init_value) = _inputs_T
+  _inputs_flat = [input, init_value]
+  _attrs = ("T", _attr_T, "dimensions_to_reduce", dimensions_to_reduce,
+  "reducer", reducer)
+  _result = _execute.execute(b"XlaReduce", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaReduce", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaReduce")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_reduce_window')
+def xla_reduce_window(input, init_value, window_dimensions, window_strides, base_dilations, window_dilations, padding, computation, name=None):
+  r"""Wraps the XLA ReduceWindow operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#reducewindow .
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor
+    init_value: A `Tensor`. Must have the same type as `input`.
+      a scalar representing the initial value for the reduction
+    window_dimensions: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      the shape of the window
+    window_strides: A `Tensor`. Must have the same type as `window_dimensions`.
+      the inter-window strides
+    base_dilations: A `Tensor`. Must have the same type as `window_dimensions`.
+    window_dilations: A `Tensor`. Must have the same type as `window_dimensions`.
+    padding: A `Tensor`. Must have the same type as `window_dimensions`.
+      the padding to apply at the start and end of each input dimensions
+    computation: A function decorated with @Defun. a reducer function to apply
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaReduceWindow", name, _ctx.post_execution_callbacks, input,
+        init_value, window_dimensions, window_strides, base_dilations,
+        window_dilations, padding, "computation", computation)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_reduce_window_eager_fallback(
+            input, init_value, window_dimensions, window_strides,
+            base_dilations, window_dilations, padding,
+            computation=computation, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_reduce_window, input=input, init_value=init_value,
+                                 window_dimensions=window_dimensions,
+                                 window_strides=window_strides,
+                                 base_dilations=base_dilations,
+                                 window_dilations=window_dilations,
+                                 padding=padding, computation=computation,
+                                 name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaReduceWindow", input=input, init_value=init_value,
+                           window_dimensions=window_dimensions,
+                           window_strides=window_strides,
+                           base_dilations=base_dilations,
+                           window_dilations=window_dilations, padding=padding,
+                           computation=computation, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_reduce_window, input=input, init_value=init_value,
+                             window_dimensions=window_dimensions,
+                             window_strides=window_strides,
+                             base_dilations=base_dilations,
+                             window_dilations=window_dilations,
+                             padding=padding, computation=computation,
+                             name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"), "computation",
+            _op.get_attr("computation"))
+  _execute.record_gradient(
+      "XlaReduceWindow", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaReduceWindow(input, init_value, window_dimensions, window_strides, base_dilations, window_dilations, padding, computation, name=None):
+  return xla_reduce_window(input=input, init_value=init_value, window_dimensions=window_dimensions, window_strides=window_strides, base_dilations=base_dilations, window_dilations=window_dilations, padding=padding, computation=computation, name=name)
+XlaReduceWindow.__doc__ = xla_reduce_window.__doc__
+XlaReduceWindow = _doc_controls.do_not_generate_docs(_kwarg_only(XlaReduceWindow))
+tf_export("raw_ops.XlaReduceWindow")(XlaReduceWindow)
+
+
+def xla_reduce_window_eager_fallback(input, init_value, window_dimensions, window_strides, base_dilations, window_dilations, padding, computation, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_reduce_window
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, init_value], _ctx)
+  (input, init_value) = _inputs_T
+  _attr_Tindices, _inputs_Tindices = _execute.args_to_matching_eager([window_dimensions, window_strides, base_dilations, window_dilations, padding], _ctx)
+  (window_dimensions, window_strides, base_dilations, window_dilations, padding) = _inputs_Tindices
+  _inputs_flat = [input, init_value, window_dimensions, window_strides, base_dilations, window_dilations, padding]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices, "computation",
+  computation)
+  _result = _execute.execute(b"XlaReduceWindow", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaReduceWindow", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaReduceWindow")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_replica_id')
+def xla_replica_id(name=None):
+  r"""Replica ID.
+
+  Args:
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `int32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaReplicaId", name, _ctx.post_execution_callbacks)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_replica_id_eager_fallback(
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_replica_id, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaReplicaId", name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_replica_id, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = None
+  _execute.record_gradient(
+      "XlaReplicaId", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaReplicaId(name=None):
+  return xla_replica_id(name=name)
+XlaReplicaId.__doc__ = xla_replica_id.__doc__
+XlaReplicaId = _doc_controls.do_not_generate_docs(_kwarg_only(XlaReplicaId))
+tf_export("raw_ops.XlaReplicaId")(XlaReplicaId)
+
+
+def xla_replica_id_eager_fallback(name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_replica_id
+  """
+  _ctx = ctx if ctx else _context.context()
+  _inputs_flat = []
+  _attrs = None
+  _result = _execute.execute(b"XlaReplicaId", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaReplicaId", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaReplicaId")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_select_and_scatter')
+def xla_select_and_scatter(operand, window_dimensions, window_strides, padding, source, init_value, select, scatter, name=None):
+  r"""Wraps the XLA SelectAndScatter operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#selectandscatter
+  .
+
+  Args:
+    operand: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor
+    window_dimensions: A `Tensor`. Must be one of the following types: `int32`, `int64`.
+      the shape of the window
+    window_strides: A `Tensor`. Must have the same type as `window_dimensions`.
+      the inter-window strides
+    padding: A `Tensor`. Must have the same type as `window_dimensions`.
+      the padding to apply at the start and end of each input dimensions
+    source: A `Tensor`. Must have the same type as `operand`.
+      a tensor of values to scatter
+    init_value: A `Tensor`. Must have the same type as `operand`.
+      a scalar representing the initial value for the output tensor
+    select: A function decorated with @Defun. a selection function to apply
+    scatter: A function decorated with @Defun. a scatter function to apply
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `operand`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaSelectAndScatter", name, _ctx.post_execution_callbacks, operand,
+        window_dimensions, window_strides, padding, source, init_value,
+        "select", select, "scatter", scatter)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_select_and_scatter_eager_fallback(
+            operand, window_dimensions, window_strides, padding, source,
+            init_value, select=select, scatter=scatter, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_select_and_scatter, operand=operand,
+                                      window_dimensions=window_dimensions,
+                                      window_strides=window_strides,
+                                      padding=padding, source=source,
+                                      init_value=init_value, select=select,
+                                      scatter=scatter, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaSelectAndScatter", operand=operand,
+                               window_dimensions=window_dimensions,
+                               window_strides=window_strides, padding=padding,
+                               source=source, init_value=init_value,
+                               select=select, scatter=scatter, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_select_and_scatter, operand=operand,
+                                  window_dimensions=window_dimensions,
+                                  window_strides=window_strides,
+                                  padding=padding, source=source,
+                                  init_value=init_value, select=select,
+                                  scatter=scatter, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "Tindices",
+            _op._get_attr_type("Tindices"), "select", _op.get_attr("select"),
+            "scatter", _op.get_attr("scatter"))
+  _execute.record_gradient(
+      "XlaSelectAndScatter", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaSelectAndScatter(operand, window_dimensions, window_strides, padding, source, init_value, select, scatter, name=None):
+  return xla_select_and_scatter(operand=operand, window_dimensions=window_dimensions, window_strides=window_strides, padding=padding, source=source, init_value=init_value, select=select, scatter=scatter, name=name)
+XlaSelectAndScatter.__doc__ = xla_select_and_scatter.__doc__
+XlaSelectAndScatter = _doc_controls.do_not_generate_docs(_kwarg_only(XlaSelectAndScatter))
+tf_export("raw_ops.XlaSelectAndScatter")(XlaSelectAndScatter)
+
+
+def xla_select_and_scatter_eager_fallback(operand, window_dimensions, window_strides, padding, source, init_value, select, scatter, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_select_and_scatter
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([operand, source, init_value], _ctx)
+  (operand, source, init_value) = _inputs_T
+  _attr_Tindices, _inputs_Tindices = _execute.args_to_matching_eager([window_dimensions, window_strides, padding], _ctx)
+  (window_dimensions, window_strides, padding) = _inputs_Tindices
+  _inputs_flat = [operand, window_dimensions, window_strides, padding, source, init_value]
+  _attrs = ("T", _attr_T, "Tindices", _attr_Tindices, "select", select,
+  "scatter", scatter)
+  _result = _execute.execute(b"XlaSelectAndScatter", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaSelectAndScatter", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaSelectAndScatter")(None)
+
+
+_xla_self_adjoint_eig_outputs = ["w", "v"]
+_XlaSelfAdjointEigOutput = _collections.namedtuple(
+    "XlaSelfAdjointEig", _xla_self_adjoint_eig_outputs)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_self_adjoint_eig')
+def xla_self_adjoint_eig(a, lower, max_iter, epsilon, name=None):
+  r"""Computes the eigen decomposition of a batch of self-adjoint matrices
+
+  (Note: Only real inputs are supported).
+
+  Computes the eigenvalues and eigenvectors of the innermost N-by-N matrices in
+  tensor such that tensor[...,:,:] * v[..., :,i] = e[..., i] * v[...,:,i], for
+  i=0...N-1.
+
+  Args:
+    a: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor.
+    lower: A `bool`.
+      a boolean specifies whether the calculation is done with the lower
+      triangular part or the upper triangular part.
+    max_iter: An `int`.
+      maximum number of sweep update, i.e., the whole lower triangular
+      part or upper triangular part based on parameter lower. Heuristically, it has
+      been argued that approximatly logN sweeps are needed in practice (Ref: Golub &
+      van Loan "Matrix Computation").
+    epsilon: A `float`. the tolerance ratio.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (w, v).
+
+    w: A `Tensor`. Has the same type as `a`. The eigenvalues in ascending order, each repeated according to its
+      multiplicity.
+    v: A `Tensor`. Has the same type as `a`. The column v[..., :, i] is the normalized eigenvector corresponding to the
+      eigenvalue w[..., i].
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "XlaSelfAdjointEig", name, _ctx.post_execution_callbacks, a, "lower",
+        lower, "max_iter", max_iter, "epsilon", epsilon)
+      _result = _XlaSelfAdjointEigOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_self_adjoint_eig_eager_fallback(
+            a, lower=lower, max_iter=max_iter, epsilon=epsilon, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_self_adjoint_eig, a=a, lower=lower, max_iter=max_iter,
+                                    epsilon=epsilon, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  lower = _execute.make_bool(lower, "lower")
+  max_iter = _execute.make_int(max_iter, "max_iter")
+  epsilon = _execute.make_float(epsilon, "epsilon")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaSelfAdjointEig", a=a, lower=lower, max_iter=max_iter,
+                             epsilon=epsilon, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_self_adjoint_eig, a=a, lower=lower, max_iter=max_iter,
+                                epsilon=epsilon, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("lower", _op.get_attr("lower"), "max_iter",
+            _op.get_attr("max_iter"), "epsilon", _op.get_attr("epsilon"), "T",
+            _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "XlaSelfAdjointEig", _inputs_flat, _attrs, _result, name)
+  _result = _XlaSelfAdjointEigOutput._make(_result)
+  return _result
+
+def XlaSelfAdjointEig(a, lower, max_iter, epsilon, name=None):
+  return xla_self_adjoint_eig(a=a, lower=lower, max_iter=max_iter, epsilon=epsilon, name=name)
+XlaSelfAdjointEig.__doc__ = xla_self_adjoint_eig.__doc__
+XlaSelfAdjointEig = _doc_controls.do_not_generate_docs(_kwarg_only(XlaSelfAdjointEig))
+tf_export("raw_ops.XlaSelfAdjointEig")(XlaSelfAdjointEig)
+
+
+def xla_self_adjoint_eig_eager_fallback(a, lower, max_iter, epsilon, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_self_adjoint_eig
+  """
+  _ctx = ctx if ctx else _context.context()
+  lower = _execute.make_bool(lower, "lower")
+  max_iter = _execute.make_int(max_iter, "max_iter")
+  epsilon = _execute.make_float(epsilon, "epsilon")
+  _attr_T, (a,) = _execute.args_to_matching_eager([a], _ctx)
+  _inputs_flat = [a]
+  _attrs = ("lower", lower, "max_iter", max_iter, "epsilon", epsilon, "T",
+  _attr_T)
+  _result = _execute.execute(b"XlaSelfAdjointEig", 2, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaSelfAdjointEig", _inputs_flat, _attrs, _result, name)
+  _result = _XlaSelfAdjointEigOutput._make(_result)
+  return _result
+
+_ops.RegisterShape("XlaSelfAdjointEig")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_send')
+def xla_send(tensor, tensor_name, name=None):
+  r"""Sends the named tensor to another XLA computation. Wraps the XLA Send operator
+
+  documented at
+   https://www.tensorflow.org/performance/xla/operation_semantics#send .
+
+  Args:
+    tensor: A `Tensor`. The tensor to send.
+    tensor_name: A `string`. A string key that identifies the channel.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaSend",
+        name, _ctx.post_execution_callbacks, tensor, "tensor_name",
+        tensor_name)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_send_eager_fallback(
+            tensor, tensor_name=tensor_name, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_send, tensor=tensor, tensor_name=tensor_name, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  tensor_name = _execute.make_str(tensor_name, "tensor_name")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaSend", tensor=tensor, tensor_name=tensor_name, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_send, tensor=tensor, tensor_name=tensor_name, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  return _op
+  _result = None
+  return _result
+
+def XlaSend(tensor, tensor_name, name=None):
+  return xla_send(tensor=tensor, tensor_name=tensor_name, name=name)
+XlaSend.__doc__ = xla_send.__doc__
+XlaSend = _doc_controls.do_not_generate_docs(_kwarg_only(XlaSend))
+tf_export("raw_ops.XlaSend")(XlaSend)
+
+
+def xla_send_eager_fallback(tensor, tensor_name, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_send
+  """
+  _ctx = ctx if ctx else _context.context()
+  tensor_name = _execute.make_str(tensor_name, "tensor_name")
+  _attr_T, (tensor,) = _execute.args_to_matching_eager([tensor], _ctx)
+  _inputs_flat = [tensor]
+  _attrs = ("T", _attr_T, "tensor_name", tensor_name)
+  _result = _execute.execute(b"XlaSend", 0, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+_ops.RegisterShape("XlaSend")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_sort')
+def xla_sort(input, name=None):
+  r"""Wraps the XLA Sort operator, documented at
+
+   https://www.tensorflow.org/performance/xla/operation_semantics#sort
+  .
+
+  Sorts a tensor. Currently only sorts in ascending order are supported.
+
+  Args:
+    input: A `Tensor`. A `Tensor` of type T.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`. A `Tensor` of type T.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaSort",
+        name, _ctx.post_execution_callbacks, input)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_sort_eager_fallback(
+            input, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_sort, input=input, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaSort", input=input, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_sort, input=input, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "XlaSort", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def XlaSort(input, name=None):
+  return xla_sort(input=input, name=name)
+XlaSort.__doc__ = xla_sort.__doc__
+XlaSort = _doc_controls.do_not_generate_docs(_kwarg_only(XlaSort))
+tf_export("raw_ops.XlaSort")(XlaSort)
+
+
+def xla_sort_eager_fallback(input, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_sort
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _inputs_flat = [input]
+  _attrs = ("T", _attr_T)
+  _result = _execute.execute(b"XlaSort", 1, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaSort", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("XlaSort")(None)
+
+
+_xla_svd_outputs = ["s", "u", "v"]
+_XlaSvdOutput = _collections.namedtuple(
+    "XlaSvd", _xla_svd_outputs)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_svd')
+def xla_svd(a, max_iter, epsilon, precision_config, name=None):
+  r"""Computes the eigen decomposition of a batch of self-adjoint matrices
+
+  (Note: Only real inputs are supported).
+
+  Computes the eigenvalues and eigenvectors of the innermost M-by-N matrices in
+  tensor such that tensor[...,:,:] = u[..., :, :] * Diag(s[..., :]) * Transpose(v[...,:,:]).
+
+  Args:
+    a: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      the input tensor.
+    max_iter: An `int`.
+      maximum number of sweep update, i.e., the whole lower triangular
+      part or upper triangular part based on parameter lower. Heuristically, it has
+      been argued that approximatly log(min (M, N)) sweeps are needed in practice
+      (Ref: Golub & van Loan "Matrix Computation").
+    epsilon: A `float`. the tolerance ratio.
+    precision_config: A `string`. a serialized xla::PrecisionConfig proto.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (s, u, v).
+
+    s: A `Tensor`. Has the same type as `a`. Singular values. The values are sorted in reverse order of magnitude, so
+      s[..., 0] is the largest value, s[..., 1] is the second largest, etc.
+    u: A `Tensor`. Has the same type as `a`. Left singular vectors.
+    v: A `Tensor`. Has the same type as `a`. Right singular vectors.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaSvd",
+        name, _ctx.post_execution_callbacks, a, "max_iter", max_iter,
+        "epsilon", epsilon, "precision_config", precision_config)
+      _result = _XlaSvdOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_svd_eager_fallback(
+            a, max_iter=max_iter, epsilon=epsilon,
+            precision_config=precision_config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_svd, a=a, max_iter=max_iter, epsilon=epsilon,
+                       precision_config=precision_config, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  max_iter = _execute.make_int(max_iter, "max_iter")
+  epsilon = _execute.make_float(epsilon, "epsilon")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaSvd", a=a, max_iter=max_iter, epsilon=epsilon,
+                  precision_config=precision_config, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_svd, a=a, max_iter=max_iter, epsilon=epsilon,
+                   precision_config=precision_config, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("max_iter", _op.get_attr("max_iter"), "epsilon",
+            _op.get_attr("epsilon"), "precision_config",
+            _op.get_attr("precision_config"), "T", _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "XlaSvd", _inputs_flat, _attrs, _result, name)
+  _result = _XlaSvdOutput._make(_result)
+  return _result
+
+def XlaSvd(a, max_iter, epsilon, precision_config, name=None):
+  return xla_svd(a=a, max_iter=max_iter, epsilon=epsilon, precision_config=precision_config, name=name)
+XlaSvd.__doc__ = xla_svd.__doc__
+XlaSvd = _doc_controls.do_not_generate_docs(_kwarg_only(XlaSvd))
+tf_export("raw_ops.XlaSvd")(XlaSvd)
+
+
+def xla_svd_eager_fallback(a, max_iter, epsilon, precision_config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_svd
+  """
+  _ctx = ctx if ctx else _context.context()
+  max_iter = _execute.make_int(max_iter, "max_iter")
+  epsilon = _execute.make_float(epsilon, "epsilon")
+  precision_config = _execute.make_str(precision_config, "precision_config")
+  _attr_T, (a,) = _execute.args_to_matching_eager([a], _ctx)
+  _inputs_flat = [a]
+  _attrs = ("max_iter", max_iter, "epsilon", epsilon, "precision_config",
+  precision_config, "T", _attr_T)
+  _result = _execute.execute(b"XlaSvd", 3, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaSvd", _inputs_flat, _attrs, _result, name)
+  _result = _XlaSvdOutput._make(_result)
+  return _result
+
+_ops.RegisterShape("XlaSvd")(None)
+
+
+@_dispatch.add_dispatch_list
+@tf_export('xla_while')
+def xla_while(input, cond, body, name=None):
+  r"""output = input; While (Cond(output)) { output = Body(output) }
+
+  Args:
+    input: A list of `Tensor` objects.
+      A list of input tensors whose types are T.
+    cond: A function decorated with @Defun.
+      A function takes 'input' and returns a tensor.  If the tensor is
+      a scalar of non-boolean, the scalar is converted to a boolean
+      according to the following rule: if the scalar is a numerical
+      value, non-zero means True and zero means False; if the scalar is
+      a string, non-empty means True and empty means False. If the
+      tensor is not a scalar, non-emptiness means True and False
+      otherwise.
+    body: A function decorated with @Defun.
+      A function that takes a list of tensors and returns another
+      list of tensors. Both lists have the same types as specified by T.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `Tensor` objects. Has the same type as `input`.
+    A list of output tensors whose types are T.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "XlaWhile",
+        name, _ctx.post_execution_callbacks, input, "cond", cond, "body",
+        body)
+      return _result
+    except _core._FallbackException:
+      try:
+        return xla_while_eager_fallback(
+            input, cond=cond, body=body, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              xla_while, input=input, cond=cond, body=body, name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "XlaWhile", input=input, cond=cond, body=body, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          xla_while, input=input, cond=cond, body=body, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  if not _result:
+    return _op
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op.get_attr("T"), "cond", _op.get_attr("cond"), "body",
+            _op.get_attr("body"))
+  _execute.record_gradient(
+      "XlaWhile", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def XlaWhile(input, cond, body, name=None):
+  return xla_while(input=input, cond=cond, body=body, name=name)
+XlaWhile.__doc__ = xla_while.__doc__
+XlaWhile = _doc_controls.do_not_generate_docs(_kwarg_only(XlaWhile))
+tf_export("raw_ops.XlaWhile")(XlaWhile)
+
+
+def xla_while_eager_fallback(input, cond, body, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function xla_while
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, input = _execute.convert_to_mixed_eager_tensors(input, _ctx)
+  _inputs_flat = list(input)
+  _attrs = ("T", _attr_T, "cond", cond, "body", body)
+  _result = _execute.execute(b"XlaWhile", len(input), inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "XlaWhile", _inputs_flat, _attrs, _result, name)
+  return _result
+
+_ops.RegisterShape("XlaWhile")(None)
+
+def _InitOpDefLibrary(op_list_proto_bytes):
+  op_list = _op_def_pb2.OpList()
+  op_list.ParseFromString(op_list_proto_bytes)
+  _op_def_registry.register_op_list(op_list)
+  op_def_lib = _op_def_library.OpDefLibrary()
+  op_def_lib.add_op_list(op_list)
+  return op_def_lib
+# op {
+#   name: "XlaBroadcastHelper"
+#   input_arg {
+#     name: "lhs"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "rhs"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "broadcast_dims"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "lhs_output"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "rhs_output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaConv"
+#   input_arg {
+#     name: "lhs"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "rhs"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "window_strides"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "padding"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "lhs_dilation"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "rhs_dilation"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "feature_group_count"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dimension_numbers"
+#     type: "string"
+#   }
+#   attr {
+#     name: "precision_config"
+#     type: "string"
+#   }
+# }
+# op {
+#   name: "XlaDequantize"
+#   input_arg {
+#     name: "input"
+#     type: DT_UINT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type: DT_BFLOAT16
+#   }
+#   attr {
+#     name: "min_range"
+#     type: "float"
+#   }
+#   attr {
+#     name: "max_range"
+#     type: "float"
+#   }
+#   attr {
+#     name: "mode"
+#     type: "string"
+#   }
+#   attr {
+#     name: "transpose_output"
+#     type: "bool"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "XlaDot"
+#   input_arg {
+#     name: "lhs"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "rhs"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dimension_numbers"
+#     type: "string"
+#   }
+#   attr {
+#     name: "precision_config"
+#     type: "string"
+#   }
+# }
+# op {
+#   name: "XlaDynamicSlice"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "start_indices"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "size_indices"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaDynamicUpdateSlice"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "update"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "indices"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaEinsum"
+#   input_arg {
+#     name: "a"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "b"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "product"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "equation"
+#     type: "string"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_BFLOAT16
+#         type: DT_FLOAT
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaIf"
+#   input_arg {
+#     name: "cond"
+#     type_attr: "Tcond"
+#   }
+#   input_arg {
+#     name: "inputs"
+#     type_list_attr: "Tin"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_list_attr: "Tout"
+#   }
+#   attr {
+#     name: "Tcond"
+#     type: "type"
+#   }
+#   attr {
+#     name: "then_branch"
+#     type: "func"
+#   }
+#   attr {
+#     name: "else_branch"
+#     type: "func"
+#   }
+#   attr {
+#     name: "Tin"
+#     type: "list(type)"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "Tout"
+#     type: "list(type)"
+#     has_minimum: true
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "XlaKeyValueSort"
+#   input_arg {
+#     name: "keys"
+#     type_attr: "K"
+#   }
+#   input_arg {
+#     name: "values"
+#     type_attr: "V"
+#   }
+#   output_arg {
+#     name: "sorted_keys"
+#     type_attr: "K"
+#   }
+#   output_arg {
+#     name: "sorted_values"
+#     type_attr: "V"
+#   }
+#   attr {
+#     name: "K"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_INT64
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "V"
+#     type: "type"
+#   }
+# }
+# op {
+#   name: "XlaPad"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "padding_value"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "padding_low"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "padding_high"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "padding_interior"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaRecv"
+#   output_arg {
+#     name: "tensor"
+#     type_attr: "dtype"
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   attr {
+#     name: "tensor_name"
+#     type: "string"
+#   }
+#   attr {
+#     name: "shape"
+#     type: "shape"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "XlaReduce"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "init_value"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dimensions_to_reduce"
+#     type: "list(int)"
+#   }
+#   attr {
+#     name: "reducer"
+#     type: "func"
+#   }
+# }
+# op {
+#   name: "XlaReduceWindow"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "init_value"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "window_dimensions"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "window_strides"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "base_dilations"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "window_dilations"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "padding"
+#     type_attr: "Tindices"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "computation"
+#     type: "func"
+#   }
+# }
+# op {
+#   name: "XlaReplicaId"
+#   output_arg {
+#     name: "id"
+#     type: DT_INT32
+#   }
+# }
+# op {
+#   name: "XlaSelectAndScatter"
+#   input_arg {
+#     name: "operand"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "window_dimensions"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "window_strides"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "padding"
+#     type_attr: "Tindices"
+#   }
+#   input_arg {
+#     name: "source"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "init_value"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "Tindices"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "select"
+#     type: "func"
+#   }
+#   attr {
+#     name: "scatter"
+#     type: "func"
+#   }
+# }
+# op {
+#   name: "XlaSelfAdjointEig"
+#   input_arg {
+#     name: "a"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "w"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "v"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "lower"
+#     type: "bool"
+#   }
+#   attr {
+#     name: "max_iter"
+#     type: "int"
+#   }
+#   attr {
+#     name: "epsilon"
+#     type: "float"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaSend"
+#   input_arg {
+#     name: "tensor"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+#   attr {
+#     name: "tensor_name"
+#     type: "string"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "XlaSort"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+# }
+# op {
+#   name: "XlaSvd"
+#   input_arg {
+#     name: "a"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "s"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "u"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "v"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "max_iter"
+#     type: "int"
+#   }
+#   attr {
+#     name: "epsilon"
+#     type: "float"
+#   }
+#   attr {
+#     name: "precision_config"
+#     type: "string"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "XlaWhile"
+#   input_arg {
+#     name: "input"
+#     type_list_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_list_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "list(type)"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "cond"
+#     type: "func"
+#   }
+#   attr {
+#     name: "body"
+#     type: "func"
+#   }
+#   is_stateful: true
+# }
+_op_def_lib = _InitOpDefLibrary(b"\n\242\001\n\022XlaBroadcastHelper\022\010\n\003lhs\"\001T\022\010\n\003rhs\"\001T\022\032\n\016broadcast_dims\"\010Tindices\032\017\n\nlhs_output\"\001T\032\017\n\nrhs_output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\n\245\002\n\007XlaConv\022\010\n\003lhs\"\001T\022\010\n\003rhs\"\001T\022\032\n\016window_strides\"\010Tindices\022\023\n\007padding\"\010Tindices\022\030\n\014lhs_dilation\"\010Tindices\022\030\n\014rhs_dilation\"\010Tindices\022\037\n\023feature_group_count\"\010Tindices\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\"\033\n\021dimension_numbers\022\006string\"\032\n\020precision_config\022\006string\n{\n\rXlaDequantize\022\t\n\005input\030\026\032\n\n\006output\030\016\"\022\n\tmin_range\022\005float\"\022\n\tmax_range\022\005float\"\016\n\004mode\022\006string\"\030\n\020transpose_output\022\004bool\210\001\001\n\204\001\n\006XlaDot\022\010\n\003lhs\"\001T\022\010\n\003rhs\"\001T\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"\033\n\021dimension_numbers\022\006string\"\032\n\020precision_config\022\006string\n\204\001\n\017XlaDynamicSlice\022\n\n\005input\"\001T\022\031\n\rstart_indices\"\010Tindices\022\030\n\014size_indices\"\010Tindices\032\013\n\006output\"\001T\"\t\n\001T\022\004type\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\nw\n\025XlaDynamicUpdateSlice\022\n\n\005input\"\001T\022\013\n\006update\"\001T\022\023\n\007indices\"\010Tindices\032\013\n\006output\"\001T\"\t\n\001T\022\004type\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\nP\n\tXlaEinsum\022\006\n\001a\"\001T\022\006\n\001b\"\001T\032\014\n\007product\"\001T\"\022\n\010equation\022\006string\"\021\n\001T\022\004type:\006\n\0042\002\016\001\n\234\001\n\005XlaIf\022\r\n\004cond\"\005Tcond\022\r\n\006inputs2\003Tin\032\016\n\006output2\004Tout\"\r\n\005Tcond\022\004type\"\023\n\013then_branch\022\004func\"\023\n\013else_branch\022\004func\"\023\n\003Tin\022\nlist(type)(\001\"\024\n\004Tout\022\nlist(type)(\001\210\001\001\nw\n\017XlaKeyValueSort\022\t\n\004keys\"\001K\022\013\n\006values\"\001V\032\020\n\013sorted_keys\"\001K\032\022\n\rsorted_values\"\001V\"\033\n\001K\022\004type:\020\n\0162\014\001\002\003\004\005\006\t\016\021\023\026\027\"\t\n\001V\022\004type\n\253\001\n\006XlaPad\022\n\n\005input\"\001T\022\022\n\rpadding_value\"\001T\022\027\n\013padding_low\"\010Tindices\022\030\n\014padding_high\"\010Tindices\022\034\n\020padding_interior\"\010Tindices\032\013\n\006output\"\001T\"\t\n\001T\022\004type\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\nS\n\007XlaRecv\032\017\n\006tensor\"\005dtype\"\r\n\005dtype\022\004type\"\025\n\013tensor_name\022\006string\"\016\n\005shape\022\005shape\210\001\001\n\213\001\n\tXlaReduce\022\n\n\005input\"\001T\022\017\n\ninit_value\"\001T\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"!\n\024dimensions_to_reduce\022\tlist(int)\"\017\n\007reducer\022\004func\n\226\002\n\017XlaReduceWindow\022\n\n\005input\"\001T\022\017\n\ninit_value\"\001T\022\035\n\021window_dimensions\"\010Tindices\022\032\n\016window_strides\"\010Tindices\022\032\n\016base_dilations\"\010Tindices\022\034\n\020window_dilations\"\010Tindices\022\023\n\007padding\"\010Tindices\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\"\023\n\013computation\022\004func\n\026\n\014XlaReplicaId\032\006\n\002id\030\003\n\373\001\n\023XlaSelectAndScatter\022\014\n\007operand\"\001T\022\035\n\021window_dimensions\"\010Tindices\022\032\n\016window_strides\"\010Tindices\022\023\n\007padding\"\010Tindices\022\013\n\006source\"\001T\022\017\n\ninit_value\"\001T\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\"\030\n\010Tindices\022\004type:\006\n\0042\002\003\t\"\016\n\006select\022\004func\"\017\n\007scatter\022\004func\n\177\n\021XlaSelfAdjointEig\022\006\n\001a\"\001T\032\006\n\001w\"\001T\032\006\n\001v\"\001T\"\r\n\005lower\022\004bool\"\017\n\010max_iter\022\003int\"\020\n\007epsilon\022\005float\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\n;\n\007XlaSend\022\013\n\006tensor\"\001T\"\t\n\001T\022\004type\"\025\n\013tensor_name\022\006string\210\001\001\n-\n\007XlaSort\022\n\n\005input\"\001T\032\013\n\006output\"\001T\"\t\n\001T\022\004type\n\211\001\n\006XlaSvd\022\006\n\001a\"\001T\032\006\n\001s\"\001T\032\006\n\001u\"\001T\032\006\n\001v\"\001T\"\017\n\010max_iter\022\003int\"\020\n\007epsilon\022\005float\"\032\n\020precision_config\022\006string\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\nU\n\010XlaWhile\022\n\n\005input2\001T\032\013\n\006output2\001T\"\021\n\001T\022\nlist(type)(\001\"\014\n\004cond\022\004func\"\014\n\004body\022\004func\210\001\001")

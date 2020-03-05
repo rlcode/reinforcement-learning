@@ -1,0 +1,8626 @@
+"""Python wrappers around TensorFlow ops.
+
+This file is MACHINE GENERATED! Do not edit.
+"""
+
+import collections as _collections
+import six as _six
+
+from tensorflow.python import pywrap_tensorflow as _pywrap_tensorflow
+from tensorflow.python.eager import context as _context
+from tensorflow.python.eager import core as _core
+from tensorflow.python.eager import execute as _execute
+from tensorflow.python.framework import dtypes as _dtypes
+from tensorflow.python.framework import errors as _errors
+from tensorflow.python.framework import tensor_shape as _tensor_shape
+
+from tensorflow.core.framework import op_def_pb2 as _op_def_pb2
+# Needed to trigger the call to _set_call_cpp_shape_fn.
+from tensorflow.python.framework import common_shapes as _common_shapes
+from tensorflow.python.framework import op_def_registry as _op_def_registry
+from tensorflow.python.framework import ops as _ops
+from tensorflow.python.framework import op_def_library as _op_def_library
+from tensorflow.python.util.deprecation import deprecated_endpoints
+from tensorflow.python.util import dispatch as _dispatch
+from tensorflow.python.util.tf_export import tf_export
+from tensorflow.python.util.tf_export import kwarg_only as _kwarg_only
+from tensorflow.tools.docs import doc_controls as _doc_controls
+
+
+def all_to_all(input, group_assignment, concat_dimension, split_dimension, split_count, name=None):
+  r"""An Op to exchange data across TPU replicas.
+
+  On each replica, the input is split into `split_count` blocks along
+  `split_dimension` and send to the other replicas given group_assignment. After
+  receiving `split_count` - 1 blocks from other replicas, we concatenate the
+  blocks along `concat_dimension` as the output.
+
+  For example, suppose there are 2 TPU replicas:
+  replica 0 receives input: `[[A, B]]`
+  replica 1 receives input: `[[C, D]]`
+
+  group_assignment=`[[0, 1]]`
+  concat_dimension=0
+  split_dimension=1
+  split_count=2
+
+  replica 0's output: `[[A], [C]]`
+  replica 1's output: `[[B], [D]]`
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`, `bool`.
+      The local input to the sum.
+    group_assignment: A `Tensor` of type `int32`. An int32 tensor with shape
+      [num_groups, num_replicas_per_group]. `group_assignment[i]` represents the
+      replica ids in the ith subgroup.
+    concat_dimension: An `int`. The dimension number to concatenate.
+    split_dimension: An `int`. The dimension number to split.
+    split_count: An `int`.
+      The number of splits, this number must equal to the sub-group
+      size(group_assignment.get_shape()[1])
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "AllToAll",
+        name, _ctx.post_execution_callbacks, input, group_assignment,
+        "concat_dimension", concat_dimension, "split_dimension",
+        split_dimension, "split_count", split_count)
+      return _result
+    except _core._FallbackException:
+      try:
+        return all_to_all_eager_fallback(
+            input, group_assignment, concat_dimension=concat_dimension,
+            split_dimension=split_dimension, split_count=split_count,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  concat_dimension = _execute.make_int(concat_dimension, "concat_dimension")
+  split_dimension = _execute.make_int(split_dimension, "split_dimension")
+  split_count = _execute.make_int(split_count, "split_count")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "AllToAll", input=input, group_assignment=group_assignment,
+                    concat_dimension=concat_dimension,
+                    split_dimension=split_dimension, split_count=split_count,
+                    name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "concat_dimension",
+            _op.get_attr("concat_dimension"), "split_dimension",
+            _op.get_attr("split_dimension"), "split_count",
+            _op.get_attr("split_count"))
+  _execute.record_gradient(
+      "AllToAll", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def AllToAll(input, group_assignment, concat_dimension, split_dimension, split_count, name=None):
+  return all_to_all(input=input, group_assignment=group_assignment, concat_dimension=concat_dimension, split_dimension=split_dimension, split_count=split_count, name=name)
+AllToAll.__doc__ = all_to_all.__doc__
+AllToAll = _doc_controls.do_not_generate_docs(_kwarg_only(AllToAll))
+tf_export("raw_ops.AllToAll")(AllToAll)
+
+
+def all_to_all_eager_fallback(input, group_assignment, concat_dimension, split_dimension, split_count, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function all_to_all
+  """
+  _ctx = ctx if ctx else _context.context()
+  concat_dimension = _execute.make_int(concat_dimension, "concat_dimension")
+  split_dimension = _execute.make_int(split_dimension, "split_dimension")
+  split_count = _execute.make_int(split_count, "split_count")
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  group_assignment = _ops.convert_to_tensor(group_assignment, _dtypes.int32)
+  _inputs_flat = [input, group_assignment]
+  _attrs = ("T", _attr_T, "concat_dimension", concat_dimension,
+  "split_dimension", split_dimension, "split_count", split_count)
+  _result = _execute.execute(b"AllToAll", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "AllToAll", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def collective_permute(input, source_target_pairs, name=None):
+  r"""An Op to permute tensors across replicated TPU instances.
+
+  Each instance supplies its own input.
+
+  For example, suppose there are 4 TPU instances: `[A, B, C, D]`. Passing
+  source_target_pairs=`[[0,1],[1,2],[2,3],[3,0]]` gets the outputs:
+  `[D, A, B, C]`.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `complex64`, `int64`, `qint8`, `quint8`, `qint32`, `bfloat16`, `uint16`, `complex128`, `half`, `uint32`, `uint64`.
+      The local input to be permuted. Currently only supports float and
+      bfloat16.
+    source_target_pairs: A `Tensor` of type `int32`.
+      A tensor with shape [num_pairs, 2].
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CollectivePermute", name, _ctx.post_execution_callbacks, input,
+        source_target_pairs)
+      return _result
+    except _core._FallbackException:
+      try:
+        return collective_permute_eager_fallback(
+            input, source_target_pairs, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CollectivePermute", input=input,
+                             source_target_pairs=source_target_pairs,
+                             name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "CollectivePermute", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def CollectivePermute(input, source_target_pairs, name=None):
+  return collective_permute(input=input, source_target_pairs=source_target_pairs, name=name)
+CollectivePermute.__doc__ = collective_permute.__doc__
+CollectivePermute = _doc_controls.do_not_generate_docs(_kwarg_only(CollectivePermute))
+tf_export("raw_ops.CollectivePermute")(CollectivePermute)
+
+
+def collective_permute_eager_fallback(input, source_target_pairs, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function collective_permute
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  source_target_pairs = _ops.convert_to_tensor(source_target_pairs, _dtypes.int32)
+  _inputs_flat = [input, source_target_pairs]
+  _attrs = ("T", _attr_T)
+  _result = _execute.execute(b"CollectivePermute", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CollectivePermute", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def configure_distributed_tpu(embedding_config="", tpu_embedding_config="", is_global_init=False, name=None):
+  r"""Sets up the centralized structures for a distributed TPU system.
+
+  Args:
+    embedding_config: An optional `string`. Defaults to `""`.
+      Reserved. Do not use.
+    tpu_embedding_config: An optional `string`. Defaults to `""`.
+      Serialized tensorflow.tpu.TPUEmbeddingConfiguration that
+      describes the embedding lookups of the program.
+    is_global_init: An optional `bool`. Defaults to `False`.
+      Reserved. Do not use.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `string`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "ConfigureDistributedTPU", name, _ctx.post_execution_callbacks,
+        "embedding_config", embedding_config, "tpu_embedding_config",
+        tpu_embedding_config, "is_global_init", is_global_init)
+      return _result
+    except _core._FallbackException:
+      try:
+        return configure_distributed_tpu_eager_fallback(
+            embedding_config=embedding_config,
+            tpu_embedding_config=tpu_embedding_config,
+            is_global_init=is_global_init, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if embedding_config is None:
+    embedding_config = ""
+  embedding_config = _execute.make_str(embedding_config, "embedding_config")
+  if tpu_embedding_config is None:
+    tpu_embedding_config = ""
+  tpu_embedding_config = _execute.make_str(tpu_embedding_config, "tpu_embedding_config")
+  if is_global_init is None:
+    is_global_init = False
+  is_global_init = _execute.make_bool(is_global_init, "is_global_init")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "ConfigureDistributedTPU", embedding_config=embedding_config,
+                                   tpu_embedding_config=tpu_embedding_config,
+                                   is_global_init=is_global_init, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("embedding_config", _op.get_attr("embedding_config"),
+            "tpu_embedding_config", _op.get_attr("tpu_embedding_config"),
+            "is_global_init", _op.get_attr("is_global_init"))
+  _execute.record_gradient(
+      "ConfigureDistributedTPU", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def ConfigureDistributedTPU(embedding_config="", tpu_embedding_config="", is_global_init=False, name=None):
+  return configure_distributed_tpu(embedding_config=embedding_config, tpu_embedding_config=tpu_embedding_config, is_global_init=is_global_init, name=name)
+ConfigureDistributedTPU.__doc__ = configure_distributed_tpu.__doc__
+ConfigureDistributedTPU = _doc_controls.do_not_generate_docs(_kwarg_only(ConfigureDistributedTPU))
+tf_export("raw_ops.ConfigureDistributedTPU")(ConfigureDistributedTPU)
+
+
+def configure_distributed_tpu_eager_fallback(embedding_config="", tpu_embedding_config="", is_global_init=False, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function configure_distributed_tpu
+  """
+  _ctx = ctx if ctx else _context.context()
+  if embedding_config is None:
+    embedding_config = ""
+  embedding_config = _execute.make_str(embedding_config, "embedding_config")
+  if tpu_embedding_config is None:
+    tpu_embedding_config = ""
+  tpu_embedding_config = _execute.make_str(tpu_embedding_config, "tpu_embedding_config")
+  if is_global_init is None:
+    is_global_init = False
+  is_global_init = _execute.make_bool(is_global_init, "is_global_init")
+  _inputs_flat = []
+  _attrs = ("embedding_config", embedding_config, "tpu_embedding_config",
+  tpu_embedding_config, "is_global_init", is_global_init)
+  _result = _execute.execute(b"ConfigureDistributedTPU", 1,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "ConfigureDistributedTPU", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def configure_tpu_embedding(config, name=None):
+  r"""Sets up TPUEmbedding in a distributed TPU system.
+
+  Args:
+    config: A `string`.
+      Serialized tensorflow.tpu.TPUEmbeddingConfiguration that
+      describes the embedding lookups of the program.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "ConfigureTPUEmbedding", name, _ctx.post_execution_callbacks,
+        "config", config)
+      return _result
+    except _core._FallbackException:
+      try:
+        return configure_tpu_embedding_eager_fallback(
+            config=config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  config = _execute.make_str(config, "config")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "ConfigureTPUEmbedding", config=config, name=name)
+  return _op
+  _result = None
+  return _result
+
+def ConfigureTPUEmbedding(config, name=None):
+  return configure_tpu_embedding(config=config, name=name)
+ConfigureTPUEmbedding.__doc__ = configure_tpu_embedding.__doc__
+ConfigureTPUEmbedding = _doc_controls.do_not_generate_docs(_kwarg_only(ConfigureTPUEmbedding))
+tf_export("raw_ops.ConfigureTPUEmbedding")(ConfigureTPUEmbedding)
+
+
+def configure_tpu_embedding_eager_fallback(config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function configure_tpu_embedding
+  """
+  _ctx = ctx if ctx else _context.context()
+  config = _execute.make_str(config, "config")
+  _inputs_flat = []
+  _attrs = ("config", config)
+  _result = _execute.execute(b"ConfigureTPUEmbedding", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def cross_replica_sum(input, group_assignment, name=None):
+  r"""An Op to sum inputs across replicated TPU instances.
+
+  Each instance supplies its own input.
+
+  For example, suppose there are 8 TPU instances: `[A, B, C, D, E, F, G, H]`.
+  Passing group_assignment=`[[0,2,4,6],[1,3,5,7]]` sets `A, C, E, G` as group 0,
+  and `B, D, F, H` as group 1. Thus we get the outputs:
+  `[A+C+E+G, B+D+F+H, A+C+E+G, B+D+F+H, A+C+E+G, B+D+F+H, A+C+E+G, B+D+F+H]`.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `bfloat16`, `float32`, `int32`, `uint32`.
+      The local input to the sum.
+    group_assignment: A `Tensor` of type `int32`. An int32 tensor with shape
+      [num_groups, num_replicas_per_group]. `group_assignment[i]` represents the
+      replica ids in the ith subgroup.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CrossReplicaSum", name, _ctx.post_execution_callbacks, input,
+        group_assignment)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cross_replica_sum_eager_fallback(
+            input, group_assignment, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CrossReplicaSum", input=input, group_assignment=group_assignment,
+                           name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "CrossReplicaSum", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def CrossReplicaSum(input, group_assignment, name=None):
+  return cross_replica_sum(input=input, group_assignment=group_assignment, name=name)
+CrossReplicaSum.__doc__ = cross_replica_sum.__doc__
+CrossReplicaSum = _doc_controls.do_not_generate_docs(_kwarg_only(CrossReplicaSum))
+tf_export("raw_ops.CrossReplicaSum")(CrossReplicaSum)
+
+
+def cross_replica_sum_eager_fallback(input, group_assignment, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cross_replica_sum
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  group_assignment = _ops.convert_to_tensor(group_assignment, _dtypes.int32)
+  _inputs_flat = [input, group_assignment]
+  _attrs = ("T", _attr_T)
+  _result = _execute.execute(b"CrossReplicaSum", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CrossReplicaSum", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def enqueue_tpu_embedding_integer_batch(batch, mode_override, device_ordinal=-1, name=None):
+  r"""An op that enqueues a list of input batch tensors to TPUEmbedding.
+
+  Args:
+    batch: A list of at least 1 `Tensor` objects with type `int32`.
+      A list of 1D tensors, one for each embedding table, containing the
+      indices into the tables.
+    mode_override: A `Tensor` of type `string`.
+      A string input that overrides the mode specified in the
+      TPUEmbeddingConfiguration. Supported values are {'unspecified', 'inference',
+      'training', 'backward_pass_only'}. When set to 'unspecified', the mode set
+      in TPUEmbeddingConfiguration is used, otherwise mode_override is used.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. Should be >= 0 and less than the number
+      of TPU cores in the task on which the node is placed.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "EnqueueTPUEmbeddingIntegerBatch", name,
+        _ctx.post_execution_callbacks, batch, mode_override, "device_ordinal",
+        device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return enqueue_tpu_embedding_integer_batch_eager_fallback(
+            batch, mode_override, device_ordinal=device_ordinal, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(batch, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'batch' argument to "
+        "'enqueue_tpu_embedding_integer_batch' Op, not %r." % batch)
+  _attr_N = len(batch)
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "EnqueueTPUEmbeddingIntegerBatch", batch=batch,
+                                           mode_override=mode_override,
+                                           device_ordinal=device_ordinal,
+                                           name=name)
+  return _op
+  _result = None
+  return _result
+
+def EnqueueTPUEmbeddingIntegerBatch(batch, mode_override, device_ordinal=-1, name=None):
+  return enqueue_tpu_embedding_integer_batch(batch=batch, mode_override=mode_override, device_ordinal=device_ordinal, name=name)
+EnqueueTPUEmbeddingIntegerBatch.__doc__ = enqueue_tpu_embedding_integer_batch.__doc__
+EnqueueTPUEmbeddingIntegerBatch = _doc_controls.do_not_generate_docs(_kwarg_only(EnqueueTPUEmbeddingIntegerBatch))
+tf_export("raw_ops.EnqueueTPUEmbeddingIntegerBatch")(EnqueueTPUEmbeddingIntegerBatch)
+
+
+def enqueue_tpu_embedding_integer_batch_eager_fallback(batch, mode_override, device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function enqueue_tpu_embedding_integer_batch
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(batch, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'batch' argument to "
+        "'enqueue_tpu_embedding_integer_batch' Op, not %r." % batch)
+  _attr_N = len(batch)
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  batch = _ops.convert_n_to_tensor(batch, _dtypes.int32)
+  mode_override = _ops.convert_to_tensor(mode_override, _dtypes.string)
+  _inputs_flat = list(batch) + [mode_override]
+  _attrs = ("N", _attr_N, "device_ordinal", device_ordinal)
+  _result = _execute.execute(b"EnqueueTPUEmbeddingIntegerBatch", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def enqueue_tpu_embedding_sparse_batch(sample_indices, embedding_indices, aggregation_weights, mode_override, device_ordinal=-1, combiners=[], name=None):
+  r"""An op that enqueues TPUEmbedding input indices from a SparseTensor.
+
+  This Op eases the porting of code that uses embedding_lookup_sparse(),
+  although some Python preprocessing of the SparseTensor arguments to
+  embedding_lookup_sparse() is required to produce the arguments to this Op,
+  since only a single EnqueueTPUEmbeddingSparseBatch Op is allowed per training
+  step.
+
+  The tensors at corresponding positions in the three input lists
+  must have the same shape, i.e. rank 1 with dim_size() equal to the total
+  number of lookups into the table described by the corresponding table_id.
+
+  Args:
+    sample_indices: A list of at least 1 `Tensor` objects with the same type in: `int32`, `int64`.
+      A list of rank 1 Tensors specifying the training example and
+      feature to which the corresponding embedding_indices and aggregation_weights
+      values belong. sample_indices[i] must equal b * nf + f, where nf is the
+      number of features from the corresponding table, f is in [0, nf), and
+      b is in [0, batch size).
+    embedding_indices: A list with the same length as `sample_indices` of `Tensor` objects with the same type in: `int32`, `int64`.
+      A list of rank 1 Tensors, indices into the embedding tables.
+    aggregation_weights: A list with the same length as `sample_indices` of `Tensor` objects with the same type in: `float32`, `float64`.
+      A list of rank 1 Tensors containing per sample -- i.e. per
+      (training example, feature) -- aggregation weights.
+    mode_override: A `Tensor` of type `string`.
+      A string input that overrides the mode specified in the
+      TPUEmbeddingConfiguration. Supported values are {'unspecified', 'inference',
+      'training', 'backward_pass_only'}. When set to 'unspecified', the mode set
+      in TPUEmbeddingConfiguration is used, otherwise mode_override is used.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. Should be >= 0 and less than the number
+      of TPU cores in the task on which the node is placed.
+    combiners: An optional list of `strings`. Defaults to `[]`.
+      A list of string scalars, one for each embedding table that specify
+      how to normalize the embedding activations after weighted summation.
+      Supported combiners are 'mean', 'sum', or 'sqrtn'. It is invalid to have
+      the sum of the weights be 0 for 'mean' or the sum of the squared weights be
+      0 for 'sqrtn'. If combiners isn't passed, the default is to use 'sum' for
+      all tables.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "EnqueueTPUEmbeddingSparseBatch", name, _ctx.post_execution_callbacks,
+        sample_indices, embedding_indices, aggregation_weights, mode_override,
+        "device_ordinal", device_ordinal, "combiners", combiners)
+      return _result
+    except _core._FallbackException:
+      try:
+        return enqueue_tpu_embedding_sparse_batch_eager_fallback(
+            sample_indices, embedding_indices, aggregation_weights,
+            mode_override, device_ordinal=device_ordinal, combiners=combiners,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(sample_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'sample_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % sample_indices)
+  _attr_N = len(sample_indices)
+  if not isinstance(embedding_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'embedding_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % embedding_indices)
+  if len(embedding_indices) != _attr_N:
+    raise ValueError(
+        "List argument 'embedding_indices' to 'enqueue_tpu_embedding_sparse_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(embedding_indices), _attr_N))
+  if not isinstance(aggregation_weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'aggregation_weights' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % aggregation_weights)
+  if len(aggregation_weights) != _attr_N:
+    raise ValueError(
+        "List argument 'aggregation_weights' to 'enqueue_tpu_embedding_sparse_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(aggregation_weights), _attr_N))
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  if combiners is None:
+    combiners = []
+  if not isinstance(combiners, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'combiners' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % combiners)
+  combiners = [_execute.make_str(_s, "combiners") for _s in combiners]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "EnqueueTPUEmbeddingSparseBatch", sample_indices=sample_indices,
+                                          embedding_indices=embedding_indices,
+                                          aggregation_weights=aggregation_weights,
+                                          mode_override=mode_override,
+                                          device_ordinal=device_ordinal,
+                                          combiners=combiners, name=name)
+  return _op
+  _result = None
+  return _result
+
+def EnqueueTPUEmbeddingSparseBatch(sample_indices, embedding_indices, aggregation_weights, mode_override, device_ordinal=-1, combiners=[], name=None):
+  return enqueue_tpu_embedding_sparse_batch(sample_indices=sample_indices, embedding_indices=embedding_indices, aggregation_weights=aggregation_weights, mode_override=mode_override, device_ordinal=device_ordinal, combiners=combiners, name=name)
+EnqueueTPUEmbeddingSparseBatch.__doc__ = enqueue_tpu_embedding_sparse_batch.__doc__
+EnqueueTPUEmbeddingSparseBatch = _doc_controls.do_not_generate_docs(_kwarg_only(EnqueueTPUEmbeddingSparseBatch))
+tf_export("raw_ops.EnqueueTPUEmbeddingSparseBatch")(EnqueueTPUEmbeddingSparseBatch)
+
+
+def enqueue_tpu_embedding_sparse_batch_eager_fallback(sample_indices, embedding_indices, aggregation_weights, mode_override, device_ordinal=-1, combiners=[], name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function enqueue_tpu_embedding_sparse_batch
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(sample_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'sample_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % sample_indices)
+  _attr_N = len(sample_indices)
+  if not isinstance(embedding_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'embedding_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % embedding_indices)
+  if len(embedding_indices) != _attr_N:
+    raise ValueError(
+        "List argument 'embedding_indices' to 'enqueue_tpu_embedding_sparse_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(embedding_indices), _attr_N))
+  if not isinstance(aggregation_weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'aggregation_weights' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % aggregation_weights)
+  if len(aggregation_weights) != _attr_N:
+    raise ValueError(
+        "List argument 'aggregation_weights' to 'enqueue_tpu_embedding_sparse_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(aggregation_weights), _attr_N))
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  if combiners is None:
+    combiners = []
+  if not isinstance(combiners, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'combiners' argument to "
+        "'enqueue_tpu_embedding_sparse_batch' Op, not %r." % combiners)
+  combiners = [_execute.make_str(_s, "combiners") for _s in combiners]
+  _attr_T1, sample_indices = _execute.args_to_matching_eager(list(sample_indices), _ctx, _dtypes.int32)
+  _attr_T2, embedding_indices = _execute.args_to_matching_eager(list(embedding_indices), _ctx, _dtypes.int32)
+  _attr_T3, aggregation_weights = _execute.args_to_matching_eager(list(aggregation_weights), _ctx, _dtypes.float32)
+  mode_override = _ops.convert_to_tensor(mode_override, _dtypes.string)
+  _inputs_flat = list(sample_indices) + list(embedding_indices) + list(aggregation_weights) + [mode_override]
+  _attrs = ("T1", _attr_T1, "T2", _attr_T2, "T3", _attr_T3, "N", _attr_N,
+  "device_ordinal", device_ordinal, "combiners", combiners)
+  _result = _execute.execute(b"EnqueueTPUEmbeddingSparseBatch", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def enqueue_tpu_embedding_sparse_tensor_batch(sample_indices, embedding_indices, aggregation_weights, mode_override, table_ids, device_ordinal=-1, combiners=[], max_sequence_lengths=[], name=None):
+  r"""Eases the porting of code that uses tf.nn.embedding_lookup_sparse().
+
+  sample_indices[i], embedding_indices[i] and aggregation_weights[i] correspond
+  to the ith feature. table_ids[i] indicates which embedding table to look up ith
+  feature.
+
+  The tensors at corresponding positions in the three input lists (sample_indices,
+  embedding_indices and aggregation_weights) must have the same shape, i.e. rank 1
+  with dim_size() equal to the total number of lookups into the table described by
+  the corresponding feature.
+
+  Args:
+    sample_indices: A list of at least 1 `Tensor` objects with the same type in: `int32`, `int64`.
+      A list of rank 1 Tensors specifying the training example to
+      which the corresponding embedding_indices and aggregation_weights values
+      belong. It corresponds to sp_ids.indices[:,0] in  embedding_lookup_sparse().
+    embedding_indices: A list with the same length as `sample_indices` of `Tensor` objects with the same type in: `int32`, `int64`.
+      A list of rank 1 Tensors, indices into the embedding tables.
+      It corresponds to sp_ids.values in embedding_lookup_sparse().
+    aggregation_weights: A list with the same length as `sample_indices` of `Tensor` objects with the same type in: `float32`, `float64`.
+      A list of rank 1 Tensors containing per training example
+      aggregation weights. It corresponds to sp_weights.values in
+      embedding_lookup_sparse().
+    mode_override: A `Tensor` of type `string`.
+      A string input that overrides the mode specified in the
+      TPUEmbeddingConfiguration. Supported values are {'unspecified', 'inference',
+      'training', 'backward_pass_only'}. When set to 'unspecified', the mode set
+      in TPUEmbeddingConfiguration is used, otherwise mode_override is used.
+    table_ids: A list of `ints`.
+      A list of integers specifying the identifier of the embedding table
+      (offset of TableDescriptor in the TPUEmbeddingConfiguration) to lookup the
+      corresponding input. The ith input is looked up using table_ids[i]. The size
+      of the table_ids list must be equal to that of sample_indices,
+      embedding_indices and aggregation_weights.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. Should be >= 0 and less than the number
+      of TPU cores in the task on which the node is placed.
+    combiners: An optional list of `strings`. Defaults to `[]`.
+      A list of string scalars, one for each embedding table that specify
+      how to normalize the embedding activations after weighted summation.
+      Supported combiners are 'mean', 'sum', or 'sqrtn'. It is invalid to have
+      the sum of the weights be 0 for 'mean' or the sum of the squared weights be
+      0 for 'sqrtn'. If combiners isn't passed, the default is to use 'sum' for
+      all tables.
+    max_sequence_lengths: An optional list of `ints`. Defaults to `[]`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "EnqueueTPUEmbeddingSparseTensorBatch", name,
+        _ctx.post_execution_callbacks, sample_indices, embedding_indices,
+        aggregation_weights, mode_override, "device_ordinal", device_ordinal,
+        "combiners", combiners, "table_ids", table_ids,
+        "max_sequence_lengths", max_sequence_lengths)
+      return _result
+    except _core._FallbackException:
+      try:
+        return enqueue_tpu_embedding_sparse_tensor_batch_eager_fallback(
+            sample_indices, embedding_indices, aggregation_weights,
+            mode_override, device_ordinal=device_ordinal, combiners=combiners,
+            table_ids=table_ids, max_sequence_lengths=max_sequence_lengths,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(sample_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'sample_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % sample_indices)
+  _attr_N = len(sample_indices)
+  if not isinstance(embedding_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'embedding_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % embedding_indices)
+  if len(embedding_indices) != _attr_N:
+    raise ValueError(
+        "List argument 'embedding_indices' to 'enqueue_tpu_embedding_sparse_tensor_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(embedding_indices), _attr_N))
+  if not isinstance(aggregation_weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'aggregation_weights' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % aggregation_weights)
+  if len(aggregation_weights) != _attr_N:
+    raise ValueError(
+        "List argument 'aggregation_weights' to 'enqueue_tpu_embedding_sparse_tensor_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(aggregation_weights), _attr_N))
+  if not isinstance(table_ids, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'table_ids' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % table_ids)
+  table_ids = [_execute.make_int(_i, "table_ids") for _i in table_ids]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  if combiners is None:
+    combiners = []
+  if not isinstance(combiners, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'combiners' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % combiners)
+  combiners = [_execute.make_str(_s, "combiners") for _s in combiners]
+  if max_sequence_lengths is None:
+    max_sequence_lengths = []
+  if not isinstance(max_sequence_lengths, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'max_sequence_lengths' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % max_sequence_lengths)
+  max_sequence_lengths = [_execute.make_int(_i, "max_sequence_lengths") for _i in max_sequence_lengths]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "EnqueueTPUEmbeddingSparseTensorBatch", sample_indices=sample_indices,
+                                                embedding_indices=embedding_indices,
+                                                aggregation_weights=aggregation_weights,
+                                                mode_override=mode_override,
+                                                table_ids=table_ids,
+                                                device_ordinal=device_ordinal,
+                                                combiners=combiners,
+                                                max_sequence_lengths=max_sequence_lengths,
+                                                name=name)
+  return _op
+  _result = None
+  return _result
+
+def EnqueueTPUEmbeddingSparseTensorBatch(sample_indices, embedding_indices, aggregation_weights, mode_override, table_ids, device_ordinal=-1, combiners=[], max_sequence_lengths=[], name=None):
+  return enqueue_tpu_embedding_sparse_tensor_batch(sample_indices=sample_indices, embedding_indices=embedding_indices, aggregation_weights=aggregation_weights, mode_override=mode_override, table_ids=table_ids, device_ordinal=device_ordinal, combiners=combiners, max_sequence_lengths=max_sequence_lengths, name=name)
+EnqueueTPUEmbeddingSparseTensorBatch.__doc__ = enqueue_tpu_embedding_sparse_tensor_batch.__doc__
+EnqueueTPUEmbeddingSparseTensorBatch = _doc_controls.do_not_generate_docs(_kwarg_only(EnqueueTPUEmbeddingSparseTensorBatch))
+tf_export("raw_ops.EnqueueTPUEmbeddingSparseTensorBatch")(EnqueueTPUEmbeddingSparseTensorBatch)
+
+
+def enqueue_tpu_embedding_sparse_tensor_batch_eager_fallback(sample_indices, embedding_indices, aggregation_weights, mode_override, table_ids, device_ordinal=-1, combiners=[], max_sequence_lengths=[], name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function enqueue_tpu_embedding_sparse_tensor_batch
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(sample_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'sample_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % sample_indices)
+  _attr_N = len(sample_indices)
+  if not isinstance(embedding_indices, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'embedding_indices' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % embedding_indices)
+  if len(embedding_indices) != _attr_N:
+    raise ValueError(
+        "List argument 'embedding_indices' to 'enqueue_tpu_embedding_sparse_tensor_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(embedding_indices), _attr_N))
+  if not isinstance(aggregation_weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'aggregation_weights' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % aggregation_weights)
+  if len(aggregation_weights) != _attr_N:
+    raise ValueError(
+        "List argument 'aggregation_weights' to 'enqueue_tpu_embedding_sparse_tensor_batch' Op with length %d "
+        "must match length %d of argument 'sample_indices'." %
+        (len(aggregation_weights), _attr_N))
+  if not isinstance(table_ids, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'table_ids' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % table_ids)
+  table_ids = [_execute.make_int(_i, "table_ids") for _i in table_ids]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  if combiners is None:
+    combiners = []
+  if not isinstance(combiners, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'combiners' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % combiners)
+  combiners = [_execute.make_str(_s, "combiners") for _s in combiners]
+  if max_sequence_lengths is None:
+    max_sequence_lengths = []
+  if not isinstance(max_sequence_lengths, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'max_sequence_lengths' argument to "
+        "'enqueue_tpu_embedding_sparse_tensor_batch' Op, not %r." % max_sequence_lengths)
+  max_sequence_lengths = [_execute.make_int(_i, "max_sequence_lengths") for _i in max_sequence_lengths]
+  _attr_T1, sample_indices = _execute.args_to_matching_eager(list(sample_indices), _ctx, _dtypes.int32)
+  _attr_T2, embedding_indices = _execute.args_to_matching_eager(list(embedding_indices), _ctx, _dtypes.int32)
+  _attr_T3, aggregation_weights = _execute.args_to_matching_eager(list(aggregation_weights), _ctx, _dtypes.float32)
+  mode_override = _ops.convert_to_tensor(mode_override, _dtypes.string)
+  _inputs_flat = list(sample_indices) + list(embedding_indices) + list(aggregation_weights) + [mode_override]
+  _attrs = ("T1", _attr_T1, "T2", _attr_T2, "T3", _attr_T3, "N", _attr_N,
+  "device_ordinal", device_ordinal, "combiners", combiners, "table_ids",
+  table_ids, "max_sequence_lengths", max_sequence_lengths)
+  _result = _execute.execute(b"EnqueueTPUEmbeddingSparseTensorBatch", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def infeed_dequeue(dtype, shape, name=None):
+  r"""A placeholder op for a value that will be fed into the computation.
+
+  Args:
+    dtype: A `tf.DType`. The type of elements in the tensor.
+    shape: A `tf.TensorShape` or list of `ints`. The shape of the tensor.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `dtype`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "InfeedDequeue", name, _ctx.post_execution_callbacks, "dtype", dtype,
+        "shape", shape)
+      return _result
+    except _core._FallbackException:
+      try:
+        return infeed_dequeue_eager_fallback(
+            dtype=dtype, shape=shape, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  dtype = _execute.make_type(dtype, "dtype")
+  shape = _execute.make_shape(shape, "shape")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "InfeedDequeue", dtype=dtype, shape=shape, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("dtype", _op._get_attr_type("dtype"), "shape",
+            _op.get_attr("shape"))
+  _execute.record_gradient(
+      "InfeedDequeue", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def InfeedDequeue(dtype, shape, name=None):
+  return infeed_dequeue(dtype=dtype, shape=shape, name=name)
+InfeedDequeue.__doc__ = infeed_dequeue.__doc__
+InfeedDequeue = _doc_controls.do_not_generate_docs(_kwarg_only(InfeedDequeue))
+tf_export("raw_ops.InfeedDequeue")(InfeedDequeue)
+
+
+def infeed_dequeue_eager_fallback(dtype, shape, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function infeed_dequeue
+  """
+  _ctx = ctx if ctx else _context.context()
+  dtype = _execute.make_type(dtype, "dtype")
+  shape = _execute.make_shape(shape, "shape")
+  _inputs_flat = []
+  _attrs = ("dtype", dtype, "shape", shape)
+  _result = _execute.execute(b"InfeedDequeue", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "InfeedDequeue", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def infeed_dequeue_tuple(dtypes, shapes, name=None):
+  r"""Fetches multiple values from infeed as an XLA tuple.
+
+  Args:
+    dtypes: A list of `tf.DTypes` that has length `>= 1`.
+      The element types of each element in `outputs`.
+    shapes: A list of shapes (each a `tf.TensorShape` or list of `ints`).
+      The shapes of each tensor in `outputs`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `Tensor` objects of type `dtypes`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "InfeedDequeueTuple", name, _ctx.post_execution_callbacks, "dtypes",
+        dtypes, "shapes", shapes)
+      return _result
+    except _core._FallbackException:
+      try:
+        return infeed_dequeue_tuple_eager_fallback(
+            dtypes=dtypes, shapes=shapes, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(dtypes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dtypes' argument to "
+        "'infeed_dequeue_tuple' Op, not %r." % dtypes)
+  dtypes = [_execute.make_type(_t, "dtypes") for _t in dtypes]
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'infeed_dequeue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "InfeedDequeueTuple", dtypes=dtypes, shapes=shapes, name=name)
+  _result = _op.outputs[:]
+  if not _result:
+    return _op
+  _inputs_flat = _op.inputs
+  _attrs = ("dtypes", _op.get_attr("dtypes"), "shapes",
+            _op.get_attr("shapes"))
+  _execute.record_gradient(
+      "InfeedDequeueTuple", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def InfeedDequeueTuple(dtypes, shapes, name=None):
+  return infeed_dequeue_tuple(dtypes=dtypes, shapes=shapes, name=name)
+InfeedDequeueTuple.__doc__ = infeed_dequeue_tuple.__doc__
+InfeedDequeueTuple = _doc_controls.do_not_generate_docs(_kwarg_only(InfeedDequeueTuple))
+tf_export("raw_ops.InfeedDequeueTuple")(InfeedDequeueTuple)
+
+
+def infeed_dequeue_tuple_eager_fallback(dtypes, shapes, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function infeed_dequeue_tuple
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(dtypes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dtypes' argument to "
+        "'infeed_dequeue_tuple' Op, not %r." % dtypes)
+  dtypes = [_execute.make_type(_t, "dtypes") for _t in dtypes]
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'infeed_dequeue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  _inputs_flat = []
+  _attrs = ("dtypes", dtypes, "shapes", shapes)
+  _result = _execute.execute(b"InfeedDequeueTuple", len(dtypes),
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "InfeedDequeueTuple", _inputs_flat, _attrs, _result, name)
+  return _result
+
+
+def infeed_enqueue(input, shape=[], layout=[], device_ordinal=-1, name=None):
+  r"""An op which feeds a single Tensor value into the computation.
+
+  Args:
+    input: A `Tensor`.
+      A tensor that will be provided using the infeed mechanism.
+    shape: An optional `tf.TensorShape` or list of `ints`. Defaults to `[]`.
+      The shape of the tensor.
+    layout: An optional list of `ints`. Defaults to `[]`.
+      A vector holding the requested layout in minor-to-major sequence.
+      If a layout attribute is passed, but its values are all -1, the layout will
+      be computed by the infeed operation.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. This should be -1 when the Op
+      is running on a TPU device, and >= 0 when the Op is running on the CPU
+      device.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "InfeedEnqueue", name, _ctx.post_execution_callbacks, input, "shape",
+        shape, "layout", layout, "device_ordinal", device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return infeed_enqueue_eager_fallback(
+            input, shape=shape, layout=layout, device_ordinal=device_ordinal,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if shape is None:
+    shape = []
+  shape = _execute.make_shape(shape, "shape")
+  if layout is None:
+    layout = []
+  if not isinstance(layout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layout' argument to "
+        "'infeed_enqueue' Op, not %r." % layout)
+  layout = [_execute.make_int(_i, "layout") for _i in layout]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "InfeedEnqueue", input=input, shape=shape, layout=layout,
+                         device_ordinal=device_ordinal, name=name)
+  return _op
+  _result = None
+  return _result
+
+def InfeedEnqueue(input, shape=[], layout=[], device_ordinal=-1, name=None):
+  return infeed_enqueue(input=input, shape=shape, layout=layout, device_ordinal=device_ordinal, name=name)
+InfeedEnqueue.__doc__ = infeed_enqueue.__doc__
+InfeedEnqueue = _doc_controls.do_not_generate_docs(_kwarg_only(InfeedEnqueue))
+tf_export("raw_ops.InfeedEnqueue")(InfeedEnqueue)
+
+
+def infeed_enqueue_eager_fallback(input, shape=[], layout=[], device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function infeed_enqueue
+  """
+  _ctx = ctx if ctx else _context.context()
+  if shape is None:
+    shape = []
+  shape = _execute.make_shape(shape, "shape")
+  if layout is None:
+    layout = []
+  if not isinstance(layout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layout' argument to "
+        "'infeed_enqueue' Op, not %r." % layout)
+  layout = [_execute.make_int(_i, "layout") for _i in layout]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _attr_dtype, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _inputs_flat = [input]
+  _attrs = ("dtype", _attr_dtype, "shape", shape, "layout", layout,
+  "device_ordinal", device_ordinal)
+  _result = _execute.execute(b"InfeedEnqueue", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def infeed_enqueue_prelinearized_buffer(input, device_ordinal=-1, name=None):
+  r"""An op which enqueues prelinearized buffer into TPU infeed.
+
+  Args:
+    input: A `Tensor` of type `variant`.
+      A variant tensor representing linearized output.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. This should be -1 when the Op is running on a TPU device
+      and = 0 when the Op is running on the CPU device.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "InfeedEnqueuePrelinearizedBuffer", name,
+        _ctx.post_execution_callbacks, input, "device_ordinal",
+        device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return infeed_enqueue_prelinearized_buffer_eager_fallback(
+            input, device_ordinal=device_ordinal, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "InfeedEnqueuePrelinearizedBuffer", input=input,
+                                            device_ordinal=device_ordinal,
+                                            name=name)
+  return _op
+  _result = None
+  return _result
+
+def InfeedEnqueuePrelinearizedBuffer(input, device_ordinal=-1, name=None):
+  return infeed_enqueue_prelinearized_buffer(input=input, device_ordinal=device_ordinal, name=name)
+InfeedEnqueuePrelinearizedBuffer.__doc__ = infeed_enqueue_prelinearized_buffer.__doc__
+InfeedEnqueuePrelinearizedBuffer = _doc_controls.do_not_generate_docs(_kwarg_only(InfeedEnqueuePrelinearizedBuffer))
+tf_export("raw_ops.InfeedEnqueuePrelinearizedBuffer")(InfeedEnqueuePrelinearizedBuffer)
+
+
+def infeed_enqueue_prelinearized_buffer_eager_fallback(input, device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function infeed_enqueue_prelinearized_buffer
+  """
+  _ctx = ctx if ctx else _context.context()
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  input = _ops.convert_to_tensor(input, _dtypes.variant)
+  _inputs_flat = [input]
+  _attrs = ("device_ordinal", device_ordinal)
+  _result = _execute.execute(b"InfeedEnqueuePrelinearizedBuffer", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def infeed_enqueue_tuple(inputs, shapes, layouts=[], device_ordinal=-1, name=None):
+  r"""Feeds multiple Tensor values into the computation as an XLA tuple.
+
+  Args:
+    inputs: A list of `Tensor` objects.
+      A list of tensors that will be provided using the infeed mechanism.
+    shapes: A list of shapes (each a `tf.TensorShape` or list of `ints`).
+      The shapes of each tensor in `inputs`.
+    layouts: An optional list of `ints`. Defaults to `[]`.
+      A vector holding the requested layout in minor-to-major sequence for
+      all the tuple shapes, in the order the shapes appear in the "shapes" input.
+      The layout elements for a sub-shape can be set to -1, in which case the
+      corresponding layout will be computed by the infeed operation.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. This should be -1 when the Op
+      is running on a TPU device, and >= 0 when the Op is running on the CPU
+      device.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "InfeedEnqueueTuple", name, _ctx.post_execution_callbacks, inputs,
+        "shapes", shapes, "layouts", layouts, "device_ordinal",
+        device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return infeed_enqueue_tuple_eager_fallback(
+            inputs, shapes=shapes, layouts=layouts,
+            device_ordinal=device_ordinal, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'infeed_enqueue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if layouts is None:
+    layouts = []
+  if not isinstance(layouts, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layouts' argument to "
+        "'infeed_enqueue_tuple' Op, not %r." % layouts)
+  layouts = [_execute.make_int(_i, "layouts") for _i in layouts]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "InfeedEnqueueTuple", inputs=inputs, shapes=shapes, layouts=layouts,
+                              device_ordinal=device_ordinal, name=name)
+  return _op
+  _result = None
+  return _result
+
+def InfeedEnqueueTuple(inputs, shapes, layouts=[], device_ordinal=-1, name=None):
+  return infeed_enqueue_tuple(inputs=inputs, shapes=shapes, layouts=layouts, device_ordinal=device_ordinal, name=name)
+InfeedEnqueueTuple.__doc__ = infeed_enqueue_tuple.__doc__
+InfeedEnqueueTuple = _doc_controls.do_not_generate_docs(_kwarg_only(InfeedEnqueueTuple))
+tf_export("raw_ops.InfeedEnqueueTuple")(InfeedEnqueueTuple)
+
+
+def infeed_enqueue_tuple_eager_fallback(inputs, shapes, layouts=[], device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function infeed_enqueue_tuple
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'infeed_enqueue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if layouts is None:
+    layouts = []
+  if not isinstance(layouts, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layouts' argument to "
+        "'infeed_enqueue_tuple' Op, not %r." % layouts)
+  layouts = [_execute.make_int(_i, "layouts") for _i in layouts]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _attr_dtypes, inputs = _execute.convert_to_mixed_eager_tensors(inputs, _ctx)
+  _inputs_flat = list(inputs)
+  _attrs = ("dtypes", _attr_dtypes, "shapes", shapes, "layouts", layouts,
+  "device_ordinal", device_ordinal)
+  _result = _execute.execute(b"InfeedEnqueueTuple", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adam_parameters(parameters, momenta, velocities, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load ADAM embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the ADAM optimization algorithm.
+    momenta: A `Tensor` of type `float32`.
+      Value of momenta used in the ADAM optimization algorithm.
+    velocities: A `Tensor` of type `float32`.
+      Value of velocities used in the ADAM optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingADAMParameters", name, _ctx.post_execution_callbacks,
+        parameters, momenta, velocities, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adam_parameters_eager_fallback(
+            parameters, momenta, velocities, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingADAMParameters", parameters=parameters,
+                                          momenta=momenta,
+                                          velocities=velocities,
+                                          num_shards=num_shards,
+                                          shard_id=shard_id,
+                                          table_id=table_id,
+                                          table_name=table_name, name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingADAMParameters(parameters, momenta, velocities, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adam_parameters(parameters=parameters, momenta=momenta, velocities=velocities, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingADAMParameters.__doc__ = load_tpu_embedding_adam_parameters.__doc__
+LoadTPUEmbeddingADAMParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingADAMParameters))
+tf_export("raw_ops.LoadTPUEmbeddingADAMParameters")(LoadTPUEmbeddingADAMParameters)
+
+
+def load_tpu_embedding_adam_parameters_eager_fallback(parameters, momenta, velocities, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adam_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  momenta = _ops.convert_to_tensor(momenta, _dtypes.float32)
+  velocities = _ops.convert_to_tensor(velocities, _dtypes.float32)
+  _inputs_flat = [parameters, momenta, velocities]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingADAMParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adam_parameters_grad_accum_debug(parameters, momenta, velocities, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load ADAM embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the ADAM optimization algorithm.
+    momenta: A `Tensor` of type `float32`.
+      Value of momenta used in the ADAM optimization algorithm.
+    velocities: A `Tensor` of type `float32`.
+      Value of velocities used in the ADAM optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the ADAM optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingADAMParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, momenta, velocities,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adam_parameters_grad_accum_debug_eager_fallback(
+            parameters, momenta, velocities, gradient_accumulators,
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingADAMParametersGradAccumDebug", parameters=parameters,
+                                                        momenta=momenta,
+                                                        velocities=velocities,
+                                                        gradient_accumulators=gradient_accumulators,
+                                                        num_shards=num_shards,
+                                                        shard_id=shard_id,
+                                                        table_id=table_id,
+                                                        table_name=table_name,
+                                                        name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingADAMParametersGradAccumDebug(parameters, momenta, velocities, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adam_parameters_grad_accum_debug(parameters=parameters, momenta=momenta, velocities=velocities, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingADAMParametersGradAccumDebug.__doc__ = load_tpu_embedding_adam_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingADAMParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingADAMParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingADAMParametersGradAccumDebug")(LoadTPUEmbeddingADAMParametersGradAccumDebug)
+
+
+def load_tpu_embedding_adam_parameters_grad_accum_debug_eager_fallback(parameters, momenta, velocities, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adam_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  momenta = _ops.convert_to_tensor(momenta, _dtypes.float32)
+  velocities = _ops.convert_to_tensor(velocities, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, momenta, velocities, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingADAMParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adadelta_parameters(parameters, accumulators, updates, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Adadelta embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Adadelta optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the Adadelta optimization algorithm.
+    updates: A `Tensor` of type `float32`.
+      Value of updates used in the Adadelta optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingAdadeltaParameters", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, updates,
+        "table_id", table_id, "table_name", table_name, "num_shards",
+        num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adadelta_parameters_eager_fallback(
+            parameters, accumulators, updates, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingAdadeltaParameters", parameters=parameters,
+                                              accumulators=accumulators,
+                                              updates=updates,
+                                              num_shards=num_shards,
+                                              shard_id=shard_id,
+                                              table_id=table_id,
+                                              table_name=table_name,
+                                              name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingAdadeltaParameters(parameters, accumulators, updates, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adadelta_parameters(parameters=parameters, accumulators=accumulators, updates=updates, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingAdadeltaParameters.__doc__ = load_tpu_embedding_adadelta_parameters.__doc__
+LoadTPUEmbeddingAdadeltaParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingAdadeltaParameters))
+tf_export("raw_ops.LoadTPUEmbeddingAdadeltaParameters")(LoadTPUEmbeddingAdadeltaParameters)
+
+
+def load_tpu_embedding_adadelta_parameters_eager_fallback(parameters, accumulators, updates, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adadelta_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  updates = _ops.convert_to_tensor(updates, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, updates]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingAdadeltaParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adadelta_parameters_grad_accum_debug(parameters, accumulators, updates, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Adadelta parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Adadelta optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the Adadelta optimization algorithm.
+    updates: A `Tensor` of type `float32`.
+      Value of updates used in the Adadelta optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the Adadelta optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingAdadeltaParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, updates,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adadelta_parameters_grad_accum_debug_eager_fallback(
+            parameters, accumulators, updates, gradient_accumulators,
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingAdadeltaParametersGradAccumDebug", parameters=parameters,
+                                                            accumulators=accumulators,
+                                                            updates=updates,
+                                                            gradient_accumulators=gradient_accumulators,
+                                                            num_shards=num_shards,
+                                                            shard_id=shard_id,
+                                                            table_id=table_id,
+                                                            table_name=table_name,
+                                                            name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingAdadeltaParametersGradAccumDebug(parameters, accumulators, updates, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adadelta_parameters_grad_accum_debug(parameters=parameters, accumulators=accumulators, updates=updates, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingAdadeltaParametersGradAccumDebug.__doc__ = load_tpu_embedding_adadelta_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingAdadeltaParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingAdadeltaParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingAdadeltaParametersGradAccumDebug")(LoadTPUEmbeddingAdadeltaParametersGradAccumDebug)
+
+
+def load_tpu_embedding_adadelta_parameters_grad_accum_debug_eager_fallback(parameters, accumulators, updates, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adadelta_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  updates = _ops.convert_to_tensor(updates, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, updates, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingAdadeltaParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adagrad_parameters(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Adagrad embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Adagrad optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the Adagrad optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingAdagradParameters", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, "table_id",
+        table_id, "table_name", table_name, "num_shards", num_shards,
+        "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adagrad_parameters_eager_fallback(
+            parameters, accumulators, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingAdagradParameters", parameters=parameters,
+                                             accumulators=accumulators,
+                                             num_shards=num_shards,
+                                             shard_id=shard_id,
+                                             table_id=table_id,
+                                             table_name=table_name, name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingAdagradParameters(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adagrad_parameters(parameters=parameters, accumulators=accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingAdagradParameters.__doc__ = load_tpu_embedding_adagrad_parameters.__doc__
+LoadTPUEmbeddingAdagradParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingAdagradParameters))
+tf_export("raw_ops.LoadTPUEmbeddingAdagradParameters")(LoadTPUEmbeddingAdagradParameters)
+
+
+def load_tpu_embedding_adagrad_parameters_eager_fallback(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adagrad_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingAdagradParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_adagrad_parameters_grad_accum_debug(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Adagrad embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Adagrad optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the Adagrad optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the Adagrad optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingAdagradParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, accumulators,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_adagrad_parameters_grad_accum_debug_eager_fallback(
+            parameters, accumulators, gradient_accumulators,
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingAdagradParametersGradAccumDebug", parameters=parameters,
+                                                           accumulators=accumulators,
+                                                           gradient_accumulators=gradient_accumulators,
+                                                           num_shards=num_shards,
+                                                           shard_id=shard_id,
+                                                           table_id=table_id,
+                                                           table_name=table_name,
+                                                           name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingAdagradParametersGradAccumDebug(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_adagrad_parameters_grad_accum_debug(parameters=parameters, accumulators=accumulators, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingAdagradParametersGradAccumDebug.__doc__ = load_tpu_embedding_adagrad_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingAdagradParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingAdagradParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingAdagradParametersGradAccumDebug")(LoadTPUEmbeddingAdagradParametersGradAccumDebug)
+
+
+def load_tpu_embedding_adagrad_parameters_grad_accum_debug_eager_fallback(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_adagrad_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingAdagradParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_centered_rms_prop_parameters(parameters, ms, mom, mg, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load centered RMSProp embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the centered RMSProp optimization algorithm.
+    ms: A `Tensor` of type `float32`.
+      Value of ms used in the centered RMSProp optimization algorithm.
+    mom: A `Tensor` of type `float32`.
+      Value of mom used in the centered RMSProp optimization algorithm.
+    mg: A `Tensor` of type `float32`.
+      Value of mg used in the centered RMSProp optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingCenteredRMSPropParameters", name,
+        _ctx.post_execution_callbacks, parameters, ms, mom, mg, "table_id",
+        table_id, "table_name", table_name, "num_shards", num_shards,
+        "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_centered_rms_prop_parameters_eager_fallback(
+            parameters, ms, mom, mg, table_id=table_id, table_name=table_name,
+            num_shards=num_shards, shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingCenteredRMSPropParameters", parameters=parameters,
+                                                     ms=ms, mom=mom, mg=mg,
+                                                     num_shards=num_shards,
+                                                     shard_id=shard_id,
+                                                     table_id=table_id,
+                                                     table_name=table_name,
+                                                     name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingCenteredRMSPropParameters(parameters, ms, mom, mg, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_centered_rms_prop_parameters(parameters=parameters, ms=ms, mom=mom, mg=mg, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingCenteredRMSPropParameters.__doc__ = load_tpu_embedding_centered_rms_prop_parameters.__doc__
+LoadTPUEmbeddingCenteredRMSPropParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingCenteredRMSPropParameters))
+tf_export("raw_ops.LoadTPUEmbeddingCenteredRMSPropParameters")(LoadTPUEmbeddingCenteredRMSPropParameters)
+
+
+def load_tpu_embedding_centered_rms_prop_parameters_eager_fallback(parameters, ms, mom, mg, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_centered_rms_prop_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  ms = _ops.convert_to_tensor(ms, _dtypes.float32)
+  mom = _ops.convert_to_tensor(mom, _dtypes.float32)
+  mg = _ops.convert_to_tensor(mg, _dtypes.float32)
+  _inputs_flat = [parameters, ms, mom, mg]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingCenteredRMSPropParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_ftrl_parameters(parameters, accumulators, linears, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load FTRL embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the FTRL optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the FTRL optimization algorithm.
+    linears: A `Tensor` of type `float32`.
+      Value of linears used in the FTRL optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingFTRLParameters", name, _ctx.post_execution_callbacks,
+        parameters, accumulators, linears, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_ftrl_parameters_eager_fallback(
+            parameters, accumulators, linears, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingFTRLParameters", parameters=parameters,
+                                          accumulators=accumulators,
+                                          linears=linears,
+                                          num_shards=num_shards,
+                                          shard_id=shard_id,
+                                          table_id=table_id,
+                                          table_name=table_name, name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingFTRLParameters(parameters, accumulators, linears, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_ftrl_parameters(parameters=parameters, accumulators=accumulators, linears=linears, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingFTRLParameters.__doc__ = load_tpu_embedding_ftrl_parameters.__doc__
+LoadTPUEmbeddingFTRLParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingFTRLParameters))
+tf_export("raw_ops.LoadTPUEmbeddingFTRLParameters")(LoadTPUEmbeddingFTRLParameters)
+
+
+def load_tpu_embedding_ftrl_parameters_eager_fallback(parameters, accumulators, linears, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_ftrl_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  linears = _ops.convert_to_tensor(linears, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, linears]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingFTRLParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_ftrl_parameters_grad_accum_debug(parameters, accumulators, linears, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load FTRL embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the FTRL optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the FTRL optimization algorithm.
+    linears: A `Tensor` of type `float32`.
+      Value of linears used in the FTRL optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the FTRL optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingFTRLParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, linears,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_ftrl_parameters_grad_accum_debug_eager_fallback(
+            parameters, accumulators, linears, gradient_accumulators,
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingFTRLParametersGradAccumDebug", parameters=parameters,
+                                                        accumulators=accumulators,
+                                                        linears=linears,
+                                                        gradient_accumulators=gradient_accumulators,
+                                                        num_shards=num_shards,
+                                                        shard_id=shard_id,
+                                                        table_id=table_id,
+                                                        table_name=table_name,
+                                                        name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingFTRLParametersGradAccumDebug(parameters, accumulators, linears, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_ftrl_parameters_grad_accum_debug(parameters=parameters, accumulators=accumulators, linears=linears, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingFTRLParametersGradAccumDebug.__doc__ = load_tpu_embedding_ftrl_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingFTRLParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingFTRLParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingFTRLParametersGradAccumDebug")(LoadTPUEmbeddingFTRLParametersGradAccumDebug)
+
+
+def load_tpu_embedding_ftrl_parameters_grad_accum_debug_eager_fallback(parameters, accumulators, linears, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_ftrl_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  linears = _ops.convert_to_tensor(linears, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, linears, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingFTRLParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_mdl_adagrad_light_parameters(parameters, accumulators, weights, benefits, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load MDL Adagrad Light embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the MDL Adagrad Light optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the MDL Adagrad Light optimization algorithm.
+    weights: A `Tensor` of type `float32`.
+      Value of weights used in the MDL Adagrad Light optimization algorithm.
+    benefits: A `Tensor` of type `float32`.
+      Value of benefits used in the MDL Adagrad Light optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingMDLAdagradLightParameters", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, weights,
+        benefits, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_mdl_adagrad_light_parameters_eager_fallback(
+            parameters, accumulators, weights, benefits, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingMDLAdagradLightParameters", parameters=parameters,
+                                                     accumulators=accumulators,
+                                                     weights=weights,
+                                                     benefits=benefits,
+                                                     num_shards=num_shards,
+                                                     shard_id=shard_id,
+                                                     table_id=table_id,
+                                                     table_name=table_name,
+                                                     name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingMDLAdagradLightParameters(parameters, accumulators, weights, benefits, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_mdl_adagrad_light_parameters(parameters=parameters, accumulators=accumulators, weights=weights, benefits=benefits, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingMDLAdagradLightParameters.__doc__ = load_tpu_embedding_mdl_adagrad_light_parameters.__doc__
+LoadTPUEmbeddingMDLAdagradLightParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingMDLAdagradLightParameters))
+tf_export("raw_ops.LoadTPUEmbeddingMDLAdagradLightParameters")(LoadTPUEmbeddingMDLAdagradLightParameters)
+
+
+def load_tpu_embedding_mdl_adagrad_light_parameters_eager_fallback(parameters, accumulators, weights, benefits, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_mdl_adagrad_light_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  weights = _ops.convert_to_tensor(weights, _dtypes.float32)
+  benefits = _ops.convert_to_tensor(benefits, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, weights, benefits]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingMDLAdagradLightParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_momentum_parameters(parameters, momenta, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Momentum embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Momentum optimization algorithm.
+    momenta: A `Tensor` of type `float32`.
+      Value of momenta used in the Momentum optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingMomentumParameters", name,
+        _ctx.post_execution_callbacks, parameters, momenta, "table_id",
+        table_id, "table_name", table_name, "num_shards", num_shards,
+        "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_momentum_parameters_eager_fallback(
+            parameters, momenta, table_id=table_id, table_name=table_name,
+            num_shards=num_shards, shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingMomentumParameters", parameters=parameters,
+                                              momenta=momenta,
+                                              num_shards=num_shards,
+                                              shard_id=shard_id,
+                                              table_id=table_id,
+                                              table_name=table_name,
+                                              name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingMomentumParameters(parameters, momenta, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_momentum_parameters(parameters=parameters, momenta=momenta, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingMomentumParameters.__doc__ = load_tpu_embedding_momentum_parameters.__doc__
+LoadTPUEmbeddingMomentumParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingMomentumParameters))
+tf_export("raw_ops.LoadTPUEmbeddingMomentumParameters")(LoadTPUEmbeddingMomentumParameters)
+
+
+def load_tpu_embedding_momentum_parameters_eager_fallback(parameters, momenta, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_momentum_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  momenta = _ops.convert_to_tensor(momenta, _dtypes.float32)
+  _inputs_flat = [parameters, momenta]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingMomentumParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_momentum_parameters_grad_accum_debug(parameters, momenta, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load Momentum embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the Momentum optimization algorithm.
+    momenta: A `Tensor` of type `float32`.
+      Value of momenta used in the Momentum optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the Momentum optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingMomentumParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, momenta,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_momentum_parameters_grad_accum_debug_eager_fallback(
+            parameters, momenta, gradient_accumulators, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingMomentumParametersGradAccumDebug", parameters=parameters,
+                                                            momenta=momenta,
+                                                            gradient_accumulators=gradient_accumulators,
+                                                            num_shards=num_shards,
+                                                            shard_id=shard_id,
+                                                            table_id=table_id,
+                                                            table_name=table_name,
+                                                            name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingMomentumParametersGradAccumDebug(parameters, momenta, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_momentum_parameters_grad_accum_debug(parameters=parameters, momenta=momenta, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingMomentumParametersGradAccumDebug.__doc__ = load_tpu_embedding_momentum_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingMomentumParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingMomentumParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingMomentumParametersGradAccumDebug")(LoadTPUEmbeddingMomentumParametersGradAccumDebug)
+
+
+def load_tpu_embedding_momentum_parameters_grad_accum_debug_eager_fallback(parameters, momenta, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_momentum_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  momenta = _ops.convert_to_tensor(momenta, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, momenta, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingMomentumParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_proximal_adagrad_parameters(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load proximal Adagrad embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the proximal Adagrad optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the proximal Adagrad optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingProximalAdagradParameters", name,
+        _ctx.post_execution_callbacks, parameters, accumulators, "table_id",
+        table_id, "table_name", table_name, "num_shards", num_shards,
+        "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_proximal_adagrad_parameters_eager_fallback(
+            parameters, accumulators, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingProximalAdagradParameters", parameters=parameters,
+                                                     accumulators=accumulators,
+                                                     num_shards=num_shards,
+                                                     shard_id=shard_id,
+                                                     table_id=table_id,
+                                                     table_name=table_name,
+                                                     name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingProximalAdagradParameters(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_proximal_adagrad_parameters(parameters=parameters, accumulators=accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingProximalAdagradParameters.__doc__ = load_tpu_embedding_proximal_adagrad_parameters.__doc__
+LoadTPUEmbeddingProximalAdagradParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingProximalAdagradParameters))
+tf_export("raw_ops.LoadTPUEmbeddingProximalAdagradParameters")(LoadTPUEmbeddingProximalAdagradParameters)
+
+
+def load_tpu_embedding_proximal_adagrad_parameters_eager_fallback(parameters, accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_proximal_adagrad_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingProximalAdagradParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load proximal Adagrad embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the proximal Adagrad optimization algorithm.
+    accumulators: A `Tensor` of type `float32`.
+      Value of accumulators used in the proximal Adagrad optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the proximal Adagrad optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, accumulators,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_eager_fallback(
+            parameters, accumulators, gradient_accumulators,
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug", parameters=parameters,
+                                                                   accumulators=accumulators,
+                                                                   gradient_accumulators=gradient_accumulators,
+                                                                   num_shards=num_shards,
+                                                                   shard_id=shard_id,
+                                                                   table_id=table_id,
+                                                                   table_name=table_name,
+                                                                   name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug(parameters=parameters, accumulators=accumulators, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug.__doc__ = load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug")(LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug)
+
+
+def load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_eager_fallback(parameters, accumulators, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  accumulators = _ops.convert_to_tensor(accumulators, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, accumulators, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_rms_prop_parameters(parameters, ms, mom, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load RMSProp embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the RMSProp optimization algorithm.
+    ms: A `Tensor` of type `float32`.
+      Value of ms used in the RMSProp optimization algorithm.
+    mom: A `Tensor` of type `float32`.
+      Value of mom used in the RMSProp optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingRMSPropParameters", name,
+        _ctx.post_execution_callbacks, parameters, ms, mom, "table_id",
+        table_id, "table_name", table_name, "num_shards", num_shards,
+        "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_rms_prop_parameters_eager_fallback(
+            parameters, ms, mom, table_id=table_id, table_name=table_name,
+            num_shards=num_shards, shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingRMSPropParameters", parameters=parameters, ms=ms,
+                                             mom=mom, num_shards=num_shards,
+                                             shard_id=shard_id,
+                                             table_id=table_id,
+                                             table_name=table_name, name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingRMSPropParameters(parameters, ms, mom, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_rms_prop_parameters(parameters=parameters, ms=ms, mom=mom, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingRMSPropParameters.__doc__ = load_tpu_embedding_rms_prop_parameters.__doc__
+LoadTPUEmbeddingRMSPropParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingRMSPropParameters))
+tf_export("raw_ops.LoadTPUEmbeddingRMSPropParameters")(LoadTPUEmbeddingRMSPropParameters)
+
+
+def load_tpu_embedding_rms_prop_parameters_eager_fallback(parameters, ms, mom, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_rms_prop_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  ms = _ops.convert_to_tensor(ms, _dtypes.float32)
+  mom = _ops.convert_to_tensor(mom, _dtypes.float32)
+  _inputs_flat = [parameters, ms, mom]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingRMSPropParameters", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_rms_prop_parameters_grad_accum_debug(parameters, ms, mom, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load RMSProp embedding parameters with debug support.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the RMSProp optimization algorithm.
+    ms: A `Tensor` of type `float32`.
+      Value of ms used in the RMSProp optimization algorithm.
+    mom: A `Tensor` of type `float32`.
+      Value of mom used in the RMSProp optimization algorithm.
+    gradient_accumulators: A `Tensor` of type `float32`.
+      Value of gradient_accumulators used in the RMSProp optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingRMSPropParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, parameters, ms, mom,
+        gradient_accumulators, "table_id", table_id, "table_name", table_name,
+        "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_rms_prop_parameters_grad_accum_debug_eager_fallback(
+            parameters, ms, mom, gradient_accumulators, table_id=table_id,
+            table_name=table_name, num_shards=num_shards, shard_id=shard_id,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingRMSPropParametersGradAccumDebug", parameters=parameters,
+                                                           ms=ms, mom=mom,
+                                                           gradient_accumulators=gradient_accumulators,
+                                                           num_shards=num_shards,
+                                                           shard_id=shard_id,
+                                                           table_id=table_id,
+                                                           table_name=table_name,
+                                                           name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingRMSPropParametersGradAccumDebug(parameters, ms, mom, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_rms_prop_parameters_grad_accum_debug(parameters=parameters, ms=ms, mom=mom, gradient_accumulators=gradient_accumulators, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingRMSPropParametersGradAccumDebug.__doc__ = load_tpu_embedding_rms_prop_parameters_grad_accum_debug.__doc__
+LoadTPUEmbeddingRMSPropParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingRMSPropParametersGradAccumDebug))
+tf_export("raw_ops.LoadTPUEmbeddingRMSPropParametersGradAccumDebug")(LoadTPUEmbeddingRMSPropParametersGradAccumDebug)
+
+
+def load_tpu_embedding_rms_prop_parameters_grad_accum_debug_eager_fallback(parameters, ms, mom, gradient_accumulators, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_rms_prop_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  ms = _ops.convert_to_tensor(ms, _dtypes.float32)
+  mom = _ops.convert_to_tensor(mom, _dtypes.float32)
+  gradient_accumulators = _ops.convert_to_tensor(gradient_accumulators, _dtypes.float32)
+  _inputs_flat = [parameters, ms, mom, gradient_accumulators]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingRMSPropParametersGradAccumDebug",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def load_tpu_embedding_stochastic_gradient_descent_parameters(parameters, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Load SGD embedding parameters.
+
+  An op that loads optimization parameters into HBM for embedding. Must be
+  preceded by a ConfigureTPUEmbeddingHost op that sets up the correct
+  embedding table configuration. For example, this op is used to install
+  parameters that are loaded from a checkpoint before a training loop is
+  executed.
+
+  Args:
+    parameters: A `Tensor` of type `float32`.
+      Value of parameters used in the stochastic gradient descent optimization algorithm.
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "LoadTPUEmbeddingStochasticGradientDescentParameters", name,
+        _ctx.post_execution_callbacks, parameters, "table_id", table_id,
+        "table_name", table_name, "num_shards", num_shards, "shard_id",
+        shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return load_tpu_embedding_stochastic_gradient_descent_parameters_eager_fallback(
+            parameters, table_id=table_id, table_name=table_name,
+            num_shards=num_shards, shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "LoadTPUEmbeddingStochasticGradientDescentParameters", parameters=parameters,
+                                                               num_shards=num_shards,
+                                                               shard_id=shard_id,
+                                                               table_id=table_id,
+                                                               table_name=table_name,
+                                                               name=name)
+  return _op
+  _result = None
+  return _result
+
+def LoadTPUEmbeddingStochasticGradientDescentParameters(parameters, num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return load_tpu_embedding_stochastic_gradient_descent_parameters(parameters=parameters, num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+LoadTPUEmbeddingStochasticGradientDescentParameters.__doc__ = load_tpu_embedding_stochastic_gradient_descent_parameters.__doc__
+LoadTPUEmbeddingStochasticGradientDescentParameters = _doc_controls.do_not_generate_docs(_kwarg_only(LoadTPUEmbeddingStochasticGradientDescentParameters))
+tf_export("raw_ops.LoadTPUEmbeddingStochasticGradientDescentParameters")(LoadTPUEmbeddingStochasticGradientDescentParameters)
+
+
+def load_tpu_embedding_stochastic_gradient_descent_parameters_eager_fallback(parameters, num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function load_tpu_embedding_stochastic_gradient_descent_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  parameters = _ops.convert_to_tensor(parameters, _dtypes.float32)
+  _inputs_flat = [parameters]
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"LoadTPUEmbeddingStochasticGradientDescentParameters",
+                             0, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def outfeed_dequeue(dtype, shape, device_ordinal=-1, name=None):
+  r"""Retrieves a single tensor from the computation outfeed.
+
+  This operation will block indefinitely until data is available.
+
+  Args:
+    dtype: A `tf.DType`. The type of elements in the tensor.
+    shape: A `tf.TensorShape` or list of `ints`. The shape of the tensor.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. This should be -1 when the Op
+      is running on a TPU device, and >= 0 when the Op is running on the CPU
+      device.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `dtype`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "OutfeedDequeue", name, _ctx.post_execution_callbacks, "dtype", dtype,
+        "shape", shape, "device_ordinal", device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return outfeed_dequeue_eager_fallback(
+            dtype=dtype, shape=shape, device_ordinal=device_ordinal,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  dtype = _execute.make_type(dtype, "dtype")
+  shape = _execute.make_shape(shape, "shape")
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "OutfeedDequeue", dtype=dtype, shape=shape,
+                          device_ordinal=device_ordinal, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("dtype", _op._get_attr_type("dtype"), "shape",
+            _op.get_attr("shape"), "device_ordinal",
+            _op.get_attr("device_ordinal"))
+  _execute.record_gradient(
+      "OutfeedDequeue", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def OutfeedDequeue(dtype, shape, device_ordinal=-1, name=None):
+  return outfeed_dequeue(dtype=dtype, shape=shape, device_ordinal=device_ordinal, name=name)
+OutfeedDequeue.__doc__ = outfeed_dequeue.__doc__
+OutfeedDequeue = _doc_controls.do_not_generate_docs(_kwarg_only(OutfeedDequeue))
+tf_export("raw_ops.OutfeedDequeue")(OutfeedDequeue)
+
+
+def outfeed_dequeue_eager_fallback(dtype, shape, device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function outfeed_dequeue
+  """
+  _ctx = ctx if ctx else _context.context()
+  dtype = _execute.make_type(dtype, "dtype")
+  shape = _execute.make_shape(shape, "shape")
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _inputs_flat = []
+  _attrs = ("dtype", dtype, "shape", shape, "device_ordinal", device_ordinal)
+  _result = _execute.execute(b"OutfeedDequeue", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "OutfeedDequeue", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def outfeed_dequeue_tuple(dtypes, shapes, device_ordinal=-1, name=None):
+  r"""Retrieve multiple values from the computation outfeed.
+
+  This operation will block indefinitely until data is available. Output `i`
+  corresponds to XLA tuple element `i`.
+
+  Args:
+    dtypes: A list of `tf.DTypes` that has length `>= 1`.
+      The element types of each element in `outputs`.
+    shapes: A list of shapes (each a `tf.TensorShape` or list of `ints`).
+      The shapes of each tensor in `outputs`.
+    device_ordinal: An optional `int`. Defaults to `-1`.
+      The TPU device to use. This should be -1 when the Op
+      is running on a TPU device, and >= 0 when the Op is running on the CPU
+      device.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `Tensor` objects of type `dtypes`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "OutfeedDequeueTuple", name, _ctx.post_execution_callbacks, "dtypes",
+        dtypes, "shapes", shapes, "device_ordinal", device_ordinal)
+      return _result
+    except _core._FallbackException:
+      try:
+        return outfeed_dequeue_tuple_eager_fallback(
+            dtypes=dtypes, shapes=shapes, device_ordinal=device_ordinal,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(dtypes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dtypes' argument to "
+        "'outfeed_dequeue_tuple' Op, not %r." % dtypes)
+  dtypes = [_execute.make_type(_t, "dtypes") for _t in dtypes]
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'outfeed_dequeue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "OutfeedDequeueTuple", dtypes=dtypes, shapes=shapes,
+                               device_ordinal=device_ordinal, name=name)
+  _result = _op.outputs[:]
+  if not _result:
+    return _op
+  _inputs_flat = _op.inputs
+  _attrs = ("dtypes", _op.get_attr("dtypes"), "shapes",
+            _op.get_attr("shapes"), "device_ordinal",
+            _op.get_attr("device_ordinal"))
+  _execute.record_gradient(
+      "OutfeedDequeueTuple", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def OutfeedDequeueTuple(dtypes, shapes, device_ordinal=-1, name=None):
+  return outfeed_dequeue_tuple(dtypes=dtypes, shapes=shapes, device_ordinal=device_ordinal, name=name)
+OutfeedDequeueTuple.__doc__ = outfeed_dequeue_tuple.__doc__
+OutfeedDequeueTuple = _doc_controls.do_not_generate_docs(_kwarg_only(OutfeedDequeueTuple))
+tf_export("raw_ops.OutfeedDequeueTuple")(OutfeedDequeueTuple)
+
+
+def outfeed_dequeue_tuple_eager_fallback(dtypes, shapes, device_ordinal=-1, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function outfeed_dequeue_tuple
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(dtypes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'dtypes' argument to "
+        "'outfeed_dequeue_tuple' Op, not %r." % dtypes)
+  dtypes = [_execute.make_type(_t, "dtypes") for _t in dtypes]
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'outfeed_dequeue_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if device_ordinal is None:
+    device_ordinal = -1
+  device_ordinal = _execute.make_int(device_ordinal, "device_ordinal")
+  _inputs_flat = []
+  _attrs = ("dtypes", dtypes, "shapes", shapes, "device_ordinal",
+  device_ordinal)
+  _result = _execute.execute(b"OutfeedDequeueTuple", len(dtypes),
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "OutfeedDequeueTuple", _inputs_flat, _attrs, _result, name)
+  return _result
+
+
+def outfeed_enqueue(input, name=None):
+  r"""Enqueue a Tensor on the computation outfeed.
+
+  Args:
+    input: A `Tensor`. A tensor that will be inserted into the outfeed queue.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "OutfeedEnqueue", name, _ctx.post_execution_callbacks, input)
+      return _result
+    except _core._FallbackException:
+      try:
+        return outfeed_enqueue_eager_fallback(
+            input, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "OutfeedEnqueue", input=input, name=name)
+  return _op
+  _result = None
+  return _result
+
+def OutfeedEnqueue(input, name=None):
+  return outfeed_enqueue(input=input, name=name)
+OutfeedEnqueue.__doc__ = outfeed_enqueue.__doc__
+OutfeedEnqueue = _doc_controls.do_not_generate_docs(_kwarg_only(OutfeedEnqueue))
+tf_export("raw_ops.OutfeedEnqueue")(OutfeedEnqueue)
+
+
+def outfeed_enqueue_eager_fallback(input, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function outfeed_enqueue
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_dtype, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _inputs_flat = [input]
+  _attrs = ("dtype", _attr_dtype)
+  _result = _execute.execute(b"OutfeedEnqueue", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def outfeed_enqueue_tuple(inputs, name=None):
+  r"""Enqueue multiple Tensor values on the computation outfeed.
+
+  Args:
+    inputs: A list of `Tensor` objects.
+      A list of tensors that will be inserted into the outfeed queue as an
+      XLA tuple.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "OutfeedEnqueueTuple", name, _ctx.post_execution_callbacks, inputs)
+      return _result
+    except _core._FallbackException:
+      try:
+        return outfeed_enqueue_tuple_eager_fallback(
+            inputs, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "OutfeedEnqueueTuple", inputs=inputs, name=name)
+  return _op
+  _result = None
+  return _result
+
+def OutfeedEnqueueTuple(inputs, name=None):
+  return outfeed_enqueue_tuple(inputs=inputs, name=name)
+OutfeedEnqueueTuple.__doc__ = outfeed_enqueue_tuple.__doc__
+OutfeedEnqueueTuple = _doc_controls.do_not_generate_docs(_kwarg_only(OutfeedEnqueueTuple))
+tf_export("raw_ops.OutfeedEnqueueTuple")(OutfeedEnqueueTuple)
+
+
+def outfeed_enqueue_tuple_eager_fallback(inputs, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function outfeed_enqueue_tuple
+  """
+  _ctx = ctx if ctx else _context.context()
+  _attr_dtypes, inputs = _execute.convert_to_mixed_eager_tensors(inputs, _ctx)
+  _inputs_flat = list(inputs)
+  _attrs = ("dtypes", _attr_dtypes)
+  _result = _execute.execute(b"OutfeedEnqueueTuple", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def prelinearize(input, shape=[], layout=[], name=None):
+  r"""An op which linearizes one Tensor value to an opaque variant tensor.
+
+  Args:
+    input: A `Tensor`. A tensor that will be linearized.
+    shape: An optional `tf.TensorShape` or list of `ints`. Defaults to `[]`.
+      The shape of the tensor.
+    layout: An optional list of `ints`. Defaults to `[]`.
+      A vector holding the requested layout in minor-to-major sequence. If a layout
+      attribute is passed but its values are all -1 the layout will be computed by
+      the infeed operation.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `variant`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "Prelinearize", name, _ctx.post_execution_callbacks, input, "shape",
+        shape, "layout", layout)
+      return _result
+    except _core._FallbackException:
+      try:
+        return prelinearize_eager_fallback(
+            input, shape=shape, layout=layout, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if shape is None:
+    shape = []
+  shape = _execute.make_shape(shape, "shape")
+  if layout is None:
+    layout = []
+  if not isinstance(layout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layout' argument to "
+        "'prelinearize' Op, not %r." % layout)
+  layout = [_execute.make_int(_i, "layout") for _i in layout]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "Prelinearize", input=input, shape=shape, layout=layout, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("dtype", _op._get_attr_type("dtype"), "shape",
+            _op.get_attr("shape"), "layout", _op.get_attr("layout"))
+  _execute.record_gradient(
+      "Prelinearize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def Prelinearize(input, shape=[], layout=[], name=None):
+  return prelinearize(input=input, shape=shape, layout=layout, name=name)
+Prelinearize.__doc__ = prelinearize.__doc__
+Prelinearize = _doc_controls.do_not_generate_docs(_kwarg_only(Prelinearize))
+tf_export("raw_ops.Prelinearize")(Prelinearize)
+
+
+def prelinearize_eager_fallback(input, shape=[], layout=[], name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function prelinearize
+  """
+  _ctx = ctx if ctx else _context.context()
+  if shape is None:
+    shape = []
+  shape = _execute.make_shape(shape, "shape")
+  if layout is None:
+    layout = []
+  if not isinstance(layout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layout' argument to "
+        "'prelinearize' Op, not %r." % layout)
+  layout = [_execute.make_int(_i, "layout") for _i in layout]
+  _attr_dtype, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _inputs_flat = [input]
+  _attrs = ("dtype", _attr_dtype, "shape", shape, "layout", layout)
+  _result = _execute.execute(b"Prelinearize", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "Prelinearize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def prelinearize_tuple(inputs, shapes, layouts=[], name=None):
+  r"""An op which linearizes multiple Tensor values to an opaque variant tensor.
+
+  Args:
+    inputs: A list of `Tensor` objects.
+      A list of tensors that will be provided using the infeed mechanism.
+    shapes: A list of shapes (each a `tf.TensorShape` or list of `ints`).
+      The shapes of each tensor in `inputs`.
+    layouts: An optional list of `ints`. Defaults to `[]`.
+      A vector holding the requested layout in minor-to-major sequence for all the
+      tuple shapes in the order the shapes appear in the "shapes" input. The layout
+      elements for a sub-shape can be set to -1 in which case the corresponding layout
+      will be computed by the infeed operation.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `variant`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "PrelinearizeTuple", name, _ctx.post_execution_callbacks, inputs,
+        "shapes", shapes, "layouts", layouts)
+      return _result
+    except _core._FallbackException:
+      try:
+        return prelinearize_tuple_eager_fallback(
+            inputs, shapes=shapes, layouts=layouts, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'prelinearize_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if layouts is None:
+    layouts = []
+  if not isinstance(layouts, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layouts' argument to "
+        "'prelinearize_tuple' Op, not %r." % layouts)
+  layouts = [_execute.make_int(_i, "layouts") for _i in layouts]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "PrelinearizeTuple", inputs=inputs, shapes=shapes, layouts=layouts,
+                             name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("dtypes", _op.get_attr("dtypes"), "shapes",
+            _op.get_attr("shapes"), "layouts", _op.get_attr("layouts"))
+  _execute.record_gradient(
+      "PrelinearizeTuple", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def PrelinearizeTuple(inputs, shapes, layouts=[], name=None):
+  return prelinearize_tuple(inputs=inputs, shapes=shapes, layouts=layouts, name=name)
+PrelinearizeTuple.__doc__ = prelinearize_tuple.__doc__
+PrelinearizeTuple = _doc_controls.do_not_generate_docs(_kwarg_only(PrelinearizeTuple))
+tf_export("raw_ops.PrelinearizeTuple")(PrelinearizeTuple)
+
+
+def prelinearize_tuple_eager_fallback(inputs, shapes, layouts=[], name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function prelinearize_tuple
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(shapes, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'shapes' argument to "
+        "'prelinearize_tuple' Op, not %r." % shapes)
+  shapes = [_execute.make_shape(_s, "shapes") for _s in shapes]
+  if layouts is None:
+    layouts = []
+  if not isinstance(layouts, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'layouts' argument to "
+        "'prelinearize_tuple' Op, not %r." % layouts)
+  layouts = [_execute.make_int(_i, "layouts") for _i in layouts]
+  _attr_dtypes, inputs = _execute.convert_to_mixed_eager_tensors(inputs, _ctx)
+  _inputs_flat = list(inputs)
+  _attrs = ("dtypes", _attr_dtypes, "shapes", shapes, "layouts", layouts)
+  _result = _execute.execute(b"PrelinearizeTuple", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "PrelinearizeTuple", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def recv_tpu_embedding_activations(num_outputs, config, name=None):
+  r"""An op that receives embedding activations on the TPU.
+
+  The TPU system performs the embedding lookups and aggregations specified by
+  the arguments to TPUEmbeddingEnqueue(Integer/Sparse/SparseTensor)Batch. The
+  results of these aggregations are visible to the Tensorflow Graph as the
+  outputs of a RecvTPUEmbeddingActivations op. This op returns a list containing
+  one Tensor of activations per table specified in the model. There can be at
+  most one RecvTPUEmbeddingActivations op in the TPU graph.
+
+  Args:
+    num_outputs: An `int` that is `>= 1`.
+      The number of output activation tensors, equal to the number of
+      embedding tables in the model.
+    config: A `string`. Serialized TPUEmbeddingConfiguration proto.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `num_outputs` `Tensor` objects with type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RecvTPUEmbeddingActivations", name, _ctx.post_execution_callbacks,
+        "num_outputs", num_outputs, "config", config)
+      return _result
+    except _core._FallbackException:
+      try:
+        return recv_tpu_embedding_activations_eager_fallback(
+            num_outputs=num_outputs, config=config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_outputs = _execute.make_int(num_outputs, "num_outputs")
+  config = _execute.make_str(config, "config")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RecvTPUEmbeddingActivations", num_outputs=num_outputs, config=config,
+                                       name=name)
+  _result = _op.outputs[:]
+  if not _result:
+    return _op
+  _inputs_flat = _op.inputs
+  _attrs = ("num_outputs", _op.get_attr("num_outputs"), "config",
+            _op.get_attr("config"))
+  _execute.record_gradient(
+      "RecvTPUEmbeddingActivations", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def RecvTPUEmbeddingActivations(num_outputs, config, name=None):
+  return recv_tpu_embedding_activations(num_outputs=num_outputs, config=config, name=name)
+RecvTPUEmbeddingActivations.__doc__ = recv_tpu_embedding_activations.__doc__
+RecvTPUEmbeddingActivations = _doc_controls.do_not_generate_docs(_kwarg_only(RecvTPUEmbeddingActivations))
+tf_export("raw_ops.RecvTPUEmbeddingActivations")(RecvTPUEmbeddingActivations)
+
+
+def recv_tpu_embedding_activations_eager_fallback(num_outputs, config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function recv_tpu_embedding_activations
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_outputs = _execute.make_int(num_outputs, "num_outputs")
+  config = _execute.make_str(config, "config")
+  _inputs_flat = []
+  _attrs = ("num_outputs", num_outputs, "config", config)
+  _result = _execute.execute(b"RecvTPUEmbeddingActivations", num_outputs,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RecvTPUEmbeddingActivations", _inputs_flat, _attrs, _result, name)
+  return _result
+
+
+_retrieve_tpu_embedding_adam_parameters_outputs = ["parameters", "momenta",
+                                                  "velocities"]
+_RetrieveTPUEmbeddingADAMParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingADAMParameters",
+    _retrieve_tpu_embedding_adam_parameters_outputs)
+
+
+def retrieve_tpu_embedding_adam_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve ADAM embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, momenta, velocities).
+
+    parameters: A `Tensor` of type `float32`.
+    momenta: A `Tensor` of type `float32`.
+    velocities: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingADAMParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingADAMParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adam_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingADAMParameters", num_shards=num_shards,
+                                              shard_id=shard_id,
+                                              table_id=table_id,
+                                              table_name=table_name,
+                                              name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingADAMParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingADAMParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingADAMParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adam_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingADAMParameters.__doc__ = retrieve_tpu_embedding_adam_parameters.__doc__
+RetrieveTPUEmbeddingADAMParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingADAMParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingADAMParameters")(RetrieveTPUEmbeddingADAMParameters)
+
+
+def retrieve_tpu_embedding_adam_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adam_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingADAMParameters", 3,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingADAMParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingADAMParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_adam_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                   "momenta",
+                                                                   "velocities",
+                                                                   "gradient_accumulators"]
+_RetrieveTPUEmbeddingADAMParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingADAMParametersGradAccumDebug",
+    _retrieve_tpu_embedding_adam_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_adam_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve ADAM embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, momenta, velocities, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    momenta: A `Tensor` of type `float32`.
+    velocities: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingADAMParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingADAMParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adam_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingADAMParametersGradAccumDebug", num_shards=num_shards,
+                                                            shard_id=shard_id,
+                                                            table_id=table_id,
+                                                            table_name=table_name,
+                                                            name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingADAMParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingADAMParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingADAMParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adam_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingADAMParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_adam_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingADAMParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingADAMParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingADAMParametersGradAccumDebug")(RetrieveTPUEmbeddingADAMParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_adam_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adam_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingADAMParametersGradAccumDebug",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingADAMParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingADAMParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_adadelta_parameters_outputs = ["parameters",
+                                                      "accumulators",
+                                                      "updates"]
+_RetrieveTPUEmbeddingAdadeltaParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingAdadeltaParameters",
+    _retrieve_tpu_embedding_adadelta_parameters_outputs)
+
+
+def retrieve_tpu_embedding_adadelta_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Adadelta embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, updates).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    updates: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingAdadeltaParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingAdadeltaParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adadelta_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingAdadeltaParameters", num_shards=num_shards,
+                                                  shard_id=shard_id,
+                                                  table_id=table_id,
+                                                  table_name=table_name,
+                                                  name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdadeltaParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdadeltaParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingAdadeltaParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adadelta_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingAdadeltaParameters.__doc__ = retrieve_tpu_embedding_adadelta_parameters.__doc__
+RetrieveTPUEmbeddingAdadeltaParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingAdadeltaParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingAdadeltaParameters")(RetrieveTPUEmbeddingAdadeltaParameters)
+
+
+def retrieve_tpu_embedding_adadelta_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adadelta_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingAdadeltaParameters", 3,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdadeltaParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdadeltaParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                       "accumulators",
+                                                                       "updates",
+                                                                       "gradient_accumulators"]
+_RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug",
+    _retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Adadelta embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, updates, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    updates: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug", num_shards=num_shards,
+                                                                shard_id=shard_id,
+                                                                table_id=table_id,
+                                                                table_name=table_name,
+                                                                name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug")(RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adadelta_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_adagrad_parameters_outputs = ["parameters",
+                                                     "accumulators"]
+_RetrieveTPUEmbeddingAdagradParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingAdagradParameters",
+    _retrieve_tpu_embedding_adagrad_parameters_outputs)
+
+
+def retrieve_tpu_embedding_adagrad_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Adagrad embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingAdagradParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingAdagradParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adagrad_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingAdagradParameters", num_shards=num_shards,
+                                                 shard_id=shard_id,
+                                                 table_id=table_id,
+                                                 table_name=table_name,
+                                                 name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdagradParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdagradParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingAdagradParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adagrad_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingAdagradParameters.__doc__ = retrieve_tpu_embedding_adagrad_parameters.__doc__
+RetrieveTPUEmbeddingAdagradParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingAdagradParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingAdagradParameters")(RetrieveTPUEmbeddingAdagradParameters)
+
+
+def retrieve_tpu_embedding_adagrad_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adagrad_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingAdagradParameters", 2,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdagradParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdagradParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                      "accumulators",
+                                                                      "gradient_accumulators"]
+_RetrieveTPUEmbeddingAdagradParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug",
+    _retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Adagrad embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingAdagradParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug", num_shards=num_shards,
+                                                               shard_id=shard_id,
+                                                               table_id=table_id,
+                                                               table_name=table_name,
+                                                               name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdagradParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingAdagradParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingAdagradParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingAdagradParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingAdagradParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingAdagradParametersGradAccumDebug")(RetrieveTPUEmbeddingAdagradParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_adagrad_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingAdagradParametersGradAccumDebug",
+                             3, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingAdagradParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_centered_rms_prop_parameters_outputs = ["parameters",
+                                                               "ms", "mom",
+                                                               "mg"]
+_RetrieveTPUEmbeddingCenteredRMSPropParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingCenteredRMSPropParameters",
+    _retrieve_tpu_embedding_centered_rms_prop_parameters_outputs)
+
+
+def retrieve_tpu_embedding_centered_rms_prop_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve centered RMSProp embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, ms, mom, mg).
+
+    parameters: A `Tensor` of type `float32`.
+    ms: A `Tensor` of type `float32`.
+    mom: A `Tensor` of type `float32`.
+    mg: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingCenteredRMSPropParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingCenteredRMSPropParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_centered_rms_prop_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingCenteredRMSPropParameters", num_shards=num_shards,
+                                                         shard_id=shard_id,
+                                                         table_id=table_id,
+                                                         table_name=table_name,
+                                                         name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingCenteredRMSPropParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingCenteredRMSPropParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingCenteredRMSPropParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_centered_rms_prop_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingCenteredRMSPropParameters.__doc__ = retrieve_tpu_embedding_centered_rms_prop_parameters.__doc__
+RetrieveTPUEmbeddingCenteredRMSPropParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingCenteredRMSPropParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingCenteredRMSPropParameters")(RetrieveTPUEmbeddingCenteredRMSPropParameters)
+
+
+def retrieve_tpu_embedding_centered_rms_prop_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_centered_rms_prop_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingCenteredRMSPropParameters",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingCenteredRMSPropParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingCenteredRMSPropParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_ftrl_parameters_outputs = ["parameters",
+                                                  "accumulators", "linears"]
+_RetrieveTPUEmbeddingFTRLParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingFTRLParameters",
+    _retrieve_tpu_embedding_ftrl_parameters_outputs)
+
+
+def retrieve_tpu_embedding_ftrl_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve FTRL embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, linears).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    linears: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingFTRLParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingFTRLParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_ftrl_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingFTRLParameters", num_shards=num_shards,
+                                              shard_id=shard_id,
+                                              table_id=table_id,
+                                              table_name=table_name,
+                                              name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingFTRLParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingFTRLParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingFTRLParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_ftrl_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingFTRLParameters.__doc__ = retrieve_tpu_embedding_ftrl_parameters.__doc__
+RetrieveTPUEmbeddingFTRLParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingFTRLParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingFTRLParameters")(RetrieveTPUEmbeddingFTRLParameters)
+
+
+def retrieve_tpu_embedding_ftrl_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_ftrl_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingFTRLParameters", 3,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingFTRLParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingFTRLParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                   "accumulators",
+                                                                   "linears",
+                                                                   "gradient_accumulators"]
+_RetrieveTPUEmbeddingFTRLParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug",
+    _retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve FTRL embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, linears, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    linears: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingFTRLParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug", num_shards=num_shards,
+                                                            shard_id=shard_id,
+                                                            table_id=table_id,
+                                                            table_name=table_name,
+                                                            name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingFTRLParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingFTRLParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingFTRLParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingFTRLParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingFTRLParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingFTRLParametersGradAccumDebug")(RetrieveTPUEmbeddingFTRLParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_ftrl_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingFTRLParametersGradAccumDebug",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingFTRLParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_mdl_adagrad_light_parameters_outputs = ["parameters",
+                                                               "accumulators",
+                                                               "weights",
+                                                               "benefits"]
+_RetrieveTPUEmbeddingMDLAdagradLightParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingMDLAdagradLightParameters",
+    _retrieve_tpu_embedding_mdl_adagrad_light_parameters_outputs)
+
+
+def retrieve_tpu_embedding_mdl_adagrad_light_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve MDL Adagrad Light embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, weights, benefits).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    weights: A `Tensor` of type `float32`.
+    benefits: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingMDLAdagradLightParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingMDLAdagradLightParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_mdl_adagrad_light_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingMDLAdagradLightParameters", num_shards=num_shards,
+                                                         shard_id=shard_id,
+                                                         table_id=table_id,
+                                                         table_name=table_name,
+                                                         name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMDLAdagradLightParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMDLAdagradLightParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingMDLAdagradLightParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_mdl_adagrad_light_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingMDLAdagradLightParameters.__doc__ = retrieve_tpu_embedding_mdl_adagrad_light_parameters.__doc__
+RetrieveTPUEmbeddingMDLAdagradLightParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingMDLAdagradLightParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingMDLAdagradLightParameters")(RetrieveTPUEmbeddingMDLAdagradLightParameters)
+
+
+def retrieve_tpu_embedding_mdl_adagrad_light_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_mdl_adagrad_light_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingMDLAdagradLightParameters",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMDLAdagradLightParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMDLAdagradLightParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_momentum_parameters_outputs = ["parameters",
+                                                      "momenta"]
+_RetrieveTPUEmbeddingMomentumParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingMomentumParameters",
+    _retrieve_tpu_embedding_momentum_parameters_outputs)
+
+
+def retrieve_tpu_embedding_momentum_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Momentum embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, momenta).
+
+    parameters: A `Tensor` of type `float32`.
+    momenta: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingMomentumParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingMomentumParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_momentum_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingMomentumParameters", num_shards=num_shards,
+                                                  shard_id=shard_id,
+                                                  table_id=table_id,
+                                                  table_name=table_name,
+                                                  name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMomentumParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMomentumParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingMomentumParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_momentum_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingMomentumParameters.__doc__ = retrieve_tpu_embedding_momentum_parameters.__doc__
+RetrieveTPUEmbeddingMomentumParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingMomentumParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingMomentumParameters")(RetrieveTPUEmbeddingMomentumParameters)
+
+
+def retrieve_tpu_embedding_momentum_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_momentum_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingMomentumParameters", 2,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMomentumParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMomentumParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_momentum_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                       "momenta",
+                                                                       "gradient_accumulators"]
+_RetrieveTPUEmbeddingMomentumParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug",
+    _retrieve_tpu_embedding_momentum_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_momentum_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve Momentum embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, momenta, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    momenta: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingMomentumParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_momentum_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug", num_shards=num_shards,
+                                                                shard_id=shard_id,
+                                                                table_id=table_id,
+                                                                table_name=table_name,
+                                                                name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMomentumParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingMomentumParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_momentum_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingMomentumParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_momentum_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingMomentumParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingMomentumParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingMomentumParametersGradAccumDebug")(RetrieveTPUEmbeddingMomentumParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_momentum_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_momentum_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingMomentumParametersGradAccumDebug",
+                             3, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingMomentumParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_proximal_adagrad_parameters_outputs = ["parameters",
+                                                              "accumulators"]
+_RetrieveTPUEmbeddingProximalAdagradParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingProximalAdagradParameters",
+    _retrieve_tpu_embedding_proximal_adagrad_parameters_outputs)
+
+
+def retrieve_tpu_embedding_proximal_adagrad_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve proximal Adagrad embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingProximalAdagradParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingProximalAdagradParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_proximal_adagrad_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingProximalAdagradParameters", num_shards=num_shards,
+                                                         shard_id=shard_id,
+                                                         table_id=table_id,
+                                                         table_name=table_name,
+                                                         name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingProximalAdagradParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingProximalAdagradParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingProximalAdagradParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_proximal_adagrad_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingProximalAdagradParameters.__doc__ = retrieve_tpu_embedding_proximal_adagrad_parameters.__doc__
+RetrieveTPUEmbeddingProximalAdagradParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingProximalAdagradParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingProximalAdagradParameters")(RetrieveTPUEmbeddingProximalAdagradParameters)
+
+
+def retrieve_tpu_embedding_proximal_adagrad_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_proximal_adagrad_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingProximalAdagradParameters",
+                             2, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingProximalAdagradParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingProximalAdagradParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_outputs = ["parameters", "accumulators",
+                                                                               "gradient_accumulators"]
+_RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug",
+    _retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve proximal Adagrad embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, accumulators, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    accumulators: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug", num_shards=num_shards,
+                                                                       shard_id=shard_id,
+                                                                       table_id=table_id,
+                                                                       table_name=table_name,
+                                                                       name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug")(RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_proximal_adagrad_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug",
+                             3, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_rms_prop_parameters_outputs = ["parameters", "ms",
+                                                      "mom"]
+_RetrieveTPUEmbeddingRMSPropParametersOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingRMSPropParameters",
+    _retrieve_tpu_embedding_rms_prop_parameters_outputs)
+
+
+def retrieve_tpu_embedding_rms_prop_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve RMSProp embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, ms, mom).
+
+    parameters: A `Tensor` of type `float32`.
+    ms: A `Tensor` of type `float32`.
+    mom: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingRMSPropParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingRMSPropParametersOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_rms_prop_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingRMSPropParameters", num_shards=num_shards,
+                                                 shard_id=shard_id,
+                                                 table_id=table_id,
+                                                 table_name=table_name,
+                                                 name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingRMSPropParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingRMSPropParametersOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingRMSPropParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_rms_prop_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingRMSPropParameters.__doc__ = retrieve_tpu_embedding_rms_prop_parameters.__doc__
+RetrieveTPUEmbeddingRMSPropParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingRMSPropParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingRMSPropParameters")(RetrieveTPUEmbeddingRMSPropParameters)
+
+
+def retrieve_tpu_embedding_rms_prop_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_rms_prop_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingRMSPropParameters", 3,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingRMSPropParameters", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingRMSPropParametersOutput._make(_result)
+  return _result
+
+
+_retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug_outputs = ["parameters",
+                                                                       "ms",
+                                                                       "mom",
+                                                                       "gradient_accumulators"]
+_RetrieveTPUEmbeddingRMSPropParametersGradAccumDebugOutput = _collections.namedtuple(
+    "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug",
+    _retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug_outputs)
+
+
+def retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve RMSProp embedding parameters with debug support.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (parameters, ms, mom, gradient_accumulators).
+
+    parameters: A `Tensor` of type `float32`.
+    ms: A `Tensor` of type `float32`.
+    mom: A `Tensor` of type `float32`.
+    gradient_accumulators: A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      _result = _RetrieveTPUEmbeddingRMSPropParametersGradAccumDebugOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug", num_shards=num_shards,
+                                                               shard_id=shard_id,
+                                                               table_id=table_id,
+                                                               table_name=table_name,
+                                                               name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingRMSPropParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+def RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug.__doc__ = retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug.__doc__
+RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug))
+tf_export("raw_ops.RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug")(RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug)
+
+
+def retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_rms_prop_parameters_grad_accum_debug
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug",
+                             4, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug", _inputs_flat, _attrs, _result, name)
+  _result = _RetrieveTPUEmbeddingRMSPropParametersGradAccumDebugOutput._make(_result)
+  return _result
+
+
+def retrieve_tpu_embedding_stochastic_gradient_descent_parameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  r"""Retrieve SGD embedding parameters.
+
+  An op that retrieves optimization parameters from embedding to host
+  memory. Must be preceded by a ConfigureTPUEmbeddingHost op that sets up
+  the correct embedding table configuration. For example, this op is
+  used to retrieve updated parameters before saving a checkpoint.
+
+  Args:
+    num_shards: An `int`.
+    shard_id: An `int`.
+    table_id: An optional `int` that is `>= -1`. Defaults to `-1`.
+    table_name: An optional `string`. Defaults to `""`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "RetrieveTPUEmbeddingStochasticGradientDescentParameters", name,
+        _ctx.post_execution_callbacks, "table_id", table_id, "table_name",
+        table_name, "num_shards", num_shards, "shard_id", shard_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return retrieve_tpu_embedding_stochastic_gradient_descent_parameters_eager_fallback(
+            table_id=table_id, table_name=table_name, num_shards=num_shards,
+            shard_id=shard_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "RetrieveTPUEmbeddingStochasticGradientDescentParameters", num_shards=num_shards,
+                                                                   shard_id=shard_id,
+                                                                   table_id=table_id,
+                                                                   table_name=table_name,
+                                                                   name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "table_name",
+            _op.get_attr("table_name"), "num_shards",
+            _op.get_attr("num_shards"), "shard_id", _op.get_attr("shard_id"))
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingStochasticGradientDescentParameters", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def RetrieveTPUEmbeddingStochasticGradientDescentParameters(num_shards, shard_id, table_id=-1, table_name="", name=None):
+  return retrieve_tpu_embedding_stochastic_gradient_descent_parameters(num_shards=num_shards, shard_id=shard_id, table_id=table_id, table_name=table_name, name=name)
+RetrieveTPUEmbeddingStochasticGradientDescentParameters.__doc__ = retrieve_tpu_embedding_stochastic_gradient_descent_parameters.__doc__
+RetrieveTPUEmbeddingStochasticGradientDescentParameters = _doc_controls.do_not_generate_docs(_kwarg_only(RetrieveTPUEmbeddingStochasticGradientDescentParameters))
+tf_export("raw_ops.RetrieveTPUEmbeddingStochasticGradientDescentParameters")(RetrieveTPUEmbeddingStochasticGradientDescentParameters)
+
+
+def retrieve_tpu_embedding_stochastic_gradient_descent_parameters_eager_fallback(num_shards, shard_id, table_id=-1, table_name="", name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function retrieve_tpu_embedding_stochastic_gradient_descent_parameters
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_shards = _execute.make_int(num_shards, "num_shards")
+  shard_id = _execute.make_int(shard_id, "shard_id")
+  if table_id is None:
+    table_id = -1
+  table_id = _execute.make_int(table_id, "table_id")
+  if table_name is None:
+    table_name = ""
+  table_name = _execute.make_str(table_name, "table_name")
+  _inputs_flat = []
+  _attrs = ("table_id", table_id, "table_name", table_name, "num_shards",
+  num_shards, "shard_id", shard_id)
+  _result = _execute.execute(b"RetrieveTPUEmbeddingStochasticGradientDescentParameters",
+                             1, inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "RetrieveTPUEmbeddingStochasticGradientDescentParameters", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def send_tpu_embedding_gradients(inputs, learning_rates, config, name=None):
+  r"""Performs gradient updates of embedding tables.
+
+  Args:
+    inputs: A list of at least 1 `Tensor` objects with type `float32`.
+      A TensorList of gradients with which to update embedding tables.
+      This argument has the same length and shapes as the return value of
+      RecvTPUEmbeddingActivations, but contains gradients of the model's loss
+      with respect to the embedding activations. The embedding tables are updated
+      from these gradients via the optimizer specified in the TPU embedding
+      configuration given to tpu.initialize_system.
+    learning_rates: A list of `Tensor` objects with type `float32`.
+      A TensorList of float32 scalars, one for each dynamic learning
+      rate tag: see the comments in
+      //third_party/tensorflow/core/protobuf/tpu/optimization_parameters.proto.
+      Multiple tables can share the same dynamic learning rate tag as specified
+      in the configuration. If the learning rates for all tables are constant,
+      this list should be empty.
+    config: A `string`. Serialized TPUEmbeddingConfiguration proto.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "SendTPUEmbeddingGradients", name, _ctx.post_execution_callbacks,
+        inputs, learning_rates, "config", config)
+      return _result
+    except _core._FallbackException:
+      try:
+        return send_tpu_embedding_gradients_eager_fallback(
+            inputs, learning_rates, config=config, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(inputs, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'inputs' argument to "
+        "'send_tpu_embedding_gradients' Op, not %r." % inputs)
+  _attr_N = len(inputs)
+  if not isinstance(learning_rates, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'learning_rates' argument to "
+        "'send_tpu_embedding_gradients' Op, not %r." % learning_rates)
+  _attr_NN = len(learning_rates)
+  config = _execute.make_str(config, "config")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "SendTPUEmbeddingGradients", inputs=inputs,
+                                     learning_rates=learning_rates,
+                                     config=config, name=name)
+  return _op
+  _result = None
+  return _result
+
+def SendTPUEmbeddingGradients(inputs, learning_rates, config, name=None):
+  return send_tpu_embedding_gradients(inputs=inputs, learning_rates=learning_rates, config=config, name=name)
+SendTPUEmbeddingGradients.__doc__ = send_tpu_embedding_gradients.__doc__
+SendTPUEmbeddingGradients = _doc_controls.do_not_generate_docs(_kwarg_only(SendTPUEmbeddingGradients))
+tf_export("raw_ops.SendTPUEmbeddingGradients")(SendTPUEmbeddingGradients)
+
+
+def send_tpu_embedding_gradients_eager_fallback(inputs, learning_rates, config, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function send_tpu_embedding_gradients
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(inputs, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'inputs' argument to "
+        "'send_tpu_embedding_gradients' Op, not %r." % inputs)
+  _attr_N = len(inputs)
+  if not isinstance(learning_rates, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'learning_rates' argument to "
+        "'send_tpu_embedding_gradients' Op, not %r." % learning_rates)
+  _attr_NN = len(learning_rates)
+  config = _execute.make_str(config, "config")
+  inputs = _ops.convert_n_to_tensor(inputs, _dtypes.float32)
+  learning_rates = _ops.convert_n_to_tensor(learning_rates, _dtypes.float32)
+  _inputs_flat = list(inputs) + list(learning_rates)
+  _attrs = ("N", _attr_N, "NN", _attr_NN, "config", config)
+  _result = _execute.execute(b"SendTPUEmbeddingGradients", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def shutdown_distributed_tpu(name=None):
+  r"""Shuts down a running distributed TPU system.
+
+  The op returns an error if no system is running.
+
+  Args:
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "ShutdownDistributedTPU", name, _ctx.post_execution_callbacks)
+      return _result
+    except _core._FallbackException:
+      try:
+        return shutdown_distributed_tpu_eager_fallback(
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "ShutdownDistributedTPU", name=name)
+  return _op
+  _result = None
+  return _result
+
+def ShutdownDistributedTPU(name=None):
+  return shutdown_distributed_tpu(name=name)
+ShutdownDistributedTPU.__doc__ = shutdown_distributed_tpu.__doc__
+ShutdownDistributedTPU = _doc_controls.do_not_generate_docs(_kwarg_only(ShutdownDistributedTPU))
+tf_export("raw_ops.ShutdownDistributedTPU")(ShutdownDistributedTPU)
+
+
+def shutdown_distributed_tpu_eager_fallback(name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function shutdown_distributed_tpu
+  """
+  _ctx = ctx if ctx else _context.context()
+  _inputs_flat = []
+  _attrs = None
+  _result = _execute.execute(b"ShutdownDistributedTPU", 0,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _result = None
+  return _result
+
+
+def tpu_compilation_result(name=None):
+  r"""CompilationResultProto indicating the status of the TPU compilation.
+
+  Args:
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `string`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUCompilationResult", name, _ctx.post_execution_callbacks)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_compilation_result_eager_fallback(
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUCompilationResult", name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = None
+  _execute.record_gradient(
+      "TPUCompilationResult", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def TPUCompilationResult(name=None):
+  return tpu_compilation_result(name=name)
+TPUCompilationResult.__doc__ = tpu_compilation_result.__doc__
+TPUCompilationResult = _doc_controls.do_not_generate_docs(_kwarg_only(TPUCompilationResult))
+tf_export("raw_ops.TPUCompilationResult")(TPUCompilationResult)
+
+
+def tpu_compilation_result_eager_fallback(name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_compilation_result
+  """
+  _ctx = ctx if ctx else _context.context()
+  _inputs_flat = []
+  _attrs = None
+  _result = _execute.execute(b"TPUCompilationResult", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "TPUCompilationResult", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def tpu_embedding_activations(embedding_variable, sliced_activations, table_id, lookup_id, name=None):
+  r"""An op enabling differentiation of TPU Embeddings.
+
+  This op simply returns its first input, which is assumed to have been sliced
+  from the Tensors returned by TPUEmbeddingDequeueActivations. The presence of
+  this op, and its first argument being a trainable Variable, enables automatic
+  differentiation of graphs containing embeddings via the TPU Embedding Python
+  libraries.
+
+  Args:
+    embedding_variable: A `Tensor` of type `float32`.
+      A trainable variable, enabling optimizers to find this op.
+    sliced_activations: A `Tensor` of type `float32`.
+      The embedding activations Tensor to return.
+    table_id: An `int` that is `>= 0`.
+      The id of the table in the embedding layer configuration from which
+      these activations were computed.
+    lookup_id: An `int` that is `>= 0`.
+      Identifier of the set of embedding indices which produced these
+      activations.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `float32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUEmbeddingActivations", name, _ctx.post_execution_callbacks,
+        embedding_variable, sliced_activations, "table_id", table_id,
+        "lookup_id", lookup_id)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_embedding_activations_eager_fallback(
+            embedding_variable, sliced_activations, table_id=table_id,
+            lookup_id=lookup_id, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  table_id = _execute.make_int(table_id, "table_id")
+  lookup_id = _execute.make_int(lookup_id, "lookup_id")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUEmbeddingActivations", embedding_variable=embedding_variable,
+                                   sliced_activations=sliced_activations,
+                                   table_id=table_id, lookup_id=lookup_id,
+                                   name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("table_id", _op.get_attr("table_id"), "lookup_id",
+            _op.get_attr("lookup_id"))
+  _execute.record_gradient(
+      "TPUEmbeddingActivations", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def TPUEmbeddingActivations(embedding_variable, sliced_activations, table_id, lookup_id, name=None):
+  return tpu_embedding_activations(embedding_variable=embedding_variable, sliced_activations=sliced_activations, table_id=table_id, lookup_id=lookup_id, name=name)
+TPUEmbeddingActivations.__doc__ = tpu_embedding_activations.__doc__
+TPUEmbeddingActivations = _doc_controls.do_not_generate_docs(_kwarg_only(TPUEmbeddingActivations))
+tf_export("raw_ops.TPUEmbeddingActivations")(TPUEmbeddingActivations)
+
+
+def tpu_embedding_activations_eager_fallback(embedding_variable, sliced_activations, table_id, lookup_id, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_embedding_activations
+  """
+  _ctx = ctx if ctx else _context.context()
+  table_id = _execute.make_int(table_id, "table_id")
+  lookup_id = _execute.make_int(lookup_id, "lookup_id")
+  embedding_variable = _ops.convert_to_tensor(embedding_variable, _dtypes.float32)
+  sliced_activations = _ops.convert_to_tensor(sliced_activations, _dtypes.float32)
+  _inputs_flat = [embedding_variable, sliced_activations]
+  _attrs = ("table_id", table_id, "lookup_id", lookup_id)
+  _result = _execute.execute(b"TPUEmbeddingActivations", 1,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "TPUEmbeddingActivations", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def tpu_ordinal_selector(name=None):
+  r"""A TPU core selector Op.
+
+  This Op produces a set of TPU cores (for warm-up) or a single TPU core
+  (for regular inference) to execute the TPU program on. The output is
+  consumed by TPUPartitionedCall.
+
+  Args:
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `int32`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUOrdinalSelector", name, _ctx.post_execution_callbacks)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_ordinal_selector_eager_fallback(
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUOrdinalSelector", name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = None
+  _execute.record_gradient(
+      "TPUOrdinalSelector", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def TPUOrdinalSelector(name=None):
+  return tpu_ordinal_selector(name=name)
+TPUOrdinalSelector.__doc__ = tpu_ordinal_selector.__doc__
+TPUOrdinalSelector = _doc_controls.do_not_generate_docs(_kwarg_only(TPUOrdinalSelector))
+tf_export("raw_ops.TPUOrdinalSelector")(TPUOrdinalSelector)
+
+
+def tpu_ordinal_selector_eager_fallback(name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_ordinal_selector
+  """
+  _ctx = ctx if ctx else _context.context()
+  _inputs_flat = []
+  _attrs = None
+  _result = _execute.execute(b"TPUOrdinalSelector", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "TPUOrdinalSelector", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def tpu_partitioned_call(args, device_ordinal, Tout, f, name=None):
+  r"""Calls a function placed on a specified TPU device.
+
+  Args:
+    args: A list of `Tensor` objects. The arguments to the function.
+    device_ordinal: A `Tensor` of type `int32`.
+      The TPU device ordinal to run the function on.
+    Tout: A list of `tf.DTypes`. The types of the outputs of the function.
+    f: A function decorated with @Defun. The function to call.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `Tensor` objects of type `Tout`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUPartitionedCall", name, _ctx.post_execution_callbacks, args,
+        device_ordinal, "Tout", Tout, "f", f)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_partitioned_call_eager_fallback(
+            args, device_ordinal, Tout=Tout, f=f, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(Tout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'Tout' argument to "
+        "'tpu_partitioned_call' Op, not %r." % Tout)
+  Tout = [_execute.make_type(_t, "Tout") for _t in Tout]
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUPartitionedCall", args=args, device_ordinal=device_ordinal,
+                              Tout=Tout, f=f, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("Tin", _op.get_attr("Tin"), "Tout", _op.get_attr("Tout"), "f",
+            _op.get_attr("f"))
+  _execute.record_gradient(
+      "TPUPartitionedCall", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def TPUPartitionedCall(args, device_ordinal, Tout, f, name=None):
+  return tpu_partitioned_call(args=args, device_ordinal=device_ordinal, Tout=Tout, f=f, name=name)
+TPUPartitionedCall.__doc__ = tpu_partitioned_call.__doc__
+TPUPartitionedCall = _doc_controls.do_not_generate_docs(_kwarg_only(TPUPartitionedCall))
+tf_export("raw_ops.TPUPartitionedCall")(TPUPartitionedCall)
+
+
+def tpu_partitioned_call_eager_fallback(args, device_ordinal, Tout, f, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_partitioned_call
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(Tout, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'Tout' argument to "
+        "'tpu_partitioned_call' Op, not %r." % Tout)
+  Tout = [_execute.make_type(_t, "Tout") for _t in Tout]
+  _attr_Tin, args = _execute.convert_to_mixed_eager_tensors(args, _ctx)
+  device_ordinal = _ops.convert_to_tensor(device_ordinal, _dtypes.int32)
+  _inputs_flat = list(args) + [device_ordinal]
+  _attrs = ("Tin", _attr_Tin, "Tout", Tout, "f", f)
+  _result = _execute.execute(b"TPUPartitionedCall", len(Tout),
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "TPUPartitionedCall", _inputs_flat, _attrs, _result, name)
+  return _result
+
+
+def tpu_replicate_metadata(num_replicas, num_cores_per_replica=1, topology="", use_tpu=True, device_assignment=[], computation_shape=[], host_compute_core=[], padding_map=[], step_marker_location="STEP_MARK_AT_ENTRY", allow_soft_placement=False, name=None):
+  r"""Metadata indicaitng how the TPU computation should be replicated.
+
+  Args:
+    num_replicas: An `int` that is `>= 0`.
+      Number of replicas of the computation
+    num_cores_per_replica: An optional `int`. Defaults to `1`.
+      Number of cores per replica. Used for model parallelism.
+    topology: An optional `string`. Defaults to `""`.
+      TopologyProto indicating the topology of the TPU pod slice.
+    use_tpu: An optional `bool`. Defaults to `True`.
+      Whether to place the computation on the TPU.
+    device_assignment: An optional list of `ints`. Defaults to `[]`.
+      The assignment of devices for the computation.
+    computation_shape: An optional list of `ints`. Defaults to `[]`.
+      DEPRECATED. Use num_cores_per_replica instead.
+    host_compute_core: An optional list of `strings`. Defaults to `[]`.
+    padding_map: An optional list of `strings`. Defaults to `[]`.
+    step_marker_location: An optional `string`. Defaults to `"STEP_MARK_AT_ENTRY"`.
+    allow_soft_placement: An optional `bool`. Defaults to `False`.
+    name: A name for the operation (optional).
+
+  Returns:
+    The created Operation.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUReplicateMetadata", name, _ctx.post_execution_callbacks,
+        "num_replicas", num_replicas, "num_cores_per_replica",
+        num_cores_per_replica, "topology", topology, "use_tpu", use_tpu,
+        "device_assignment", device_assignment, "computation_shape",
+        computation_shape, "host_compute_core", host_compute_core,
+        "padding_map", padding_map, "step_marker_location",
+        step_marker_location, "allow_soft_placement", allow_soft_placement)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_replicate_metadata_eager_fallback(
+            num_replicas=num_replicas,
+            num_cores_per_replica=num_cores_per_replica, topology=topology,
+            use_tpu=use_tpu, device_assignment=device_assignment,
+            computation_shape=computation_shape,
+            host_compute_core=host_compute_core, padding_map=padding_map,
+            step_marker_location=step_marker_location,
+            allow_soft_placement=allow_soft_placement, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_replicas = _execute.make_int(num_replicas, "num_replicas")
+  if num_cores_per_replica is None:
+    num_cores_per_replica = 1
+  num_cores_per_replica = _execute.make_int(num_cores_per_replica, "num_cores_per_replica")
+  if topology is None:
+    topology = ""
+  topology = _execute.make_str(topology, "topology")
+  if use_tpu is None:
+    use_tpu = True
+  use_tpu = _execute.make_bool(use_tpu, "use_tpu")
+  if device_assignment is None:
+    device_assignment = []
+  if not isinstance(device_assignment, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'device_assignment' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % device_assignment)
+  device_assignment = [_execute.make_int(_i, "device_assignment") for _i in device_assignment]
+  if computation_shape is None:
+    computation_shape = []
+  if not isinstance(computation_shape, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'computation_shape' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % computation_shape)
+  computation_shape = [_execute.make_int(_i, "computation_shape") for _i in computation_shape]
+  if host_compute_core is None:
+    host_compute_core = []
+  if not isinstance(host_compute_core, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'host_compute_core' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % host_compute_core)
+  host_compute_core = [_execute.make_str(_s, "host_compute_core") for _s in host_compute_core]
+  if padding_map is None:
+    padding_map = []
+  if not isinstance(padding_map, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'padding_map' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % padding_map)
+  padding_map = [_execute.make_str(_s, "padding_map") for _s in padding_map]
+  if step_marker_location is None:
+    step_marker_location = "STEP_MARK_AT_ENTRY"
+  step_marker_location = _execute.make_str(step_marker_location, "step_marker_location")
+  if allow_soft_placement is None:
+    allow_soft_placement = False
+  allow_soft_placement = _execute.make_bool(allow_soft_placement, "allow_soft_placement")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUReplicateMetadata", num_replicas=num_replicas,
+                                num_cores_per_replica=num_cores_per_replica,
+                                topology=topology, use_tpu=use_tpu,
+                                device_assignment=device_assignment,
+                                computation_shape=computation_shape,
+                                host_compute_core=host_compute_core,
+                                padding_map=padding_map,
+                                step_marker_location=step_marker_location,
+                                allow_soft_placement=allow_soft_placement,
+                                name=name)
+  return _op
+  _result = None
+  return _result
+
+def TPUReplicateMetadata(num_replicas, num_cores_per_replica=1, topology="", use_tpu=True, device_assignment=[], computation_shape=[], host_compute_core=[], padding_map=[], step_marker_location="STEP_MARK_AT_ENTRY", allow_soft_placement=False, name=None):
+  return tpu_replicate_metadata(num_replicas=num_replicas, num_cores_per_replica=num_cores_per_replica, topology=topology, use_tpu=use_tpu, device_assignment=device_assignment, computation_shape=computation_shape, host_compute_core=host_compute_core, padding_map=padding_map, step_marker_location=step_marker_location, allow_soft_placement=allow_soft_placement, name=name)
+TPUReplicateMetadata.__doc__ = tpu_replicate_metadata.__doc__
+TPUReplicateMetadata = _doc_controls.do_not_generate_docs(_kwarg_only(TPUReplicateMetadata))
+tf_export("raw_ops.TPUReplicateMetadata")(TPUReplicateMetadata)
+
+
+def tpu_replicate_metadata_eager_fallback(num_replicas, num_cores_per_replica=1, topology="", use_tpu=True, device_assignment=[], computation_shape=[], host_compute_core=[], padding_map=[], step_marker_location="STEP_MARK_AT_ENTRY", allow_soft_placement=False, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_replicate_metadata
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_replicas = _execute.make_int(num_replicas, "num_replicas")
+  if num_cores_per_replica is None:
+    num_cores_per_replica = 1
+  num_cores_per_replica = _execute.make_int(num_cores_per_replica, "num_cores_per_replica")
+  if topology is None:
+    topology = ""
+  topology = _execute.make_str(topology, "topology")
+  if use_tpu is None:
+    use_tpu = True
+  use_tpu = _execute.make_bool(use_tpu, "use_tpu")
+  if device_assignment is None:
+    device_assignment = []
+  if not isinstance(device_assignment, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'device_assignment' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % device_assignment)
+  device_assignment = [_execute.make_int(_i, "device_assignment") for _i in device_assignment]
+  if computation_shape is None:
+    computation_shape = []
+  if not isinstance(computation_shape, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'computation_shape' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % computation_shape)
+  computation_shape = [_execute.make_int(_i, "computation_shape") for _i in computation_shape]
+  if host_compute_core is None:
+    host_compute_core = []
+  if not isinstance(host_compute_core, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'host_compute_core' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % host_compute_core)
+  host_compute_core = [_execute.make_str(_s, "host_compute_core") for _s in host_compute_core]
+  if padding_map is None:
+    padding_map = []
+  if not isinstance(padding_map, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'padding_map' argument to "
+        "'tpu_replicate_metadata' Op, not %r." % padding_map)
+  padding_map = [_execute.make_str(_s, "padding_map") for _s in padding_map]
+  if step_marker_location is None:
+    step_marker_location = "STEP_MARK_AT_ENTRY"
+  step_marker_location = _execute.make_str(step_marker_location, "step_marker_location")
+  if allow_soft_placement is None:
+    allow_soft_placement = False
+  allow_soft_placement = _execute.make_bool(allow_soft_placement, "allow_soft_placement")
+  _inputs_flat = []
+  _attrs = ("num_replicas", num_replicas, "num_cores_per_replica",
+  num_cores_per_replica, "topology", topology, "use_tpu", use_tpu,
+  "device_assignment", device_assignment, "computation_shape",
+  computation_shape, "host_compute_core", host_compute_core, "padding_map",
+  padding_map, "step_marker_location", step_marker_location,
+  "allow_soft_placement", allow_soft_placement)
+  _result = _execute.execute(b"TPUReplicateMetadata", 0, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _result = None
+  return _result
+
+
+def tpu_replicated_input(inputs, name=None):
+  r"""Connects N inputs to an N-way replicated TPU computation.
+
+  Args:
+    inputs: A list of at least 1 `Tensor` objects with the same type.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `inputs`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUReplicatedInput", name, _ctx.post_execution_callbacks, inputs)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_replicated_input_eager_fallback(
+            inputs, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(inputs, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'inputs' argument to "
+        "'tpu_replicated_input' Op, not %r." % inputs)
+  _attr_N = len(inputs)
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUReplicatedInput", inputs=inputs, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("N", _op.get_attr("N"), "T", _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "TPUReplicatedInput", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def TPUReplicatedInput(inputs, name=None):
+  return tpu_replicated_input(inputs=inputs, name=name)
+TPUReplicatedInput.__doc__ = tpu_replicated_input.__doc__
+TPUReplicatedInput = _doc_controls.do_not_generate_docs(_kwarg_only(TPUReplicatedInput))
+tf_export("raw_ops.TPUReplicatedInput")(TPUReplicatedInput)
+
+
+def tpu_replicated_input_eager_fallback(inputs, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_replicated_input
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(inputs, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'inputs' argument to "
+        "'tpu_replicated_input' Op, not %r." % inputs)
+  _attr_N = len(inputs)
+  _attr_T, inputs = _execute.args_to_matching_eager(list(inputs), _ctx)
+  _inputs_flat = list(inputs)
+  _attrs = ("N", _attr_N, "T", _attr_T)
+  _result = _execute.execute(b"TPUReplicatedInput", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "TPUReplicatedInput", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def tpu_replicated_output(input, num_replicas, name=None):
+  r"""Connects outputs of an N-way replicated computation to N outputs.
+
+  Args:
+    input: A `Tensor`.
+    num_replicas: An `int` that is `>= 1`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A list of `num_replicas` `Tensor` objects with the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "TPUReplicatedOutput", name, _ctx.post_execution_callbacks, input,
+        "num_replicas", num_replicas)
+      return _result
+    except _core._FallbackException:
+      try:
+        return tpu_replicated_output_eager_fallback(
+            input, num_replicas=num_replicas, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_replicas = _execute.make_int(num_replicas, "num_replicas")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "TPUReplicatedOutput", input=input, num_replicas=num_replicas,
+                               name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("num_replicas", _op.get_attr("num_replicas"), "T",
+            _op._get_attr_type("T"))
+  _execute.record_gradient(
+      "TPUReplicatedOutput", _inputs_flat, _attrs, _result, name)
+  return _result
+
+def TPUReplicatedOutput(input, num_replicas, name=None):
+  return tpu_replicated_output(input=input, num_replicas=num_replicas, name=name)
+TPUReplicatedOutput.__doc__ = tpu_replicated_output.__doc__
+TPUReplicatedOutput = _doc_controls.do_not_generate_docs(_kwarg_only(TPUReplicatedOutput))
+tf_export("raw_ops.TPUReplicatedOutput")(TPUReplicatedOutput)
+
+
+def tpu_replicated_output_eager_fallback(input, num_replicas, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function tpu_replicated_output
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_replicas = _execute.make_int(num_replicas, "num_replicas")
+  _attr_T, (input,) = _execute.args_to_matching_eager([input], _ctx)
+  _inputs_flat = [input]
+  _attrs = ("num_replicas", num_replicas, "T", _attr_T)
+  _result = _execute.execute(b"TPUReplicatedOutput", num_replicas,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "TPUReplicatedOutput", _inputs_flat, _attrs, _result, name)
+  return _result
+
+
+def worker_heartbeat(request, name=None):
+  r"""Worker heartbeat op.
+
+  Heartbeats may be sent periodically to indicate the coordinator is still active,
+  to retrieve the current worker status and to expedite shutdown when necessary.
+
+  Args:
+    request: A `Tensor` of type `string`.
+      A string tensor containing a serialized WorkerHeartbeatRequest
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `string`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "WorkerHeartbeat", name, _ctx.post_execution_callbacks, request)
+      return _result
+    except _core._FallbackException:
+      try:
+        return worker_heartbeat_eager_fallback(
+            request, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "WorkerHeartbeat", request=request, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = None
+  _execute.record_gradient(
+      "WorkerHeartbeat", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def WorkerHeartbeat(request, name=None):
+  return worker_heartbeat(request=request, name=name)
+WorkerHeartbeat.__doc__ = worker_heartbeat.__doc__
+WorkerHeartbeat = _doc_controls.do_not_generate_docs(_kwarg_only(WorkerHeartbeat))
+tf_export("raw_ops.WorkerHeartbeat")(WorkerHeartbeat)
+
+
+def worker_heartbeat_eager_fallback(request, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function worker_heartbeat
+  """
+  _ctx = ctx if ctx else _context.context()
+  request = _ops.convert_to_tensor(request, _dtypes.string)
+  _inputs_flat = [request]
+  _attrs = None
+  _result = _execute.execute(b"WorkerHeartbeat", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "WorkerHeartbeat", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def _InitOpDefLibrary(op_list_proto_bytes):
+  op_list = _op_def_pb2.OpList()
+  op_list.ParseFromString(op_list_proto_bytes)
+  _op_def_registry.register_op_list(op_list)
+  op_def_lib = _op_def_library.OpDefLibrary()
+  op_def_lib.add_op_list(op_list)
+  return op_def_lib
+# op {
+#   name: "AllToAll"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "group_assignment"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#         type: DT_BOOL
+#       }
+#     }
+#   }
+#   attr {
+#     name: "concat_dimension"
+#     type: "int"
+#   }
+#   attr {
+#     name: "split_dimension"
+#     type: "int"
+#   }
+#   attr {
+#     name: "split_count"
+#     type: "int"
+#   }
+# }
+# op {
+#   name: "CollectivePermute"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "source_target_pairs"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#         type: DT_INT32
+#         type: DT_UINT8
+#         type: DT_INT16
+#         type: DT_INT8
+#         type: DT_COMPLEX64
+#         type: DT_INT64
+#         type: DT_QINT8
+#         type: DT_QUINT8
+#         type: DT_QINT32
+#         type: DT_BFLOAT16
+#         type: DT_UINT16
+#         type: DT_COMPLEX128
+#         type: DT_HALF
+#         type: DT_UINT32
+#         type: DT_UINT64
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "ConfigureDistributedTPU"
+#   output_arg {
+#     name: "topology"
+#     type: DT_STRING
+#   }
+#   attr {
+#     name: "embedding_config"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "tpu_embedding_config"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "is_global_init"
+#     type: "bool"
+#     default_value {
+#       b: false
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "ConfigureTPUEmbedding"
+#   attr {
+#     name: "config"
+#     type: "string"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CrossReplicaSum"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "group_assignment"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_BFLOAT16
+#         type: DT_FLOAT
+#         type: DT_INT32
+#         type: DT_UINT32
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "EnqueueTPUEmbeddingIntegerBatch"
+#   input_arg {
+#     name: "batch"
+#     type: DT_INT32
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "mode_override"
+#     type: DT_STRING
+#   }
+#   attr {
+#     name: "N"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "EnqueueTPUEmbeddingSparseBatch"
+#   input_arg {
+#     name: "sample_indices"
+#     type_attr: "T1"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "embedding_indices"
+#     type_attr: "T2"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "aggregation_weights"
+#     type_attr: "T3"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "mode_override"
+#     type: DT_STRING
+#   }
+#   attr {
+#     name: "T1"
+#     type: "type"
+#     default_value {
+#       type: DT_INT32
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "T2"
+#     type: "type"
+#     default_value {
+#       type: DT_INT32
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "T3"
+#     type: "type"
+#     default_value {
+#       type: DT_FLOAT
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "N"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   attr {
+#     name: "combiners"
+#     type: "list(string)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "EnqueueTPUEmbeddingSparseTensorBatch"
+#   input_arg {
+#     name: "sample_indices"
+#     type_attr: "T1"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "embedding_indices"
+#     type_attr: "T2"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "aggregation_weights"
+#     type_attr: "T3"
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "mode_override"
+#     type: DT_STRING
+#   }
+#   attr {
+#     name: "T1"
+#     type: "type"
+#     default_value {
+#       type: DT_INT32
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "T2"
+#     type: "type"
+#     default_value {
+#       type: DT_INT32
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "T3"
+#     type: "type"
+#     default_value {
+#       type: DT_FLOAT
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "N"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   attr {
+#     name: "combiners"
+#     type: "list(string)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "table_ids"
+#     type: "list(int)"
+#   }
+#   attr {
+#     name: "max_sequence_lengths"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "InfeedDequeue"
+#   output_arg {
+#     name: "output"
+#     type_attr: "dtype"
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   attr {
+#     name: "shape"
+#     type: "shape"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "InfeedDequeueTuple"
+#   output_arg {
+#     name: "outputs"
+#     type_list_attr: "dtypes"
+#   }
+#   attr {
+#     name: "dtypes"
+#     type: "list(type)"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "shapes"
+#     type: "list(shape)"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "InfeedEnqueue"
+#   input_arg {
+#     name: "input"
+#     type_attr: "dtype"
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   attr {
+#     name: "shape"
+#     type: "shape"
+#     default_value {
+#       shape {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "layout"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "InfeedEnqueuePrelinearizedBuffer"
+#   input_arg {
+#     name: "input"
+#     type: DT_VARIANT
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+# }
+# op {
+#   name: "InfeedEnqueueTuple"
+#   input_arg {
+#     name: "inputs"
+#     type_list_attr: "dtypes"
+#   }
+#   attr {
+#     name: "dtypes"
+#     type: "list(type)"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "shapes"
+#     type: "list(shape)"
+#   }
+#   attr {
+#     name: "layouts"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingADAMParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "velocities"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingADAMParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "velocities"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingAdadeltaParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "updates"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingAdadeltaParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "updates"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingAdagradParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingAdagradParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingCenteredRMSPropParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "mg"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingFTRLParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "linears"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingFTRLParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "linears"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingMDLAdagradLightParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "weights"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "benefits"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingMomentumParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingMomentumParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingProximalAdagradParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingRMSPropParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingRMSPropParametersGradAccumDebug"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "LoadTPUEmbeddingStochasticGradientDescentParameters"
+#   input_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "OutfeedDequeue"
+#   output_arg {
+#     name: "output"
+#     type_attr: "dtype"
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   attr {
+#     name: "shape"
+#     type: "shape"
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "OutfeedDequeueTuple"
+#   output_arg {
+#     name: "outputs"
+#     type_list_attr: "dtypes"
+#   }
+#   attr {
+#     name: "dtypes"
+#     type: "list(type)"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "shapes"
+#     type: "list(shape)"
+#   }
+#   attr {
+#     name: "device_ordinal"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "OutfeedEnqueue"
+#   input_arg {
+#     name: "input"
+#     type_attr: "dtype"
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "OutfeedEnqueueTuple"
+#   input_arg {
+#     name: "inputs"
+#     type_list_attr: "dtypes"
+#   }
+#   attr {
+#     name: "dtypes"
+#     type: "list(type)"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "Prelinearize"
+#   input_arg {
+#     name: "input"
+#     type_attr: "dtype"
+#   }
+#   output_arg {
+#     name: "output"
+#     type: DT_VARIANT
+#   }
+#   attr {
+#     name: "dtype"
+#     type: "type"
+#   }
+#   attr {
+#     name: "shape"
+#     type: "shape"
+#     default_value {
+#       shape {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "layout"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "PrelinearizeTuple"
+#   input_arg {
+#     name: "inputs"
+#     type_list_attr: "dtypes"
+#   }
+#   output_arg {
+#     name: "output"
+#     type: DT_VARIANT
+#   }
+#   attr {
+#     name: "dtypes"
+#     type: "list(type)"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "shapes"
+#     type: "list(shape)"
+#   }
+#   attr {
+#     name: "layouts"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+# }
+# op {
+#   name: "RecvTPUEmbeddingActivations"
+#   output_arg {
+#     name: "outputs"
+#     type: DT_FLOAT
+#     number_attr: "num_outputs"
+#   }
+#   attr {
+#     name: "num_outputs"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "config"
+#     type: "string"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingADAMParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "velocities"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingADAMParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "velocities"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingAdadeltaParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "updates"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "updates"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingAdagradParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingAdagradParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingCenteredRMSPropParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "mg"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingFTRLParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "linears"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingFTRLParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "linears"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingMDLAdagradLightParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "weights"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "benefits"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingMomentumParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingMomentumParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "momenta"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingProximalAdagradParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "accumulators"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingRMSPropParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "ms"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "mom"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "gradient_accumulators"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "RetrieveTPUEmbeddingStochasticGradientDescentParameters"
+#   output_arg {
+#     name: "parameters"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     default_value {
+#       i: -1
+#     }
+#     has_minimum: true
+#     minimum: -1
+#   }
+#   attr {
+#     name: "table_name"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "num_shards"
+#     type: "int"
+#   }
+#   attr {
+#     name: "shard_id"
+#     type: "int"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "SendTPUEmbeddingGradients"
+#   input_arg {
+#     name: "inputs"
+#     type: DT_FLOAT
+#     number_attr: "N"
+#   }
+#   input_arg {
+#     name: "learning_rates"
+#     type: DT_FLOAT
+#     number_attr: "NN"
+#   }
+#   attr {
+#     name: "N"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "NN"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "config"
+#     type: "string"
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "ShutdownDistributedTPU"
+#   is_stateful: true
+# }
+# op {
+#   name: "TPUCompilationResult"
+#   output_arg {
+#     name: "output"
+#     type: DT_STRING
+#   }
+# }
+# op {
+#   name: "TPUEmbeddingActivations"
+#   input_arg {
+#     name: "embedding_variable"
+#     type: DT_FLOAT
+#   }
+#   input_arg {
+#     name: "sliced_activations"
+#     type: DT_FLOAT
+#   }
+#   output_arg {
+#     name: "output"
+#     type: DT_FLOAT
+#   }
+#   attr {
+#     name: "table_id"
+#     type: "int"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "lookup_id"
+#     type: "int"
+#     has_minimum: true
+#   }
+# }
+# op {
+#   name: "TPUOrdinalSelector"
+#   output_arg {
+#     name: "device_ordinals"
+#     type: DT_INT32
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "TPUPartitionedCall"
+#   input_arg {
+#     name: "args"
+#     type_list_attr: "Tin"
+#   }
+#   input_arg {
+#     name: "device_ordinal"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type_list_attr: "Tout"
+#   }
+#   attr {
+#     name: "Tin"
+#     type: "list(type)"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "Tout"
+#     type: "list(type)"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "f"
+#     type: "func"
+#   }
+# }
+# op {
+#   name: "TPUReplicateMetadata"
+#   attr {
+#     name: "num_replicas"
+#     type: "int"
+#     has_minimum: true
+#   }
+#   attr {
+#     name: "num_cores_per_replica"
+#     type: "int"
+#     default_value {
+#       i: 1
+#     }
+#   }
+#   attr {
+#     name: "topology"
+#     type: "string"
+#     default_value {
+#       s: ""
+#     }
+#   }
+#   attr {
+#     name: "use_tpu"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   attr {
+#     name: "device_assignment"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "computation_shape"
+#     type: "list(int)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "host_compute_core"
+#     type: "list(string)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "padding_map"
+#     type: "list(string)"
+#     default_value {
+#       list {
+#       }
+#     }
+#   }
+#   attr {
+#     name: "step_marker_location"
+#     type: "string"
+#     default_value {
+#       s: "STEP_MARK_AT_ENTRY"
+#     }
+#   }
+#   attr {
+#     name: "allow_soft_placement"
+#     type: "bool"
+#     default_value {
+#       b: false
+#     }
+#   }
+# }
+# op {
+#   name: "TPUReplicatedInput"
+#   input_arg {
+#     name: "inputs"
+#     type_attr: "T"
+#     number_attr: "N"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "N"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+# }
+# op {
+#   name: "TPUReplicatedOutput"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "outputs"
+#     type_attr: "T"
+#     number_attr: "num_replicas"
+#   }
+#   attr {
+#     name: "num_replicas"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#   }
+# }
+# op {
+#   name: "WorkerHeartbeat"
+#   input_arg {
+#     name: "request"
+#     type: DT_STRING
+#   }
+#   output_arg {
+#     name: "response"
+#     type: DT_STRING
+#   }
+#   is_stateful: true
+# }
+_op_def_lib = _InitOpDefLibrary(b"\n\241\001\n\010AllToAll\022\n\n\005input\"\001T\022\024\n\020group_assignment\030\003\032\013\n\006output\"\001T\"!\n\001T\022\004type:\026\n\0242\022\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\n\"\027\n\020concat_dimension\022\003int\"\026\n\017split_dimension\022\003int\"\022\n\013split_count\022\003int\ng\n\021CollectivePermute\022\n\n\005input\"\001T\022\027\n\023source_target_pairs\030\003\032\013\n\006output\"\001T\" \n\001T\022\004type:\025\n\0232\021\001\002\003\004\005\006\010\t\013\014\r\016\021\022\023\026\027\n\212\001\n\027ConfigureDistributedTPU\032\014\n\010topology\030\007\"\036\n\020embedding_config\022\006string\032\002\022\000\"\"\n\024tpu_embedding_config\022\006string\032\002\022\000\"\032\n\016is_global_init\022\004bool\032\002(\000\210\001\001\n,\n\025ConfigureTPUEmbedding\"\020\n\006config\022\006string\210\001\001\nU\n\017CrossReplicaSum\022\n\n\005input\"\001T\022\024\n\020group_assignment\030\003\032\013\n\006output\"\001T\"\023\n\001T\022\004type:\010\n\0062\004\016\001\003\026\nw\n\037EnqueueTPUEmbeddingIntegerBatch\022\014\n\005batch\030\003*\001N\022\021\n\rmode_override\030\007\"\014\n\001N\022\003int(\0010\001\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\210\001\001\n\242\002\n\036EnqueueTPUEmbeddingSparseBatch\022\027\n\016sample_indices\"\002T1*\001N\022\032\n\021embedding_indices\"\002T2*\001N\022\034\n\023aggregation_weights\"\002T3*\001N\022\021\n\rmode_override\030\007\"\026\n\002T1\022\004type\032\0020\003:\006\n\0042\002\003\t\"\026\n\002T2\022\004type\032\0020\003:\006\n\0042\002\003\t\"\026\n\002T3\022\004type\032\0020\001:\006\n\0042\002\001\002\"\014\n\001N\022\003int(\0010\001\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\"\035\n\tcombiners\022\014list(string)\032\002\n\000\210\001\001\n\347\002\n$EnqueueTPUEmbeddingSparseTensorBatch\022\027\n\016sample_indices\"\002T1*\001N\022\032\n\021embedding_indices\"\002T2*\001N\022\034\n\023aggregation_weights\"\002T3*\001N\022\021\n\rmode_override\030\007\"\026\n\002T1\022\004type\032\0020\003:\006\n\0042\002\003\t\"\026\n\002T2\022\004type\032\0020\003:\006\n\0042\002\003\t\"\026\n\002T3\022\004type\032\0020\001:\006\n\0042\002\001\002\"\014\n\001N\022\003int(\0010\001\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\"\035\n\tcombiners\022\014list(string)\032\002\n\000\"\026\n\ttable_ids\022\tlist(int)\"%\n\024max_sequence_lengths\022\tlist(int)\032\002\n\000\210\001\001\nB\n\rInfeedDequeue\032\017\n\006output\"\005dtype\"\r\n\005dtype\022\004type\"\016\n\005shape\022\005shape\210\001\001\n[\n\022InfeedDequeueTuple\032\021\n\007outputs2\006dtypes\"\030\n\006dtypes\022\nlist(type)(\0010\001\"\025\n\006shapes\022\013list(shape)\210\001\001\n\202\001\n\rInfeedEnqueue\022\016\n\005input\"\005dtype\"\r\n\005dtype\022\004type\"\022\n\005shape\022\005shape\032\002:\000\"\027\n\006layout\022\tlist(int)\032\002\n\000\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\210\001\001\nQ\n InfeedEnqueuePrelinearizedBuffer\022\t\n\005input\030\025\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\n\230\001\n\022InfeedEnqueueTuple\022\020\n\006inputs2\006dtypes\"\030\n\006dtypes\022\nlist(type)(\0010\001\"\025\n\006shapes\022\013list(shape)\"\030\n\007layouts\022\tlist(int)\032\002\n\000\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\210\001\001\n\271\001\n\036LoadTPUEmbeddingADAMParameters\022\016\n\nparameters\030\001\022\013\n\007momenta\030\001\022\016\n\nvelocities\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\342\001\n,LoadTPUEmbeddingADAMParametersGradAccumDebug\022\016\n\nparameters\030\001\022\013\n\007momenta\030\001\022\016\n\nvelocities\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\277\001\n\"LoadTPUEmbeddingAdadeltaParameters\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\013\n\007updates\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\350\001\n0LoadTPUEmbeddingAdadeltaParametersGradAccumDebug\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\013\n\007updates\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\261\001\n!LoadTPUEmbeddingAdagradParameters\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\332\001\n/LoadTPUEmbeddingAdagradParametersGradAccumDebug\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\300\001\n)LoadTPUEmbeddingCenteredRMSPropParameters\022\016\n\nparameters\030\001\022\006\n\002ms\030\001\022\007\n\003mom\030\001\022\006\n\002mg\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\273\001\n\036LoadTPUEmbeddingFTRLParameters\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\013\n\007linears\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\344\001\n,LoadTPUEmbeddingFTRLParametersGradAccumDebug\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\013\n\007linears\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\324\001\n)LoadTPUEmbeddingMDLAdagradLightParameters\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\013\n\007weights\030\001\022\014\n\010benefits\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\255\001\n\"LoadTPUEmbeddingMomentumParameters\022\016\n\nparameters\030\001\022\013\n\007momenta\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\326\001\n0LoadTPUEmbeddingMomentumParametersGradAccumDebug\022\016\n\nparameters\030\001\022\013\n\007momenta\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\271\001\n)LoadTPUEmbeddingProximalAdagradParameters\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\342\001\n7LoadTPUEmbeddingProximalAdagradParametersGradAccumDebug\022\016\n\nparameters\030\001\022\020\n\014accumulators\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\260\001\n!LoadTPUEmbeddingRMSPropParameters\022\016\n\nparameters\030\001\022\006\n\002ms\030\001\022\007\n\003mom\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\331\001\n/LoadTPUEmbeddingRMSPropParametersGradAccumDebug\022\016\n\nparameters\030\001\022\006\n\002ms\030\001\022\007\n\003mom\030\001\022\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\261\001\n3LoadTPUEmbeddingStochasticGradientDescentParameters\022\016\n\nparameters\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\ng\n\016OutfeedDequeue\032\017\n\006output\"\005dtype\"\r\n\005dtype\022\004type\"\016\n\005shape\022\005shape\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\210\001\001\n\200\001\n\023OutfeedDequeueTuple\032\021\n\007outputs2\006dtypes\"\030\n\006dtypes\022\nlist(type)(\0010\001\"\025\n\006shapes\022\013list(shape)\"\"\n\016device_ordinal\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001\210\001\001\n2\n\016OutfeedEnqueue\022\016\n\005input\"\005dtype\"\r\n\005dtype\022\004type\210\001\001\nD\n\023OutfeedEnqueueTuple\022\020\n\006inputs2\006dtypes\"\030\n\006dtypes\022\nlist(type)(\0010\001\210\001\001\nf\n\014Prelinearize\022\016\n\005input\"\005dtype\032\n\n\006output\030\025\"\r\n\005dtype\022\004type\"\022\n\005shape\022\005shape\032\002:\000\"\027\n\006layout\022\tlist(int)\032\002\n\000\n|\n\021PrelinearizeTuple\022\020\n\006inputs2\006dtypes\032\n\n\006output\030\025\"\030\n\006dtypes\022\nlist(type)(\0010\001\"\025\n\006shapes\022\013list(shape)\"\030\n\007layouts\022\tlist(int)\032\002\n\000\nd\n\033RecvTPUEmbeddingActivations\032\030\n\007outputs\030\001*\013num_outputs\"\026\n\013num_outputs\022\003int(\0010\001\"\020\n\006config\022\006string\210\001\001\n\275\001\n\"RetrieveTPUEmbeddingADAMParameters\032\016\n\nparameters\030\001\032\013\n\007momenta\030\001\032\016\n\nvelocities\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\346\001\n0RetrieveTPUEmbeddingADAMParametersGradAccumDebug\032\016\n\nparameters\030\001\032\013\n\007momenta\030\001\032\016\n\nvelocities\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\303\001\n&RetrieveTPUEmbeddingAdadeltaParameters\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\013\n\007updates\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\354\001\n4RetrieveTPUEmbeddingAdadeltaParametersGradAccumDebug\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\013\n\007updates\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\265\001\n%RetrieveTPUEmbeddingAdagradParameters\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\336\001\n3RetrieveTPUEmbeddingAdagradParametersGradAccumDebug\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\304\001\n-RetrieveTPUEmbeddingCenteredRMSPropParameters\032\016\n\nparameters\030\001\032\006\n\002ms\030\001\032\007\n\003mom\030\001\032\006\n\002mg\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\277\001\n\"RetrieveTPUEmbeddingFTRLParameters\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\013\n\007linears\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\350\001\n0RetrieveTPUEmbeddingFTRLParametersGradAccumDebug\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\013\n\007linears\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\330\001\n-RetrieveTPUEmbeddingMDLAdagradLightParameters\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\013\n\007weights\030\001\032\014\n\010benefits\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\261\001\n&RetrieveTPUEmbeddingMomentumParameters\032\016\n\nparameters\030\001\032\013\n\007momenta\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\332\001\n4RetrieveTPUEmbeddingMomentumParametersGradAccumDebug\032\016\n\nparameters\030\001\032\013\n\007momenta\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\275\001\n-RetrieveTPUEmbeddingProximalAdagradParameters\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\346\001\n;RetrieveTPUEmbeddingProximalAdagradParametersGradAccumDebug\032\016\n\nparameters\030\001\032\020\n\014accumulators\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\264\001\n%RetrieveTPUEmbeddingRMSPropParameters\032\016\n\nparameters\030\001\032\006\n\002ms\030\001\032\007\n\003mom\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\335\001\n3RetrieveTPUEmbeddingRMSPropParametersGradAccumDebug\032\016\n\nparameters\030\001\032\006\n\002ms\030\001\032\007\n\003mom\030\001\032\031\n\025gradient_accumulators\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\n\265\001\n7RetrieveTPUEmbeddingStochasticGradientDescentParameters\032\016\n\nparameters\030\001\")\n\010table_id\022\003int\032\013\030\377\377\377\377\377\377\377\377\377\001(\0010\377\377\377\377\377\377\377\377\377\001\"\030\n\ntable_name\022\006string\032\002\022\000\"\021\n\nnum_shards\022\003int\"\017\n\010shard_id\022\003int\210\001\001\nv\n\031SendTPUEmbeddingGradients\022\r\n\006inputs\030\001*\001N\022\026\n\016learning_rates\030\001*\002NN\"\014\n\001N\022\003int(\0010\001\"\017\n\002NN\022\003int\032\002\030\000(\001\"\020\n\006config\022\006string\210\001\001\n\033\n\026ShutdownDistributedTPU\210\001\001\n\"\n\024TPUCompilationResult\032\n\n\006output\030\007\n|\n\027TPUEmbeddingActivations\022\026\n\022embedding_variable\030\001\022\026\n\022sliced_activations\030\001\032\n\n\006output\030\001\"\021\n\010table_id\022\003int(\001\"\022\n\tlookup_id\022\003int(\001\n,\n\022TPUOrdinalSelector\032\023\n\017device_ordinals\030\003\210\001\001\n{\n\022TPUPartitionedCall\022\013\n\004args2\003Tin\022\022\n\016device_ordinal\030\003\032\016\n\006output2\004Tout\"\023\n\003Tin\022\nlist(type)(\001\"\024\n\004Tout\022\nlist(type)(\001\"\t\n\001f\022\004func\n\344\002\n\024TPUReplicateMetadata\"\025\n\014num_replicas\022\003int(\001\" \n\025num_cores_per_replica\022\003int\032\002\030\001\"\026\n\010topology\022\006string\032\002\022\000\"\023\n\007use_tpu\022\004bool\032\002(\001\"\"\n\021device_assignment\022\tlist(int)\032\002\n\000\"\"\n\021computation_shape\022\tlist(int)\032\002\n\000\"%\n\021host_compute_core\022\014list(string)\032\002\n\000\"\037\n\013padding_map\022\014list(string)\032\002\n\000\"4\n\024step_marker_location\022\006string\032\024\022\022STEP_MARK_AT_ENTRY\" \n\024allow_soft_placement\022\004bool\032\002(\000\nJ\n\022TPUReplicatedInput\022\016\n\006inputs\"\001T*\001N\032\013\n\006output\"\001T\"\014\n\001N\022\003int(\0010\001\"\t\n\001T\022\004type\na\n\023TPUReplicatedOutput\022\n\n\005input\"\001T\032\032\n\007outputs\"\001T*\014num_replicas\"\027\n\014num_replicas\022\003int(\0010\001\"\t\n\001T\022\004type\n/\n\017WorkerHeartbeat\022\013\n\007request\030\007\032\014\n\010response\030\007\210\001\001")

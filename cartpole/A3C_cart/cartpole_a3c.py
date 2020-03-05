@@ -9,13 +9,14 @@ from keras.models import Model
 from keras.optimizers import Adam
 from keras import backend as K
 
-
+#tf.compat.v1.disable_v2_behavior()
 # global variables for threading
 episode = 0
 scores = []
 
-EPISODES = 2000
+EPISODES = 10
 
+#Works with Keras 2.0.3 and Tensorflow 1.15.2
 # This is A3C(Asynchronous Advantage Actor Critic) agent(global) for the Cartpole
 # In this example, we use A3C algorithm
 class A3CAgent:
@@ -151,6 +152,7 @@ class Agent(threading.Thread):
     # Thread interactive with environment
     def run(self):
         global episode
+        print(threading.current_thread())
         env = gym.make(self.env_name)
         while episode < EPISODES:
             state = env.reset()

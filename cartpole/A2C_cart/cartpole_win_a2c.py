@@ -56,12 +56,13 @@ class A2CAgent:
 
     # approximate policy and value using Neural Network
     # actor: state is input and probability of each action is output of model
+
     def build_actor(self):
         actor = Sequential()
         actor.add(Dense(24, input_dim=self.state_size, activation='relu',
-                        kernel_initializer='he_uniform'))
+                        kernel_initializer='glorot_uniform'))
         actor.add(Dense(self.action_size, activation='softmax',
-                        kernel_initializer='he_uniform'))
+                        kernel_initializer='glorot_uniform'))
         actor.summary()
         # See note regarding crossentropy in cartpole_reinforce.py
         actor.compile(loss='categorical_crossentropy',

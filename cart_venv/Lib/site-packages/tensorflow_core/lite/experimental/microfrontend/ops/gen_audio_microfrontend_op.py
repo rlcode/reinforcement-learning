@@ -1,0 +1,589 @@
+"""Python wrappers around TensorFlow ops.
+
+This file is MACHINE GENERATED! Do not edit.
+"""
+
+import collections as _collections
+import six as _six
+
+from tensorflow.python import pywrap_tensorflow as _pywrap_tensorflow
+from tensorflow.python.eager import context as _context
+from tensorflow.python.eager import core as _core
+from tensorflow.python.eager import execute as _execute
+from tensorflow.python.framework import dtypes as _dtypes
+from tensorflow.python.framework import errors as _errors
+from tensorflow.python.framework import tensor_shape as _tensor_shape
+
+from tensorflow.core.framework import op_def_pb2 as _op_def_pb2
+# Needed to trigger the call to _set_call_cpp_shape_fn.
+from tensorflow.python.framework import common_shapes as _common_shapes
+from tensorflow.python.framework import op_def_registry as _op_def_registry
+from tensorflow.python.framework import ops as _ops
+from tensorflow.python.framework import op_def_library as _op_def_library
+from tensorflow.python.util.deprecation import deprecated_endpoints
+from tensorflow.python.util import dispatch as _dispatch
+from tensorflow.python.util.tf_export import tf_export
+from tensorflow.python.util.tf_export import kwarg_only as _kwarg_only
+from tensorflow.tools.docs import doc_controls as _doc_controls
+
+
+@_dispatch.add_dispatch_list
+@tf_export('audio_microfrontend')
+def audio_microfrontend(audio, sample_rate=16000, window_size=25, window_step=10, num_channels=32, upper_band_limit=7500, lower_band_limit=125, smoothing_bits=10, even_smoothing=0.025, odd_smoothing=0.06, min_signal_remaining=0.05, enable_pcan=False, pcan_strength=0.95, pcan_offset=80, gain_bits=21, enable_log=True, scale_shift=6, left_context=0, right_context=0, frame_stride=1, zero_padding=False, out_scale=1, out_type=_dtypes.uint16, name=None):
+  r"""Audio Microfrontend Op.
+
+  This Op converts a sequence of audio data into one or more
+  feature vectors containing filterbanks of the input. The
+  conversion process uses a lightweight library to perform:
+
+  1. A slicing window function
+  2. Short-time FFTs
+  3. Filterbank calculations
+  4. Noise reduction
+  5. PCAN Auto Gain Control
+  6. Logarithmic scaling
+
+  Arguments
+    audio: 1D Tensor, int16 audio data in temporal ordering.
+    sample_rate: Integer, the sample rate of the audio in Hz.
+    window_size: Integer, length of desired time frames in ms.
+    window_step: Integer, length of step size for the next frame in ms.
+    num_channels: Integer, the number of filterbank channels to use.
+    upper_band_limit: Float, the highest frequency included in the filterbanks.
+    lower_band_limit: Float, the lowest frequency included in the filterbanks.
+    smoothing_bits: Int, scale up signal by 2^(smoothing_bits) before reduction.
+    even_smoothing: Float, smoothing coefficient for even-numbered channels.
+    odd_smoothing: Float, smoothing coefficient for odd-numbered channels.
+    min_signal_remaining: Float, fraction of signal to preserve in smoothing.
+    enable_pcan: Bool, enable PCAN auto gain control.
+    pcan_strength: Float, gain normalization exponent.
+    pcan_offset: Float, positive value added in the normalization denominator.
+    gain_bits: Int, number of fractional bits in the gain.
+    enable_log: Bool, enable logarithmic scaling of filterbanks.
+    scale_shift: Integer, scale filterbanks by 2^(scale_shift).
+    left_context: Integer, number of preceding frames to attach to each frame.
+    right_context: Integer, number of preceding frames to attach to each frame.
+    frame_stride: Integer, M frames to skip over, where output[n] = frame[n*M].
+    zero_padding: Bool, if left/right context is out-of-bounds, attach frame of
+                  zeroes. Otherwise, frame[0] or frame[size-1] will be copied.
+    out_scale: Integer, divide all filterbanks by this number.
+    out_type: DType, type of the output Tensor, defaults to UINT16.
+
+  Returns
+    filterbanks: 2D Tensor, each row is a time frame, each column is a channel.
+
+  Args:
+    audio: A `Tensor` of type `int16`.
+    sample_rate: An optional `int`. Defaults to `16000`.
+    window_size: An optional `int`. Defaults to `25`.
+    window_step: An optional `int`. Defaults to `10`.
+    num_channels: An optional `int`. Defaults to `32`.
+    upper_band_limit: An optional `float`. Defaults to `7500`.
+    lower_band_limit: An optional `float`. Defaults to `125`.
+    smoothing_bits: An optional `int`. Defaults to `10`.
+    even_smoothing: An optional `float`. Defaults to `0.025`.
+    odd_smoothing: An optional `float`. Defaults to `0.06`.
+    min_signal_remaining: An optional `float`. Defaults to `0.05`.
+    enable_pcan: An optional `bool`. Defaults to `False`.
+    pcan_strength: An optional `float`. Defaults to `0.95`.
+    pcan_offset: An optional `float`. Defaults to `80`.
+    gain_bits: An optional `int`. Defaults to `21`.
+    enable_log: An optional `bool`. Defaults to `True`.
+    scale_shift: An optional `int`. Defaults to `6`.
+    left_context: An optional `int`. Defaults to `0`.
+    right_context: An optional `int`. Defaults to `0`.
+    frame_stride: An optional `int`. Defaults to `1`.
+    zero_padding: An optional `bool`. Defaults to `False`.
+    out_scale: An optional `int`. Defaults to `1`.
+    out_type: An optional `tf.DType` from: `tf.uint16, tf.float32`. Defaults to `tf.uint16`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `out_type`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "AudioMicrofrontend", name, _ctx.post_execution_callbacks, audio,
+        "sample_rate", sample_rate, "window_size", window_size, "window_step",
+        window_step, "num_channels", num_channels, "upper_band_limit",
+        upper_band_limit, "lower_band_limit", lower_band_limit,
+        "smoothing_bits", smoothing_bits, "even_smoothing", even_smoothing,
+        "odd_smoothing", odd_smoothing, "min_signal_remaining",
+        min_signal_remaining, "enable_pcan", enable_pcan, "pcan_strength",
+        pcan_strength, "pcan_offset", pcan_offset, "gain_bits", gain_bits,
+        "enable_log", enable_log, "scale_shift", scale_shift, "left_context",
+        left_context, "right_context", right_context, "frame_stride",
+        frame_stride, "zero_padding", zero_padding, "out_scale", out_scale,
+        "out_type", out_type)
+      return _result
+    except _core._FallbackException:
+      try:
+        return audio_microfrontend_eager_fallback(
+            audio, sample_rate=sample_rate, window_size=window_size,
+            window_step=window_step, num_channels=num_channels,
+            upper_band_limit=upper_band_limit,
+            lower_band_limit=lower_band_limit, smoothing_bits=smoothing_bits,
+            even_smoothing=even_smoothing, odd_smoothing=odd_smoothing,
+            min_signal_remaining=min_signal_remaining,
+            enable_pcan=enable_pcan, pcan_strength=pcan_strength,
+            pcan_offset=pcan_offset, gain_bits=gain_bits,
+            enable_log=enable_log, scale_shift=scale_shift,
+            left_context=left_context, right_context=right_context,
+            frame_stride=frame_stride, zero_padding=zero_padding,
+            out_scale=out_scale, out_type=out_type, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+      except (TypeError, ValueError):
+        result = _dispatch.dispatch(
+              audio_microfrontend, audio=audio, sample_rate=sample_rate,
+                                   window_size=window_size,
+                                   window_step=window_step,
+                                   num_channels=num_channels,
+                                   upper_band_limit=upper_band_limit,
+                                   lower_band_limit=lower_band_limit,
+                                   smoothing_bits=smoothing_bits,
+                                   even_smoothing=even_smoothing,
+                                   odd_smoothing=odd_smoothing,
+                                   min_signal_remaining=min_signal_remaining,
+                                   enable_pcan=enable_pcan,
+                                   pcan_strength=pcan_strength,
+                                   pcan_offset=pcan_offset,
+                                   gain_bits=gain_bits, enable_log=enable_log,
+                                   scale_shift=scale_shift,
+                                   left_context=left_context,
+                                   right_context=right_context,
+                                   frame_stride=frame_stride,
+                                   zero_padding=zero_padding,
+                                   out_scale=out_scale, out_type=out_type,
+                                   name=name)
+        if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+          return result
+        raise
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if sample_rate is None:
+    sample_rate = 16000
+  sample_rate = _execute.make_int(sample_rate, "sample_rate")
+  if window_size is None:
+    window_size = 25
+  window_size = _execute.make_int(window_size, "window_size")
+  if window_step is None:
+    window_step = 10
+  window_step = _execute.make_int(window_step, "window_step")
+  if num_channels is None:
+    num_channels = 32
+  num_channels = _execute.make_int(num_channels, "num_channels")
+  if upper_band_limit is None:
+    upper_band_limit = 7500
+  upper_band_limit = _execute.make_float(upper_band_limit, "upper_band_limit")
+  if lower_band_limit is None:
+    lower_band_limit = 125
+  lower_band_limit = _execute.make_float(lower_band_limit, "lower_band_limit")
+  if smoothing_bits is None:
+    smoothing_bits = 10
+  smoothing_bits = _execute.make_int(smoothing_bits, "smoothing_bits")
+  if even_smoothing is None:
+    even_smoothing = 0.025
+  even_smoothing = _execute.make_float(even_smoothing, "even_smoothing")
+  if odd_smoothing is None:
+    odd_smoothing = 0.06
+  odd_smoothing = _execute.make_float(odd_smoothing, "odd_smoothing")
+  if min_signal_remaining is None:
+    min_signal_remaining = 0.05
+  min_signal_remaining = _execute.make_float(min_signal_remaining, "min_signal_remaining")
+  if enable_pcan is None:
+    enable_pcan = False
+  enable_pcan = _execute.make_bool(enable_pcan, "enable_pcan")
+  if pcan_strength is None:
+    pcan_strength = 0.95
+  pcan_strength = _execute.make_float(pcan_strength, "pcan_strength")
+  if pcan_offset is None:
+    pcan_offset = 80
+  pcan_offset = _execute.make_float(pcan_offset, "pcan_offset")
+  if gain_bits is None:
+    gain_bits = 21
+  gain_bits = _execute.make_int(gain_bits, "gain_bits")
+  if enable_log is None:
+    enable_log = True
+  enable_log = _execute.make_bool(enable_log, "enable_log")
+  if scale_shift is None:
+    scale_shift = 6
+  scale_shift = _execute.make_int(scale_shift, "scale_shift")
+  if left_context is None:
+    left_context = 0
+  left_context = _execute.make_int(left_context, "left_context")
+  if right_context is None:
+    right_context = 0
+  right_context = _execute.make_int(right_context, "right_context")
+  if frame_stride is None:
+    frame_stride = 1
+  frame_stride = _execute.make_int(frame_stride, "frame_stride")
+  if zero_padding is None:
+    zero_padding = False
+  zero_padding = _execute.make_bool(zero_padding, "zero_padding")
+  if out_scale is None:
+    out_scale = 1
+  out_scale = _execute.make_int(out_scale, "out_scale")
+  if out_type is None:
+    out_type = _dtypes.uint16
+  out_type = _execute.make_type(out_type, "out_type")
+  try:
+    _, _, _op = _op_def_lib._apply_op_helper(
+        "AudioMicrofrontend", audio=audio, sample_rate=sample_rate,
+                              window_size=window_size,
+                              window_step=window_step,
+                              num_channels=num_channels,
+                              upper_band_limit=upper_band_limit,
+                              lower_band_limit=lower_band_limit,
+                              smoothing_bits=smoothing_bits,
+                              even_smoothing=even_smoothing,
+                              odd_smoothing=odd_smoothing,
+                              min_signal_remaining=min_signal_remaining,
+                              enable_pcan=enable_pcan,
+                              pcan_strength=pcan_strength,
+                              pcan_offset=pcan_offset, gain_bits=gain_bits,
+                              enable_log=enable_log, scale_shift=scale_shift,
+                              left_context=left_context,
+                              right_context=right_context,
+                              frame_stride=frame_stride,
+                              zero_padding=zero_padding, out_scale=out_scale,
+                              out_type=out_type, name=name)
+  except (TypeError, ValueError):
+    result = _dispatch.dispatch(
+          audio_microfrontend, audio=audio, sample_rate=sample_rate,
+                               window_size=window_size,
+                               window_step=window_step,
+                               num_channels=num_channels,
+                               upper_band_limit=upper_band_limit,
+                               lower_band_limit=lower_band_limit,
+                               smoothing_bits=smoothing_bits,
+                               even_smoothing=even_smoothing,
+                               odd_smoothing=odd_smoothing,
+                               min_signal_remaining=min_signal_remaining,
+                               enable_pcan=enable_pcan,
+                               pcan_strength=pcan_strength,
+                               pcan_offset=pcan_offset, gain_bits=gain_bits,
+                               enable_log=enable_log, scale_shift=scale_shift,
+                               left_context=left_context,
+                               right_context=right_context,
+                               frame_stride=frame_stride,
+                               zero_padding=zero_padding, out_scale=out_scale,
+                               out_type=out_type, name=name)
+    if result is not _dispatch.OpDispatcher.NOT_SUPPORTED:
+      return result
+    raise
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("sample_rate", _op.get_attr("sample_rate"), "window_size",
+            _op.get_attr("window_size"), "window_step",
+            _op.get_attr("window_step"), "num_channels",
+            _op.get_attr("num_channels"), "upper_band_limit",
+            _op.get_attr("upper_band_limit"), "lower_band_limit",
+            _op.get_attr("lower_band_limit"), "smoothing_bits",
+            _op.get_attr("smoothing_bits"), "even_smoothing",
+            _op.get_attr("even_smoothing"), "odd_smoothing",
+            _op.get_attr("odd_smoothing"), "min_signal_remaining",
+            _op.get_attr("min_signal_remaining"), "enable_pcan",
+            _op.get_attr("enable_pcan"), "pcan_strength",
+            _op.get_attr("pcan_strength"), "pcan_offset",
+            _op.get_attr("pcan_offset"), "gain_bits",
+            _op.get_attr("gain_bits"), "enable_log",
+            _op.get_attr("enable_log"), "scale_shift",
+            _op.get_attr("scale_shift"), "left_context",
+            _op.get_attr("left_context"), "right_context",
+            _op.get_attr("right_context"), "frame_stride",
+            _op.get_attr("frame_stride"), "zero_padding",
+            _op.get_attr("zero_padding"), "out_scale",
+            _op.get_attr("out_scale"), "out_type",
+            _op._get_attr_type("out_type"))
+  _execute.record_gradient(
+      "AudioMicrofrontend", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def AudioMicrofrontend(audio, sample_rate=16000, window_size=25, window_step=10, num_channels=32, upper_band_limit=7500, lower_band_limit=125, smoothing_bits=10, even_smoothing=0.025, odd_smoothing=0.06, min_signal_remaining=0.05, enable_pcan=False, pcan_strength=0.95, pcan_offset=80, gain_bits=21, enable_log=True, scale_shift=6, left_context=0, right_context=0, frame_stride=1, zero_padding=False, out_scale=1, out_type=_dtypes.uint16, name=None):
+  return audio_microfrontend(audio=audio, sample_rate=sample_rate, window_size=window_size, window_step=window_step, num_channels=num_channels, upper_band_limit=upper_band_limit, lower_band_limit=lower_band_limit, smoothing_bits=smoothing_bits, even_smoothing=even_smoothing, odd_smoothing=odd_smoothing, min_signal_remaining=min_signal_remaining, enable_pcan=enable_pcan, pcan_strength=pcan_strength, pcan_offset=pcan_offset, gain_bits=gain_bits, enable_log=enable_log, scale_shift=scale_shift, left_context=left_context, right_context=right_context, frame_stride=frame_stride, zero_padding=zero_padding, out_scale=out_scale, out_type=out_type, name=name)
+AudioMicrofrontend.__doc__ = audio_microfrontend.__doc__
+AudioMicrofrontend = _doc_controls.do_not_generate_docs(_kwarg_only(AudioMicrofrontend))
+tf_export("raw_ops.AudioMicrofrontend")(AudioMicrofrontend)
+
+
+def audio_microfrontend_eager_fallback(audio, sample_rate=16000, window_size=25, window_step=10, num_channels=32, upper_band_limit=7500, lower_band_limit=125, smoothing_bits=10, even_smoothing=0.025, odd_smoothing=0.06, min_signal_remaining=0.05, enable_pcan=False, pcan_strength=0.95, pcan_offset=80, gain_bits=21, enable_log=True, scale_shift=6, left_context=0, right_context=0, frame_stride=1, zero_padding=False, out_scale=1, out_type=_dtypes.uint16, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function audio_microfrontend
+  """
+  _ctx = ctx if ctx else _context.context()
+  if sample_rate is None:
+    sample_rate = 16000
+  sample_rate = _execute.make_int(sample_rate, "sample_rate")
+  if window_size is None:
+    window_size = 25
+  window_size = _execute.make_int(window_size, "window_size")
+  if window_step is None:
+    window_step = 10
+  window_step = _execute.make_int(window_step, "window_step")
+  if num_channels is None:
+    num_channels = 32
+  num_channels = _execute.make_int(num_channels, "num_channels")
+  if upper_band_limit is None:
+    upper_band_limit = 7500
+  upper_band_limit = _execute.make_float(upper_band_limit, "upper_band_limit")
+  if lower_band_limit is None:
+    lower_band_limit = 125
+  lower_band_limit = _execute.make_float(lower_band_limit, "lower_band_limit")
+  if smoothing_bits is None:
+    smoothing_bits = 10
+  smoothing_bits = _execute.make_int(smoothing_bits, "smoothing_bits")
+  if even_smoothing is None:
+    even_smoothing = 0.025
+  even_smoothing = _execute.make_float(even_smoothing, "even_smoothing")
+  if odd_smoothing is None:
+    odd_smoothing = 0.06
+  odd_smoothing = _execute.make_float(odd_smoothing, "odd_smoothing")
+  if min_signal_remaining is None:
+    min_signal_remaining = 0.05
+  min_signal_remaining = _execute.make_float(min_signal_remaining, "min_signal_remaining")
+  if enable_pcan is None:
+    enable_pcan = False
+  enable_pcan = _execute.make_bool(enable_pcan, "enable_pcan")
+  if pcan_strength is None:
+    pcan_strength = 0.95
+  pcan_strength = _execute.make_float(pcan_strength, "pcan_strength")
+  if pcan_offset is None:
+    pcan_offset = 80
+  pcan_offset = _execute.make_float(pcan_offset, "pcan_offset")
+  if gain_bits is None:
+    gain_bits = 21
+  gain_bits = _execute.make_int(gain_bits, "gain_bits")
+  if enable_log is None:
+    enable_log = True
+  enable_log = _execute.make_bool(enable_log, "enable_log")
+  if scale_shift is None:
+    scale_shift = 6
+  scale_shift = _execute.make_int(scale_shift, "scale_shift")
+  if left_context is None:
+    left_context = 0
+  left_context = _execute.make_int(left_context, "left_context")
+  if right_context is None:
+    right_context = 0
+  right_context = _execute.make_int(right_context, "right_context")
+  if frame_stride is None:
+    frame_stride = 1
+  frame_stride = _execute.make_int(frame_stride, "frame_stride")
+  if zero_padding is None:
+    zero_padding = False
+  zero_padding = _execute.make_bool(zero_padding, "zero_padding")
+  if out_scale is None:
+    out_scale = 1
+  out_scale = _execute.make_int(out_scale, "out_scale")
+  if out_type is None:
+    out_type = _dtypes.uint16
+  out_type = _execute.make_type(out_type, "out_type")
+  audio = _ops.convert_to_tensor(audio, _dtypes.int16)
+  _inputs_flat = [audio]
+  _attrs = ("sample_rate", sample_rate, "window_size", window_size,
+  "window_step", window_step, "num_channels", num_channels,
+  "upper_band_limit", upper_band_limit, "lower_band_limit", lower_band_limit,
+  "smoothing_bits", smoothing_bits, "even_smoothing", even_smoothing,
+  "odd_smoothing", odd_smoothing, "min_signal_remaining",
+  min_signal_remaining, "enable_pcan", enable_pcan, "pcan_strength",
+  pcan_strength, "pcan_offset", pcan_offset, "gain_bits", gain_bits,
+  "enable_log", enable_log, "scale_shift", scale_shift, "left_context",
+  left_context, "right_context", right_context, "frame_stride", frame_stride,
+  "zero_padding", zero_padding, "out_scale", out_scale, "out_type", out_type)
+  _result = _execute.execute(b"AudioMicrofrontend", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "AudioMicrofrontend", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+_ops.RegisterShape("AudioMicrofrontend")(None)
+
+def _InitOpDefLibrary(op_list_proto_bytes):
+  op_list = _op_def_pb2.OpList()
+  op_list.ParseFromString(op_list_proto_bytes)
+  _op_def_registry.register_op_list(op_list)
+  op_def_lib = _op_def_library.OpDefLibrary()
+  op_def_lib.add_op_list(op_list)
+  return op_def_lib
+# op {
+#   name: "AudioMicrofrontend"
+#   input_arg {
+#     name: "audio"
+#     type: DT_INT16
+#   }
+#   output_arg {
+#     name: "filterbanks"
+#     type_attr: "out_type"
+#   }
+#   attr {
+#     name: "sample_rate"
+#     type: "int"
+#     default_value {
+#       i: 16000
+#     }
+#   }
+#   attr {
+#     name: "window_size"
+#     type: "int"
+#     default_value {
+#       i: 25
+#     }
+#   }
+#   attr {
+#     name: "window_step"
+#     type: "int"
+#     default_value {
+#       i: 10
+#     }
+#   }
+#   attr {
+#     name: "num_channels"
+#     type: "int"
+#     default_value {
+#       i: 32
+#     }
+#   }
+#   attr {
+#     name: "upper_band_limit"
+#     type: "float"
+#     default_value {
+#       f: 7500
+#     }
+#   }
+#   attr {
+#     name: "lower_band_limit"
+#     type: "float"
+#     default_value {
+#       f: 125
+#     }
+#   }
+#   attr {
+#     name: "smoothing_bits"
+#     type: "int"
+#     default_value {
+#       i: 10
+#     }
+#   }
+#   attr {
+#     name: "even_smoothing"
+#     type: "float"
+#     default_value {
+#       f: 0.025
+#     }
+#   }
+#   attr {
+#     name: "odd_smoothing"
+#     type: "float"
+#     default_value {
+#       f: 0.06
+#     }
+#   }
+#   attr {
+#     name: "min_signal_remaining"
+#     type: "float"
+#     default_value {
+#       f: 0.05
+#     }
+#   }
+#   attr {
+#     name: "enable_pcan"
+#     type: "bool"
+#     default_value {
+#       b: false
+#     }
+#   }
+#   attr {
+#     name: "pcan_strength"
+#     type: "float"
+#     default_value {
+#       f: 0.95
+#     }
+#   }
+#   attr {
+#     name: "pcan_offset"
+#     type: "float"
+#     default_value {
+#       f: 80
+#     }
+#   }
+#   attr {
+#     name: "gain_bits"
+#     type: "int"
+#     default_value {
+#       i: 21
+#     }
+#   }
+#   attr {
+#     name: "enable_log"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   attr {
+#     name: "scale_shift"
+#     type: "int"
+#     default_value {
+#       i: 6
+#     }
+#   }
+#   attr {
+#     name: "left_context"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "right_context"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "frame_stride"
+#     type: "int"
+#     default_value {
+#       i: 1
+#     }
+#   }
+#   attr {
+#     name: "zero_padding"
+#     type: "bool"
+#     default_value {
+#       b: false
+#     }
+#   }
+#   attr {
+#     name: "out_scale"
+#     type: "int"
+#     default_value {
+#       i: 1
+#     }
+#   }
+#   attr {
+#     name: "out_type"
+#     type: "type"
+#     default_value {
+#       type: DT_UINT16
+#     }
+#     allowed_values {
+#       list {
+#         type: DT_UINT16
+#         type: DT_FLOAT
+#       }
+#     }
+#   }
+# }
+_op_def_lib = _InitOpDefLibrary(b"\n\223\005\n\022AudioMicrofrontend\022\t\n\005audio\030\005\032\027\n\013filterbanks\"\010out_type\"\027\n\013sample_rate\022\003int\032\003\030\200}\"\026\n\013window_size\022\003int\032\002\030\031\"\026\n\013window_step\022\003int\032\002\030\n\"\027\n\014num_channels\022\003int\032\002\030 \" \n\020upper_band_limit\022\005float\032\005%\000`\352E\" \n\020lower_band_limit\022\005float\032\005%\000\000\372B\"\031\n\016smoothing_bits\022\003int\032\002\030\n\"\036\n\016even_smoothing\022\005float\032\005%\315\314\314<\"\035\n\rodd_smoothing\022\005float\032\005%\217\302u=\"$\n\024min_signal_remaining\022\005float\032\005%\315\314L=\"\027\n\013enable_pcan\022\004bool\032\002(\000\"\035\n\rpcan_strength\022\005float\032\005%33s?\"\033\n\013pcan_offset\022\005float\032\005%\000\000\240B\"\024\n\tgain_bits\022\003int\032\002\030\025\"\026\n\nenable_log\022\004bool\032\002(\001\"\026\n\013scale_shift\022\003int\032\002\030\006\"\027\n\014left_context\022\003int\032\002\030\000\"\030\n\rright_context\022\003int\032\002\030\000\"\027\n\014frame_stride\022\003int\032\002\030\001\"\030\n\014zero_padding\022\004bool\032\002(\000\"\024\n\tout_scale\022\003int\032\002\030\001\"\034\n\010out_type\022\004type\032\0020\021:\006\n\0042\002\021\001")
