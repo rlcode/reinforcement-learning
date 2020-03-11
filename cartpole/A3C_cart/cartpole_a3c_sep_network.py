@@ -15,27 +15,41 @@ import argparse
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
-#tf.compat.v1.disable_v2_behavior()
 # global variables for threading
 episode = 0
-scores = []
-
+scores, train_scores = [], []
 EPISODES = 100
-TRAIN_EP = 100
 
 #Works with Keras 2.0.3 and Tensorflow 1.15.2
 # This is A3C(Asynchronous Advantage Actor Critic) agent(global) for the Cartpole
-# In this example, we use A3C algorithm
 
 def handleArguments():
     """Handles CLI arguments and saves them globally"""
-    # TODO: enable train-mode and test-mode (or else not necessary because we don't need to enforce exploration for stochastic policy)
     parser = argparse.ArgumentParser(
         description="Switch between modes in A2C or loading models from previous games")
     parser.add_argument("--demo_mode", "-d", help="Renders the gym environment", action="store_true")
     parser.add_argument("--load_model", "-l", help="Loads the model of previously gained training data", action="store_true")
     global args
     args = parser.parse_args()
+
+
+def createPlots(figure, threads):
+    # create plotter for windows os
+    rcParams.update({'figure.autolayout': True})
+    fig, fft_plot = plt.subplots()
+    matplotlib.rc('xtick')
+    matplotlib.rc('ytick')
+    fft_plot.set_xlabel("Episode", fontsize=18)
+    fft_plot.set_ylabel("Score", fontsize=18)
+    plot = scores[:]
+    if threads is False:
+        pylab.plot(range(len(plot)), plot, 'b')
+        pylab.show()
+    else:
+        pylab.plot(range(len(train_scores)), train_scores, color='blue')
+        pylab.show()
+    pylab.close('all')
+
 
 class A3CAgent:
     def __init__(self, state_size, action_size, env_name):
@@ -69,16 +83,19 @@ class A3CAgent:
     # approximate policy and value using Neural Network
     # actor -> state is input and probability of each action is output of network
     # critic -> state is input and value of state is output of network
-    # actor and critic network share first hidden layer
+    # actor and critic NN are completely separate
     def build_model(self):
-        state = Input(batch_shape=(None,  self.state_size))
-        shared = Dense(self.hidden1, input_dim=self.state_size, activation='relu', kernel_initializer='glorot_uniform')(state)
+        state = Input(batch_shape=(None, self.state_size))
 
-        actor_hidden = Dense(self.hidden2, activation='relu', kernel_initializer='glorot_uniform')(shared)
-        action_prob = Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform')(actor_hidden)
+        actor_hidden1 = Dense(self.hidden1, input_dim=self.state_size, activation='relu', kernel_initializer='glorot_uniform')(state)
+        critic_hidden1 = Dense(self.hidden1, input_dim=self.state_size, activation='relu',
+                              kernel_initializer='glorot_uniform')(state)
 
-        value_hidden = Dense(self.hidden2, activation='relu', kernel_initializer='he_uniform')(shared)
-        state_value = Dense(1, activation='linear', kernel_initializer='he_uniform')(value_hidden)
+        actor_hidden2 = Dense(self.hidden2, activation='relu', kernel_initializer='glorot_uniform')(actor_hidden1)
+        action_prob = Dense(self.action_size, activation='softmax', kernel_initializer='glorot_uniform')(actor_hidden2)
+
+        critic_hidden2 = Dense(self.hidden2, activation='relu', kernel_initializer='he_uniform')(critic_hidden1)
+        state_value = Dense(1, activation='linear', kernel_initializer='he_uniform')(critic_hidden2)
 
         actor = Model(inputs=state, outputs=action_prob)
         critic = Model(inputs=state, outputs=state_value)
@@ -91,7 +108,7 @@ class A3CAgent:
 
         return actor, critic
 
-    # make loss function for Policy Gradient
+ # make loss function for Policy Gradient
     # [log(action probability) * advantages] will be input for the back prop
     # we add entropy of action probability to loss
     def actor_optimizer(self):
@@ -129,30 +146,34 @@ class A3CAgent:
     # make agents(local) and start training
     def train(self):
         global episode
-        agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
-                        self.action_size, self.state_size) for i in range(self.threads)]
 
+        agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
+                        self.action_size, self.state_size, False) for i in range(self.threads)]
         for agent in agents:
             agent.start()
-            # TODO: How to stop threads?? They still seem to run in the background...
 
         while True:
-            time.sleep(5)
-            # TODO: episode % 0 doesn't work!
+            #time.sleep(5)
             if episode >= EPISODES or episode % 50 == 0:
+                print("Saving Model")
                 self.save_model('./save_model/a3c_cart')
-                if episode >= EPISODES:
-                    episode = 0
-                    break
+            if episode >= EPISODES:
+                createPlots(1, False)
+                episode = 0
+                break
+
         time.sleep(3)
         print("Starting Training Sequence, Loading Model...")
-        time.sleep(5)
         self.load_model('./save_model/a3c_cart')
+        time.sleep(3)
         train_agent = Agent(1, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
-                        self.action_size, self.state_size)
-        # TODO: pass args.demo_mode!
-        self.env_name.render()
+                        self.action_size, self.state_size, True)
         train_agent.start()
+
+        while True:
+            if episode >= EPISODES:
+                createPlots(2, True)
+                break
 
     def save_model(self, name):
         self.actor.save_weights(name + "_actor.h5")
@@ -164,7 +185,7 @@ class A3CAgent:
 
 # This is Agent(local) class for threading
 class Agent(threading.Thread):
-    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size):
+    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size, train_mode):
         threading.Thread.__init__(self)
 
         self.states = []
@@ -179,30 +200,32 @@ class Agent(threading.Thread):
         self.discount_factor = discount_factor
         self.action_size = action_size
         self.state_size = state_size
+        self.train_mode = train_mode
 
     # Thread interactive with environment
     def run(self):
         global episode
-        if args.demo_mode:
-            self.env_name.render()
         print(threading.current_thread())
         env = gym.make(self.env_name)
         while episode < EPISODES:
             state = env.reset()
+            if self.train_mode and args.demo_mode:
+                env.render()
+
             score = 0
             while True:
                 action = self.get_action(state)
                 next_state, reward, done, _ = env.step(action)
                 score += reward
-
                 self.memory(state, action, reward)
-
                 state = next_state
 
                 if done:
                     episode += 1
                     print("episode: ", episode, "/ score : ", score)
                     scores.append(score)
+                    if self.train_mode is True:
+                        train_scores.append(score)
                     self.train_episode(score != 500)
                     break
 
@@ -255,22 +278,11 @@ if __name__ == "__main__":
 
     env.close()
 
-    # create plotter for windows os
-    rcParams.update({'figure.autolayout': True})
-    fig, fft_plot = plt.subplots()
-    matplotlib.rc('xtick', labelsize=18)
-    matplotlib.rc('ytick', labelsize=18)
-
     global_agent = A3CAgent(state_size, action_size, env_name)
     global_agent.train()
 
-    # plot episodes on x-axis and the score on y-axis
-    fft_plot.set_xlabel("Episode", fontsize=18)
-    fft_plot.set_ylabel("Score", fontsize=18)
-    plot = scores[:]
-    pylab.plot(range(len(plot)), plot, 'b')
-    pylab.show()
-
     sys.exit()
+
+
 
 

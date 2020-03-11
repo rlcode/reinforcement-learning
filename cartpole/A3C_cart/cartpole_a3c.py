@@ -2,23 +2,55 @@ import threading
 import numpy as np
 import tensorflow as tf
 import pylab
-import time
+import matplotlib
+from matplotlib import rcParams, pyplot as plt
 import gym
 from keras.layers import Dense, Input
 from keras.models import Model
 from keras.optimizers import Adam
 from keras import backend as K
+import sys
 
-#tf.compat.v1.disable_v2_behavior()
+import argparse
+import time
+timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
+
 # global variables for threading
 episode = 0
-scores = []
-
-EPISODES = 10
+scores, train_scores = [], []
+EPISODES = 100
 
 #Works with Keras 2.0.3 and Tensorflow 1.15.2
 # This is A3C(Asynchronous Advantage Actor Critic) agent(global) for the Cartpole
-# In this example, we use A3C algorithm
+
+def handleArguments():
+    """Handles CLI arguments and saves them globally"""
+    parser = argparse.ArgumentParser(
+        description="Switch between modes in A2C or loading models from previous games")
+    parser.add_argument("--demo_mode", "-d", help="Renders the gym environment", action="store_true")
+    parser.add_argument("--load_model", "-l", help="Loads the model of previously gained training data", action="store_true")
+    global args
+    args = parser.parse_args()
+
+
+def createPlots(figure, threads):
+    # create plotter for windows os
+    rcParams.update({'figure.autolayout': True})
+    fig, fft_plot = plt.subplots()
+    matplotlib.rc('xtick')
+    matplotlib.rc('ytick')
+    fft_plot.set_xlabel("Episode", fontsize=18)
+    fft_plot.set_ylabel("Score", fontsize=18)
+    plot = scores[:]
+    if threads is False:
+        pylab.plot(range(len(plot)), plot, 'b')
+        pylab.show()
+    else:
+        pylab.plot(range(len(train_scores)), train_scores, color='blue')
+        pylab.show()
+    pylab.close('all')
+
+
 class A3CAgent:
     def __init__(self, state_size, action_size, env_name):
         # get size of state and action
@@ -44,6 +76,9 @@ class A3CAgent:
         self.sess = tf.InteractiveSession()
         K.set_session(self.sess)
         self.sess.run(tf.global_variables_initializer())
+
+        if args.load_model:
+            self.load_model("./save_model/a3c_cart")
 
     # approximate policy and value using Neural Network
     # actor -> state is input and probability of each action is output of network
@@ -107,21 +142,35 @@ class A3CAgent:
 
     # make agents(local) and start training
     def train(self):
-        # self.load_model('./save_model/cartpole_a3c.h5')
-        agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
-                        self.action_size, self.state_size) for i in range(self.threads)]
+        global episode
 
+        agents = [Agent(i, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
+                        self.action_size, self.state_size, False) for i in range(self.threads)]
         for agent in agents:
             agent.start()
 
         while True:
-            time.sleep(20)
+            #time.sleep(5)
+            if episode >= EPISODES or episode % 50 == 0:
+                print("Saving Model")
+                self.save_model('./save_model/a3c_cart')
+            if episode >= EPISODES:
+                createPlots(1, False)
+                episode = 0
+                break
 
-            plot = scores[:]
-            pylab.plot(range(len(plot)), plot, 'b')
-            pylab.savefig("./save_graph/cartpole_a3c.png")
+        time.sleep(3)
+        print("Starting Training Sequence, Loading Model...")
+        self.load_model('./save_model/a3c_cart')
+        time.sleep(3)
+        train_agent = Agent(1, self.actor, self.critic, self.optimizer, self.env_name, self.discount_factor,
+                        self.action_size, self.state_size, True)
+        train_agent.start()
 
-            self.save_model('./save_model/cartpole_a3c.h5')
+        while True:
+            if episode >= EPISODES:
+                createPlots(2, True)
+                break
 
     def save_model(self, name):
         self.actor.save_weights(name + "_actor.h5")
@@ -133,7 +182,7 @@ class A3CAgent:
 
 # This is Agent(local) class for threading
 class Agent(threading.Thread):
-    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size):
+    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size, train_mode):
         threading.Thread.__init__(self)
 
         self.states = []
@@ -148,6 +197,7 @@ class Agent(threading.Thread):
         self.discount_factor = discount_factor
         self.action_size = action_size
         self.state_size = state_size
+        self.train_mode = train_mode
 
     # Thread interactive with environment
     def run(self):
@@ -156,6 +206,9 @@ class Agent(threading.Thread):
         env = gym.make(self.env_name)
         while episode < EPISODES:
             state = env.reset()
+            if self.train_mode and args.demo_mode:
+                env.render()
+
             score = 0
             while True:
                 action = self.get_action(state)
@@ -170,6 +223,8 @@ class Agent(threading.Thread):
                     episode += 1
                     print("episode: ", episode, "/ score : ", score)
                     scores.append(score)
+                    if self.train_mode is True:
+                        train_scores.append(score)
                     self.train_episode(score != 500)
                     break
 
@@ -213,6 +268,7 @@ class Agent(threading.Thread):
 
 
 if __name__ == "__main__":
+    handleArguments()
     env_name = 'CartPole-v1'
     env = gym.make(env_name)
 
@@ -223,3 +279,7 @@ if __name__ == "__main__":
 
     global_agent = A3CAgent(state_size, action_size, env_name)
     global_agent.train()
+
+    sys.exit()
+
+
