@@ -182,7 +182,7 @@ class A3CAgent:
 
 # This is Agent(local) class for threading
 class Agent(threading.Thread):
-    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size, train_mode):
+    def __init__(self, index, actor, critic, optimizer, env_name, discount_factor, action_size, state_size, test_mode):
         threading.Thread.__init__(self)
 
         self.states = []
@@ -197,7 +197,7 @@ class Agent(threading.Thread):
         self.discount_factor = discount_factor
         self.action_size = action_size
         self.state_size = state_size
-        self.train_mode = train_mode
+        self.test_mode = test_mode
 
     # Thread interactive with environment
     def run(self):
@@ -206,7 +206,7 @@ class Agent(threading.Thread):
         env = gym.make(self.env_name)
         while episode < EPISODES:
             state = env.reset()
-            if self.train_mode and args.demo_mode:
+            if self.test_mode and args.demo_mode:
                 env.render()
 
             score = 0
