@@ -14,6 +14,7 @@ from keras.models import Model
 from keras.optimizers import Adam
 
 import argparse
+from datetime import datetime
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
@@ -41,6 +42,7 @@ def handleArguments():
     parser.add_argument("--load_model", "-l", help="Loads the model of previously gained training data", action="store_true")
     global args
     args = parser.parse_args()
+
 
 class A2CAgent:
     def __init__(self, state_size, action_size):
@@ -119,6 +121,7 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
+    starttime = datetime.now()
     handleArguments()
     # In case of CartPole-v1, maximum length of episode is 500
     env = gym.make('CartPole-v1')
@@ -165,12 +168,12 @@ if __name__ == "__main__":
                 episodes.append(e)
 
                 # plot e on x-axis and the score on y-axis
-                fft_plot.set_xlabel("Episodes", fontsize=18)
+                fft_plot.set_xlabel("Episode", fontsize=18)
                 fft_plot.set_ylabel("Score", fontsize=18)
 
                 print("episode:", e, "  score:", score)
 
-                # if the mean of scores of last 10 episode is bigger than 490
+                # if the mean of scores of last 10 episodes is bigger than 490
                 # stop training
                 #if np.mean(scores[-min(10, len(scores)):]) > 490:
                 #    sys.exit()
@@ -183,4 +186,9 @@ if __name__ == "__main__":
     # plot the results before exit
     plt.plot(episodes, scores, color='blue')
     plt.show()
+    print ()
+    endtime = datetime.now()
+
+    print ("Number of Episodes: ", EPISODES, " | Finished within: ", endtime - starttime)
+    time.sleep(5)
     sys.exit()

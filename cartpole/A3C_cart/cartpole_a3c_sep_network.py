@@ -12,6 +12,7 @@ from keras import backend as K
 import sys
 
 import argparse
+from datetime import datetime
 import time
 timestr = time.strftime("%d.%m.%Y - %H:%M:%S")
 
@@ -33,7 +34,7 @@ def handleArguments():
     args = parser.parse_args()
 
 
-def createPlots(figure, threads):
+def createPlots(threads):
     # create plotter for windows os
     rcParams.update({'figure.autolayout': True})
     fig, fft_plot = plt.subplots()
@@ -108,7 +109,7 @@ class A3CAgent:
 
         return actor, critic
 
- # make loss function for Policy Gradient
+    # make loss function for Policy Gradient
     # [log(action probability) * advantages] will be input for the back prop
     # we add entropy of action probability to loss
     def actor_optimizer(self):
@@ -153,15 +154,18 @@ class A3CAgent:
             agent.start()
 
         while True:
-            #time.sleep(5)
             if episode >= EPISODES or episode % 50 == 0:
                 print("Saving Model")
                 self.save_model('./save_model/a3c_cart')
             if episode >= EPISODES:
-                createPlots(1, False)
+                createPlots(False)
                 episode = 0
                 break
 
+        print()
+        endtime = datetime.now()
+
+        print("Number of Episodes: ", EPISODES, " | Finished within: ", endtime - starttime)
         time.sleep(3)
         print("Starting Training Sequence, Loading Model...")
         self.load_model('./save_model/a3c_cart')
@@ -172,7 +176,7 @@ class A3CAgent:
 
         while True:
             if episode >= EPISODES:
-                createPlots(2, True)
+                createPlots(True)
                 break
 
     def save_model(self, name):
@@ -217,7 +221,9 @@ class Agent(threading.Thread):
                 action = self.get_action(state)
                 next_state, reward, done, _ = env.step(action)
                 score += reward
+
                 self.memory(state, action, reward)
+
                 state = next_state
 
                 if done:
@@ -269,6 +275,7 @@ class Agent(threading.Thread):
 
 
 if __name__ == "__main__":
+    starttime = datetime.now()
     handleArguments()
     env_name = 'CartPole-v1'
     env = gym.make(env_name)
@@ -282,7 +289,5 @@ if __name__ == "__main__":
     global_agent.train()
 
     sys.exit()
-
-
 
 
