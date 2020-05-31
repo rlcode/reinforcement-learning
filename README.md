@@ -5,9 +5,9 @@
 > Maintainer - [Julien Look](https://github.com/juice1000)
 
 ## Dependencies
-1. Python 3.5
-2. Tensorflow 1.0.0
-3. Keras
+1. Python 3.6
+2. Tensorflow 1.5.0
+3. Keras 2.3
 4. numpy
 5. pandas
 6. matplot
@@ -24,6 +24,5 @@ pip install -r requirements.txt
 
 **CartPole** - Applying deep reinforcement learning on basic Cartpole game.
 
-- [Policy Gradient](./cartpole/reinforce_cart)
 - [Actor Critic (A2C)](./cartpole/A2C_cart)
 - [Asynchronous Advantage Actor Critic (A3C)](./cartpole/A3C_cart)
