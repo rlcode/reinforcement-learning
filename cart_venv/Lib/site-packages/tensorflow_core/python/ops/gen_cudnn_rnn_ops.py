@@ -1,0 +1,3515 @@
+"""Python wrappers around TensorFlow ops.
+
+This file is MACHINE GENERATED! Do not edit.
+"""
+
+import collections as _collections
+import six as _six
+
+from tensorflow.python import pywrap_tensorflow as _pywrap_tensorflow
+from tensorflow.python.eager import context as _context
+from tensorflow.python.eager import core as _core
+from tensorflow.python.eager import execute as _execute
+from tensorflow.python.framework import dtypes as _dtypes
+from tensorflow.python.framework import errors as _errors
+from tensorflow.python.framework import tensor_shape as _tensor_shape
+
+from tensorflow.core.framework import op_def_pb2 as _op_def_pb2
+# Needed to trigger the call to _set_call_cpp_shape_fn.
+from tensorflow.python.framework import common_shapes as _common_shapes
+from tensorflow.python.framework import op_def_registry as _op_def_registry
+from tensorflow.python.framework import ops as _ops
+from tensorflow.python.framework import op_def_library as _op_def_library
+from tensorflow.python.util.deprecation import deprecated_endpoints
+from tensorflow.python.util import dispatch as _dispatch
+from tensorflow.python.util.tf_export import tf_export
+from tensorflow.python.util.tf_export import kwarg_only as _kwarg_only
+from tensorflow.tools.docs import doc_controls as _doc_controls
+
+
+_cudnn_rnn_outputs = ["output", "output_h", "output_c", "reserve_space"]
+_CudnnRNNOutput = _collections.namedtuple(
+    "CudnnRNN", _cudnn_rnn_outputs)
+
+
+def cudnn_rnn(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None):
+  r"""A RNN backed by cuDNN.
+
+  Computes the RNN from the input and initial states, with respect to the params
+  buffer.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+    the actual computation before the first layer. 'skip_input' is only allowed
+    when input_size == num_units; 'auto_select' implies 'skip_input' when
+    input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: A 3-D tensor with the shape of [seq_length, batch_size, input_size].
+  input_h: A 3-D tensor with the shape of [num_layer * dir, batch_size,
+      num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  output: A 3-D tensor with the shape of [seq_length, batch_size,
+      dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  is_training: Indicates whether this operation is used for inferenece or
+    training.
+  reserve_space: An opaque tensor that can be used in backprop calculation. It
+    is only produced if is_training is false.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    is_training: An optional `bool`. Defaults to `True`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (output, output_h, output_c, reserve_space).
+
+    output: A `Tensor`. Has the same type as `input`.
+    output_h: A `Tensor`. Has the same type as `input`.
+    output_c: A `Tensor`. Has the same type as `input`.
+    reserve_space: A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name, "CudnnRNN",
+        name, _ctx.post_execution_callbacks, input, input_h, input_c, params,
+        "rnn_mode", rnn_mode, "input_mode", input_mode, "direction",
+        direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+        "is_training", is_training)
+      _result = _CudnnRNNOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_eager_fallback(
+            input, input_h, input_c, params, rnn_mode=rnn_mode,
+            input_mode=input_mode, direction=direction, dropout=dropout,
+            seed=seed, seed2=seed2, is_training=is_training, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNN", input=input, input_h=input_h, input_c=input_c,
+                    params=params, rnn_mode=rnn_mode, input_mode=input_mode,
+                    direction=direction, dropout=dropout, seed=seed,
+                    seed2=seed2, is_training=is_training, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "is_training", _op.get_attr("is_training"))
+  _execute.record_gradient(
+      "CudnnRNN", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNOutput._make(_result)
+  return _result
+
+def CudnnRNN(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None):
+  return cudnn_rnn(input=input, input_h=input_h, input_c=input_c, params=params, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, is_training=is_training, name=name)
+CudnnRNN.__doc__ = cudnn_rnn.__doc__
+CudnnRNN = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNN))
+tf_export("raw_ops.CudnnRNN")(CudnnRNN)
+
+
+def cudnn_rnn_eager_fallback(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params], _ctx)
+  (input, input_h, input_c, params) = _inputs_T
+  _inputs_flat = [input, input_h, input_c, params]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+  "is_training", is_training)
+  _result = _execute.execute(b"CudnnRNN", 4, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNN", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNOutput._make(_result)
+  return _result
+
+
+_cudnn_rnn_backprop_outputs = ["input_backprop", "input_h_backprop",
+                              "input_c_backprop", "params_backprop"]
+_CudnnRNNBackpropOutput = _collections.namedtuple(
+    "CudnnRNNBackprop", _cudnn_rnn_backprop_outputs)
+
+
+def cudnn_rnn_backprop(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  r"""Backprop step of CudnnRNN.
+
+  Compute the backprop of both data and weights in a RNN.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+      the actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: A 3-D tensor with the shape of [seq_length, batch_size, input_size].
+  input_h: A 3-D tensor with the shape of [num_layer * dir, batch_size,
+      num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  output: A 3-D tensor with the shape of [seq_length, batch_size,
+      dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  output_backprop: A 3-D tensor with the same shape as output in the forward pass.
+  output_h_backprop: A 3-D tensor with the same shape as output_h in the forward
+      pass.
+  output_c_backprop: A 3-D tensor with the same shape as output_c in the forward
+      pass.
+  reserve_space: The same reserve_space produced in for forward operation.
+  input_backprop: The backprop to input in the forward pass. Has the same shape
+      as input.
+  input_h_backprop: The backprop to input_h in the forward pass. Has the same
+      shape as input_h.
+  input_c_backprop: The backprop to input_c in the forward pass. Has the same
+      shape as input_c.
+  params_backprop: The backprop to the params buffer in the forward pass. Has the
+      same shape as params.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    output: A `Tensor`. Must have the same type as `input`.
+    output_h: A `Tensor`. Must have the same type as `input`.
+    output_c: A `Tensor`. Must have the same type as `input`.
+    output_backprop: A `Tensor`. Must have the same type as `input`.
+    output_h_backprop: A `Tensor`. Must have the same type as `input`.
+    output_c_backprop: A `Tensor`. Must have the same type as `input`.
+    reserve_space: A `Tensor`. Must have the same type as `input`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (input_backprop, input_h_backprop, input_c_backprop, params_backprop).
+
+    input_backprop: A `Tensor`. Has the same type as `input`.
+    input_h_backprop: A `Tensor`. Has the same type as `input`.
+    input_c_backprop: A `Tensor`. Has the same type as `input`.
+    params_backprop: A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNBackprop", name, _ctx.post_execution_callbacks, input,
+        input_h, input_c, params, output, output_h, output_c, output_backprop,
+        output_h_backprop, output_c_backprop, reserve_space, "rnn_mode",
+        rnn_mode, "input_mode", input_mode, "direction", direction, "dropout",
+        dropout, "seed", seed, "seed2", seed2)
+      _result = _CudnnRNNBackpropOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_backprop_eager_fallback(
+            input, input_h, input_c, params, output, output_h, output_c,
+            output_backprop, output_h_backprop, output_c_backprop,
+            reserve_space, rnn_mode=rnn_mode, input_mode=input_mode,
+            direction=direction, dropout=dropout, seed=seed, seed2=seed2,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNBackprop", input=input, input_h=input_h, input_c=input_c,
+                            params=params, output=output, output_h=output_h,
+                            output_c=output_c,
+                            output_backprop=output_backprop,
+                            output_h_backprop=output_h_backprop,
+                            output_c_backprop=output_c_backprop,
+                            reserve_space=reserve_space, rnn_mode=rnn_mode,
+                            input_mode=input_mode, direction=direction,
+                            dropout=dropout, seed=seed, seed2=seed2,
+                            name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"))
+  _execute.record_gradient(
+      "CudnnRNNBackprop", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropOutput._make(_result)
+  return _result
+
+def CudnnRNNBackprop(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  return cudnn_rnn_backprop(input=input, input_h=input_h, input_c=input_c, params=params, output=output, output_h=output_h, output_c=output_c, output_backprop=output_backprop, output_h_backprop=output_h_backprop, output_c_backprop=output_c_backprop, reserve_space=reserve_space, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, name=name)
+CudnnRNNBackprop.__doc__ = cudnn_rnn_backprop.__doc__
+CudnnRNNBackprop = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNBackprop))
+tf_export("raw_ops.CudnnRNNBackprop")(CudnnRNNBackprop)
+
+
+def cudnn_rnn_backprop_eager_fallback(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_backprop
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space], _ctx)
+  (input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space) = _inputs_T
+  _inputs_flat = [input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2)
+  _result = _execute.execute(b"CudnnRNNBackprop", 4, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNBackprop", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropOutput._make(_result)
+  return _result
+
+
+_cudnn_rnn_backprop_v2_outputs = ["input_backprop", "input_h_backprop",
+                                 "input_c_backprop", "params_backprop"]
+_CudnnRNNBackpropV2Output = _collections.namedtuple(
+    "CudnnRNNBackpropV2", _cudnn_rnn_backprop_v2_outputs)
+
+
+def cudnn_rnn_backprop_v2(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  r"""Backprop step of CudnnRNN.
+
+  Compute the backprop of both data and weights in a RNN. Takes an extra
+      "host_reserved" inupt than CudnnRNNBackprop, which is used to determine RNN
+      cudnnRNNAlgo_t and cudnnMathType_t.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicates whether there is a linear projection between the input and
+      the actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: A 3-D tensor with the shape of [seq_length, batch_size, input_size].
+  input_h: A 3-D tensor with the shape of [num_layer * dir, batch_size,
+      num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  output: A 3-D tensor with the shape of [seq_length, batch_size,
+      dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  output_backprop: A 3-D tensor with the same shape as output in the forward pass.
+  output_h_backprop: A 3-D tensor with the same shape as output_h in the forward
+      pass.
+  output_c_backprop: A 3-D tensor with the same shape as output_c in the forward
+      pass.
+  reserve_space: The same reserve_space produced in the forward operation.
+  host_reserved: The same host_reserved produced in the forward operation.
+  input_backprop: The backprop to input in the forward pass. Has the same shape
+      as input.
+  input_h_backprop: The backprop to input_h in the forward pass. Has the same
+      shape as input_h.
+  input_c_backprop: The backprop to input_c in the forward pass. Has the same
+      shape as input_c.
+  params_backprop: The backprop to the params buffer in the forward pass. Has the
+      same shape as params.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    output: A `Tensor`. Must have the same type as `input`.
+    output_h: A `Tensor`. Must have the same type as `input`.
+    output_c: A `Tensor`. Must have the same type as `input`.
+    output_backprop: A `Tensor`. Must have the same type as `input`.
+    output_h_backprop: A `Tensor`. Must have the same type as `input`.
+    output_c_backprop: A `Tensor`. Must have the same type as `input`.
+    reserve_space: A `Tensor`. Must have the same type as `input`.
+    host_reserved: A `Tensor` of type `int8`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (input_backprop, input_h_backprop, input_c_backprop, params_backprop).
+
+    input_backprop: A `Tensor`. Has the same type as `input`.
+    input_h_backprop: A `Tensor`. Has the same type as `input`.
+    input_c_backprop: A `Tensor`. Has the same type as `input`.
+    params_backprop: A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNBackpropV2", name, _ctx.post_execution_callbacks, input,
+        input_h, input_c, params, output, output_h, output_c, output_backprop,
+        output_h_backprop, output_c_backprop, reserve_space, host_reserved,
+        "rnn_mode", rnn_mode, "input_mode", input_mode, "direction",
+        direction, "dropout", dropout, "seed", seed, "seed2", seed2)
+      _result = _CudnnRNNBackpropV2Output._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_backprop_v2_eager_fallback(
+            input, input_h, input_c, params, output, output_h, output_c,
+            output_backprop, output_h_backprop, output_c_backprop,
+            reserve_space, host_reserved, rnn_mode=rnn_mode,
+            input_mode=input_mode, direction=direction, dropout=dropout,
+            seed=seed, seed2=seed2, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNBackpropV2", input=input, input_h=input_h, input_c=input_c,
+                              params=params, output=output, output_h=output_h,
+                              output_c=output_c,
+                              output_backprop=output_backprop,
+                              output_h_backprop=output_h_backprop,
+                              output_c_backprop=output_c_backprop,
+                              reserve_space=reserve_space,
+                              host_reserved=host_reserved, rnn_mode=rnn_mode,
+                              input_mode=input_mode, direction=direction,
+                              dropout=dropout, seed=seed, seed2=seed2,
+                              name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"))
+  _execute.record_gradient(
+      "CudnnRNNBackpropV2", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropV2Output._make(_result)
+  return _result
+
+def CudnnRNNBackpropV2(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  return cudnn_rnn_backprop_v2(input=input, input_h=input_h, input_c=input_c, params=params, output=output, output_h=output_h, output_c=output_c, output_backprop=output_backprop, output_h_backprop=output_h_backprop, output_c_backprop=output_c_backprop, reserve_space=reserve_space, host_reserved=host_reserved, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, name=name)
+CudnnRNNBackpropV2.__doc__ = cudnn_rnn_backprop_v2.__doc__
+CudnnRNNBackpropV2 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNBackpropV2))
+tf_export("raw_ops.CudnnRNNBackpropV2")(CudnnRNNBackpropV2)
+
+
+def cudnn_rnn_backprop_v2_eager_fallback(input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_backprop_v2
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space], _ctx)
+  (input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space) = _inputs_T
+  host_reserved = _ops.convert_to_tensor(host_reserved, _dtypes.int8)
+  _inputs_flat = [input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2)
+  _result = _execute.execute(b"CudnnRNNBackpropV2", 4, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNBackpropV2", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropV2Output._make(_result)
+  return _result
+
+
+_cudnn_rnn_backprop_v3_outputs = ["input_backprop", "input_h_backprop",
+                                 "input_c_backprop", "params_backprop"]
+_CudnnRNNBackpropV3Output = _collections.namedtuple(
+    "CudnnRNNBackpropV3", _cudnn_rnn_backprop_v3_outputs)
+
+
+def cudnn_rnn_backprop_v3(input, input_h, input_c, params, sequence_lengths, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, time_major=True, name=None):
+  r"""Backprop step of CudnnRNNV3.
+
+  Compute the backprop of both data and weights in a RNN. Takes an extra
+      "sequence_lengths" input than CudnnRNNBackprop.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicates whether there is a linear projection between the input and
+      the actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: If time_major is true, this is a 3-D tensor with the shape of
+      [seq_length, batch_size, input_size]. If time_major is false, the shape is
+      [batch_size, seq_length, input_size].
+  input_h: If time_major is true, this is a 3-D tensor with the shape of
+      [num_layer * dir, batch_size, num_units]. If time_major is false, the shape
+      is [batch_size, num_layer * dir, num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  sequence_lengths: a vector of lengths of each input sequence.
+  output: If time_major is true, this is a 3-D tensor with the shape of
+      [seq_length, batch_size, dir * num_units]. If time_major is false, the
+      shape is [batch_size, seq_length, dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  output_backprop: A 3-D tensor with the same shape as output in the forward pass.
+  output_h_backprop: A 3-D tensor with the same shape as output_h in the forward
+      pass.
+  output_c_backprop: A 3-D tensor with the same shape as output_c in the forward
+      pass.
+  time_major: Indicates whether the input/output format is time major or batch
+      major.
+  reserve_space: The same reserve_space produced in the forward operation.
+  input_backprop: The backprop to input in the forward pass. Has the same shape
+      as input.
+  input_h_backprop: The backprop to input_h in the forward pass. Has the same
+      shape as input_h.
+  input_c_backprop: The backprop to input_c in the forward pass. Has the same
+      shape as input_c.
+  params_backprop: The backprop to the params buffer in the forward pass. Has the
+      same shape as params.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    sequence_lengths: A `Tensor` of type `int32`.
+    output: A `Tensor`. Must have the same type as `input`.
+    output_h: A `Tensor`. Must have the same type as `input`.
+    output_c: A `Tensor`. Must have the same type as `input`.
+    output_backprop: A `Tensor`. Must have the same type as `input`.
+    output_h_backprop: A `Tensor`. Must have the same type as `input`.
+    output_c_backprop: A `Tensor`. Must have the same type as `input`.
+    reserve_space: A `Tensor`. Must have the same type as `input`.
+    host_reserved: A `Tensor` of type `int8`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    num_proj: An optional `int`. Defaults to `0`.
+    time_major: An optional `bool`. Defaults to `True`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (input_backprop, input_h_backprop, input_c_backprop, params_backprop).
+
+    input_backprop: A `Tensor`. Has the same type as `input`.
+    input_h_backprop: A `Tensor`. Has the same type as `input`.
+    input_c_backprop: A `Tensor`. Has the same type as `input`.
+    params_backprop: A `Tensor`. Has the same type as `input`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNBackpropV3", name, _ctx.post_execution_callbacks, input,
+        input_h, input_c, params, sequence_lengths, output, output_h,
+        output_c, output_backprop, output_h_backprop, output_c_backprop,
+        reserve_space, host_reserved, "rnn_mode", rnn_mode, "input_mode",
+        input_mode, "direction", direction, "dropout", dropout, "seed", seed,
+        "seed2", seed2, "num_proj", num_proj, "time_major", time_major)
+      _result = _CudnnRNNBackpropV3Output._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_backprop_v3_eager_fallback(
+            input, input_h, input_c, params, sequence_lengths, output,
+            output_h, output_c, output_backprop, output_h_backprop,
+            output_c_backprop, reserve_space, host_reserved,
+            rnn_mode=rnn_mode, input_mode=input_mode, direction=direction,
+            dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj,
+            time_major=time_major, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  if time_major is None:
+    time_major = True
+  time_major = _execute.make_bool(time_major, "time_major")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNBackpropV3", input=input, input_h=input_h, input_c=input_c,
+                              params=params,
+                              sequence_lengths=sequence_lengths,
+                              output=output, output_h=output_h,
+                              output_c=output_c,
+                              output_backprop=output_backprop,
+                              output_h_backprop=output_h_backprop,
+                              output_c_backprop=output_c_backprop,
+                              reserve_space=reserve_space,
+                              host_reserved=host_reserved, rnn_mode=rnn_mode,
+                              input_mode=input_mode, direction=direction,
+                              dropout=dropout, seed=seed, seed2=seed2,
+                              num_proj=num_proj, time_major=time_major,
+                              name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "num_proj", _op.get_attr("num_proj"), "time_major",
+            _op.get_attr("time_major"))
+  _execute.record_gradient(
+      "CudnnRNNBackpropV3", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropV3Output._make(_result)
+  return _result
+
+def CudnnRNNBackpropV3(input, input_h, input_c, params, sequence_lengths, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, time_major=True, name=None):
+  return cudnn_rnn_backprop_v3(input=input, input_h=input_h, input_c=input_c, params=params, sequence_lengths=sequence_lengths, output=output, output_h=output_h, output_c=output_c, output_backprop=output_backprop, output_h_backprop=output_h_backprop, output_c_backprop=output_c_backprop, reserve_space=reserve_space, host_reserved=host_reserved, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj, time_major=time_major, name=name)
+CudnnRNNBackpropV3.__doc__ = cudnn_rnn_backprop_v3.__doc__
+CudnnRNNBackpropV3 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNBackpropV3))
+tf_export("raw_ops.CudnnRNNBackpropV3")(CudnnRNNBackpropV3)
+
+
+def cudnn_rnn_backprop_v3_eager_fallback(input, input_h, input_c, params, sequence_lengths, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, time_major=True, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_backprop_v3
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  if time_major is None:
+    time_major = True
+  time_major = _execute.make_bool(time_major, "time_major")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space], _ctx)
+  (input, input_h, input_c, params, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space) = _inputs_T
+  sequence_lengths = _ops.convert_to_tensor(sequence_lengths, _dtypes.int32)
+  host_reserved = _ops.convert_to_tensor(host_reserved, _dtypes.int8)
+  _inputs_flat = [input, input_h, input_c, params, sequence_lengths, output, output_h, output_c, output_backprop, output_h_backprop, output_c_backprop, reserve_space, host_reserved]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+  "num_proj", num_proj, "time_major", time_major)
+  _result = _execute.execute(b"CudnnRNNBackpropV3", 4, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNBackpropV3", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNBackpropV3Output._make(_result)
+  return _result
+
+
+def cudnn_rnn_canonical_to_params(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  r"""Converts CudnnRNN params from canonical form to usable form.
+
+  Writes a set of weights into the opaque params buffer so they can be used in
+  upcoming training or inferences.
+
+  Note that the params buffer may not be compatible across different GPUs. So any
+  save and restoration should be converted to and from the canonical weights and
+  biases.
+
+  num_layers: Specifies the number of layers in the RNN model.
+  num_units: Specifies the size of the hidden state.
+  input_size: Specifies the size of the input state.
+  weights: the canonical form of weights that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  biases: the canonical form of biases that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  num_params: number of parameter sets for all layers.
+      Each layer may contain multiple parameter sets, with each set consisting of
+      a weight matrix and a bias vector.
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+      The actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used.
+      dir = (direction == bidirectional) ? 2 : 1
+  dropout: dropout probability. When set to 0., dropout is disabled.
+  seed: the 1st part of a seed to initialize dropout.
+  seed2: the 2nd part of a seed to initialize dropout.
+
+  Args:
+    num_layers: A `Tensor` of type `int32`.
+    num_units: A `Tensor` of type `int32`.
+    input_size: A `Tensor` of type `int32`.
+    weights: A list of at least 1 `Tensor` objects with the same type in: `half`, `float32`, `float64`.
+    biases: A list with the same length as `weights` of `Tensor` objects with the same type as `weights`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `weights`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNCanonicalToParams", name, _ctx.post_execution_callbacks,
+        num_layers, num_units, input_size, weights, biases, "rnn_mode",
+        rnn_mode, "input_mode", input_mode, "direction", direction, "dropout",
+        dropout, "seed", seed, "seed2", seed2)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_canonical_to_params_eager_fallback(
+            num_layers, num_units, input_size, weights, biases,
+            rnn_mode=rnn_mode, input_mode=input_mode, direction=direction,
+            dropout=dropout, seed=seed, seed2=seed2, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'weights' argument to "
+        "'cudnn_rnn_canonical_to_params' Op, not %r." % weights)
+  _attr_num_params = len(weights)
+  if not isinstance(biases, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'biases' argument to "
+        "'cudnn_rnn_canonical_to_params' Op, not %r." % biases)
+  if len(biases) != _attr_num_params:
+    raise ValueError(
+        "List argument 'biases' to 'cudnn_rnn_canonical_to_params' Op with length %d "
+        "must match length %d of argument 'weights'." %
+        (len(biases), _attr_num_params))
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNCanonicalToParams", num_layers=num_layers,
+                                     num_units=num_units,
+                                     input_size=input_size, weights=weights,
+                                     biases=biases, rnn_mode=rnn_mode,
+                                     input_mode=input_mode,
+                                     direction=direction, dropout=dropout,
+                                     seed=seed, seed2=seed2, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "num_params",
+            _op.get_attr("num_params"), "rnn_mode", _op.get_attr("rnn_mode"),
+            "input_mode", _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"))
+  _execute.record_gradient(
+      "CudnnRNNCanonicalToParams", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def CudnnRNNCanonicalToParams(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  return cudnn_rnn_canonical_to_params(num_layers=num_layers, num_units=num_units, input_size=input_size, weights=weights, biases=biases, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, name=name)
+CudnnRNNCanonicalToParams.__doc__ = cudnn_rnn_canonical_to_params.__doc__
+CudnnRNNCanonicalToParams = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNCanonicalToParams))
+tf_export("raw_ops.CudnnRNNCanonicalToParams")(CudnnRNNCanonicalToParams)
+
+
+def cudnn_rnn_canonical_to_params_eager_fallback(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_canonical_to_params
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'weights' argument to "
+        "'cudnn_rnn_canonical_to_params' Op, not %r." % weights)
+  _attr_num_params = len(weights)
+  if not isinstance(biases, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'biases' argument to "
+        "'cudnn_rnn_canonical_to_params' Op, not %r." % biases)
+  if len(biases) != _attr_num_params:
+    raise ValueError(
+        "List argument 'biases' to 'cudnn_rnn_canonical_to_params' Op with length %d "
+        "must match length %d of argument 'weights'." %
+        (len(biases), _attr_num_params))
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager(list(weights) + list(biases), _ctx)
+  _inputs_T = [_inputs_T[:_attr_num_params]] + _inputs_T[_attr_num_params:]
+  _inputs_T = _inputs_T[:1] + [_inputs_T[1:]]
+  (weights, biases) = _inputs_T
+  num_layers = _ops.convert_to_tensor(num_layers, _dtypes.int32)
+  num_units = _ops.convert_to_tensor(num_units, _dtypes.int32)
+  input_size = _ops.convert_to_tensor(input_size, _dtypes.int32)
+  _inputs_flat = [num_layers, num_units, input_size] + list(weights) + list(biases)
+  _attrs = ("T", _attr_T, "num_params", _attr_num_params, "rnn_mode",
+  rnn_mode, "input_mode", input_mode, "direction", direction, "dropout",
+  dropout, "seed", seed, "seed2", seed2)
+  _result = _execute.execute(b"CudnnRNNCanonicalToParams", 1,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "CudnnRNNCanonicalToParams", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def cudnn_rnn_canonical_to_params_v2(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  r"""Converts CudnnRNN params from canonical form to usable form. It supports the projection in LSTM.
+
+  Writes a set of weights into the opaque params buffer so they can be used in
+  upcoming training or inferences.
+
+  Note that the params buffer may not be compatible across different GPUs. So any
+  save and restoration should be converted to and from the canonical weights and
+  biases.
+
+  num_layers: Specifies the number of layers in the RNN model.
+  num_units: Specifies the size of the hidden state.
+  input_size: Specifies the size of the input state.
+  weights: the canonical form of weights that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  biases: the canonical form of biases that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  num_params_weigths: number of weight parameter matrix for all layers.
+  num_params_biases: number of bias parameter vector for all layers.
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+      The actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used.
+      dir = (direction == bidirectional) ? 2 : 1
+  dropout: dropout probability. When set to 0., dropout is disabled.
+  seed: the 1st part of a seed to initialize dropout.
+  seed2: the 2nd part of a seed to initialize dropout.
+  num_proj: The output dimensionality for the projection matrices. If None or 0,
+      no projection is performed.
+
+  Args:
+    num_layers: A `Tensor` of type `int32`.
+    num_units: A `Tensor` of type `int32`.
+    input_size: A `Tensor` of type `int32`.
+    weights: A list of at least 1 `Tensor` objects with the same type in: `half`, `float32`, `float64`.
+    biases: A list of at least 1 `Tensor` objects with the same type as `weights`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    num_proj: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor`. Has the same type as `weights`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNCanonicalToParamsV2", name, _ctx.post_execution_callbacks,
+        num_layers, num_units, input_size, weights, biases, "rnn_mode",
+        rnn_mode, "input_mode", input_mode, "direction", direction, "dropout",
+        dropout, "seed", seed, "seed2", seed2, "num_proj", num_proj)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_canonical_to_params_v2_eager_fallback(
+            num_layers, num_units, input_size, weights, biases,
+            rnn_mode=rnn_mode, input_mode=input_mode, direction=direction,
+            dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj,
+            name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if not isinstance(weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'weights' argument to "
+        "'cudnn_rnn_canonical_to_params_v2' Op, not %r." % weights)
+  _attr_num_params_weights = len(weights)
+  if not isinstance(biases, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'biases' argument to "
+        "'cudnn_rnn_canonical_to_params_v2' Op, not %r." % biases)
+  _attr_num_params_biases = len(biases)
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNCanonicalToParamsV2", num_layers=num_layers,
+                                       num_units=num_units,
+                                       input_size=input_size, weights=weights,
+                                       biases=biases, rnn_mode=rnn_mode,
+                                       input_mode=input_mode,
+                                       direction=direction, dropout=dropout,
+                                       seed=seed, seed2=seed2,
+                                       num_proj=num_proj, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "num_params_weights",
+            _op.get_attr("num_params_weights"), "num_params_biases",
+            _op.get_attr("num_params_biases"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "num_proj", _op.get_attr("num_proj"))
+  _execute.record_gradient(
+      "CudnnRNNCanonicalToParamsV2", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def CudnnRNNCanonicalToParamsV2(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  return cudnn_rnn_canonical_to_params_v2(num_layers=num_layers, num_units=num_units, input_size=input_size, weights=weights, biases=biases, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj, name=name)
+CudnnRNNCanonicalToParamsV2.__doc__ = cudnn_rnn_canonical_to_params_v2.__doc__
+CudnnRNNCanonicalToParamsV2 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNCanonicalToParamsV2))
+tf_export("raw_ops.CudnnRNNCanonicalToParamsV2")(CudnnRNNCanonicalToParamsV2)
+
+
+def cudnn_rnn_canonical_to_params_v2_eager_fallback(num_layers, num_units, input_size, weights, biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_canonical_to_params_v2
+  """
+  _ctx = ctx if ctx else _context.context()
+  if not isinstance(weights, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'weights' argument to "
+        "'cudnn_rnn_canonical_to_params_v2' Op, not %r." % weights)
+  _attr_num_params_weights = len(weights)
+  if not isinstance(biases, (list, tuple)):
+    raise TypeError(
+        "Expected list for 'biases' argument to "
+        "'cudnn_rnn_canonical_to_params_v2' Op, not %r." % biases)
+  _attr_num_params_biases = len(biases)
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager(list(weights) + list(biases), _ctx)
+  _inputs_T = [_inputs_T[:_attr_num_params_weights]] + _inputs_T[_attr_num_params_weights:]
+  _inputs_T = _inputs_T[:1] + [_inputs_T[1:]]
+  (weights, biases) = _inputs_T
+  num_layers = _ops.convert_to_tensor(num_layers, _dtypes.int32)
+  num_units = _ops.convert_to_tensor(num_units, _dtypes.int32)
+  input_size = _ops.convert_to_tensor(input_size, _dtypes.int32)
+  _inputs_flat = [num_layers, num_units, input_size] + list(weights) + list(biases)
+  _attrs = ("T", _attr_T, "num_params_weights", _attr_num_params_weights,
+  "num_params_biases", _attr_num_params_biases, "rnn_mode", rnn_mode,
+  "input_mode", input_mode, "direction", direction, "dropout", dropout,
+  "seed", seed, "seed2", seed2, "num_proj", num_proj)
+  _result = _execute.execute(b"CudnnRNNCanonicalToParamsV2", 1,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "CudnnRNNCanonicalToParamsV2", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+def cudnn_rnn_params_size(num_layers, num_units, input_size, T, S, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  r"""Computes size of weights that can be used by a Cudnn RNN model.
+
+  Return the params size that can be used by the Cudnn RNN model. Subsequent
+  weight allocation and initialization should use this size.
+
+  num_layers: Specifies the number of layers in the RNN model.
+  num_units: Specifies the size of the hidden state.
+  input_size: Specifies the size of the input state.
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+    The actual computation before the first layer. 'skip_input' is only allowed
+    when input_size == num_units; 'auto_select' implies 'skip_input' when
+    input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used.
+    dir = (direction == bidirectional) ? 2 : 1
+  dropout: dropout probability. When set to 0., dropout is disabled.
+  seed: the 1st part of a seed to initialize dropout.
+  seed2: the 2nd part of a seed to initialize dropout.
+  params_size: The size of the params buffer that should be allocated and
+    initialized for this RNN model. Note that this params buffer may not be
+    compatible across GPUs. Please use CudnnRNNParamsWeights and
+    CudnnRNNParamsBiases to save and restore them in a way that is compatible
+    across different runs.
+
+  Args:
+    num_layers: A `Tensor` of type `int32`.
+    num_units: A `Tensor` of type `int32`.
+    input_size: A `Tensor` of type `int32`.
+    T: A `tf.DType` from: `tf.half, tf.float32, tf.float64`.
+    S: A `tf.DType` from: `tf.int32, tf.int64`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    num_proj: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A `Tensor` of type `S`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNParamsSize", name, _ctx.post_execution_callbacks, num_layers,
+        num_units, input_size, "T", T, "S", S, "rnn_mode", rnn_mode,
+        "input_mode", input_mode, "direction", direction, "dropout", dropout,
+        "seed", seed, "seed2", seed2, "num_proj", num_proj)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_params_size_eager_fallback(
+            num_layers, num_units, input_size, T=T, S=S, rnn_mode=rnn_mode,
+            input_mode=input_mode, direction=direction, dropout=dropout,
+            seed=seed, seed2=seed2, num_proj=num_proj, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  T = _execute.make_type(T, "T")
+  S = _execute.make_type(S, "S")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNParamsSize", num_layers=num_layers, num_units=num_units,
+                              input_size=input_size, T=T, S=S,
+                              rnn_mode=rnn_mode, input_mode=input_mode,
+                              direction=direction, dropout=dropout, seed=seed,
+                              seed2=seed2, num_proj=num_proj, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "S", _op._get_attr_type("S"),
+            "rnn_mode", _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "num_proj", _op.get_attr("num_proj"))
+  _execute.record_gradient(
+      "CudnnRNNParamsSize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+def CudnnRNNParamsSize(num_layers, num_units, input_size, T, S, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  return cudnn_rnn_params_size(num_layers=num_layers, num_units=num_units, input_size=input_size, T=T, S=S, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj, name=name)
+CudnnRNNParamsSize.__doc__ = cudnn_rnn_params_size.__doc__
+CudnnRNNParamsSize = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNParamsSize))
+tf_export("raw_ops.CudnnRNNParamsSize")(CudnnRNNParamsSize)
+
+
+def cudnn_rnn_params_size_eager_fallback(num_layers, num_units, input_size, T, S, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_params_size
+  """
+  _ctx = ctx if ctx else _context.context()
+  T = _execute.make_type(T, "T")
+  S = _execute.make_type(S, "S")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  num_layers = _ops.convert_to_tensor(num_layers, _dtypes.int32)
+  num_units = _ops.convert_to_tensor(num_units, _dtypes.int32)
+  input_size = _ops.convert_to_tensor(input_size, _dtypes.int32)
+  _inputs_flat = [num_layers, num_units, input_size]
+  _attrs = ("T", T, "S", S, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+  "num_proj", num_proj)
+  _result = _execute.execute(b"CudnnRNNParamsSize", 1, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNParamsSize", _inputs_flat, _attrs, _result, name)
+  _result, = _result
+  return _result
+
+
+_cudnn_rnn_params_to_canonical_outputs = ["weights", "biases"]
+_CudnnRNNParamsToCanonicalOutput = _collections.namedtuple(
+    "CudnnRNNParamsToCanonical", _cudnn_rnn_params_to_canonical_outputs)
+
+
+def cudnn_rnn_params_to_canonical(num_layers, num_units, input_size, params, num_params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  r"""Retrieves CudnnRNN params in canonical form.
+
+  Retrieves a set of weights from the opaque params buffer that can be saved and
+  restored in a way compatible with future runs.
+
+  Note that the params buffer may not be compatible across different GPUs. So any
+  save and restoration should be converted to and from the canonical weights and
+  biases.
+
+  num_layers: Specifies the number of layers in the RNN model.
+  num_units: Specifies the size of the hidden state.
+  input_size: Specifies the size of the input state.
+  num_params: number of parameter sets for all layers.
+      Each layer may contain multiple parameter sets, with each set consisting of
+      a weight matrix and a bias vector.
+  weights: the canonical form of weights that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  biases: the canonical form of biases that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+      The actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used.
+      dir = (direction == bidirectional) ? 2 : 1
+  dropout: dropout probability. When set to 0., dropout is disabled.
+  seed: the 1st part of a seed to initialize dropout.
+  seed2: the 2nd part of a seed to initialize dropout.
+
+  Args:
+    num_layers: A `Tensor` of type `int32`.
+    num_units: A `Tensor` of type `int32`.
+    input_size: A `Tensor` of type `int32`.
+    params: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    num_params: An `int` that is `>= 1`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (weights, biases).
+
+    weights: A list of `num_params` `Tensor` objects with the same type as `params`.
+    biases: A list of `num_params` `Tensor` objects with the same type as `params`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNParamsToCanonical", name, _ctx.post_execution_callbacks,
+        num_layers, num_units, input_size, params, "num_params", num_params,
+        "rnn_mode", rnn_mode, "input_mode", input_mode, "direction",
+        direction, "dropout", dropout, "seed", seed, "seed2", seed2)
+      _result = _CudnnRNNParamsToCanonicalOutput._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_params_to_canonical_eager_fallback(
+            num_layers, num_units, input_size, params, num_params=num_params,
+            rnn_mode=rnn_mode, input_mode=input_mode, direction=direction,
+            dropout=dropout, seed=seed, seed2=seed2, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_params = _execute.make_int(num_params, "num_params")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNParamsToCanonical", num_layers=num_layers,
+                                     num_units=num_units,
+                                     input_size=input_size, params=params,
+                                     num_params=num_params, rnn_mode=rnn_mode,
+                                     input_mode=input_mode,
+                                     direction=direction, dropout=dropout,
+                                     seed=seed, seed2=seed2, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "num_params",
+            _op.get_attr("num_params"), "rnn_mode", _op.get_attr("rnn_mode"),
+            "input_mode", _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"))
+  _execute.record_gradient(
+      "CudnnRNNParamsToCanonical", _inputs_flat, _attrs, _result, name)
+  _result = [_result[:num_params]] + _result[num_params:]
+  _result = _result[:1] + [_result[1:]]
+  _result = _CudnnRNNParamsToCanonicalOutput._make(_result)
+  return _result
+
+def CudnnRNNParamsToCanonical(num_layers, num_units, input_size, params, num_params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None):
+  return cudnn_rnn_params_to_canonical(num_layers=num_layers, num_units=num_units, input_size=input_size, params=params, num_params=num_params, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, name=name)
+CudnnRNNParamsToCanonical.__doc__ = cudnn_rnn_params_to_canonical.__doc__
+CudnnRNNParamsToCanonical = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNParamsToCanonical))
+tf_export("raw_ops.CudnnRNNParamsToCanonical")(CudnnRNNParamsToCanonical)
+
+
+def cudnn_rnn_params_to_canonical_eager_fallback(num_layers, num_units, input_size, params, num_params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_params_to_canonical
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_params = _execute.make_int(num_params, "num_params")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  _attr_T, (params,) = _execute.args_to_matching_eager([params], _ctx)
+  num_layers = _ops.convert_to_tensor(num_layers, _dtypes.int32)
+  num_units = _ops.convert_to_tensor(num_units, _dtypes.int32)
+  input_size = _ops.convert_to_tensor(input_size, _dtypes.int32)
+  _inputs_flat = [num_layers, num_units, input_size, params]
+  _attrs = ("T", _attr_T, "num_params", num_params, "rnn_mode", rnn_mode,
+  "input_mode", input_mode, "direction", direction, "dropout", dropout,
+  "seed", seed, "seed2", seed2)
+  _result = _execute.execute(b"CudnnRNNParamsToCanonical", num_params +
+                             num_params, inputs=_inputs_flat, attrs=_attrs,
+                             ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNParamsToCanonical", _inputs_flat, _attrs, _result, name)
+  _result = [_result[:num_params]] + _result[num_params:]
+  _result = _result[:1] + [_result[1:]]
+  _result = _CudnnRNNParamsToCanonicalOutput._make(_result)
+  return _result
+
+
+_cudnn_rnn_params_to_canonical_v2_outputs = ["weights", "biases"]
+_CudnnRNNParamsToCanonicalV2Output = _collections.namedtuple(
+    "CudnnRNNParamsToCanonicalV2", _cudnn_rnn_params_to_canonical_v2_outputs)
+
+
+def cudnn_rnn_params_to_canonical_v2(num_layers, num_units, input_size, params, num_params_weights, num_params_biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  r"""Retrieves CudnnRNN params in canonical form. It supports the projection in LSTM.
+
+  Retrieves a set of weights from the opaque params buffer that can be saved and
+  restored in a way compatible with future runs.
+
+  Note that the params buffer may not be compatible across different GPUs. So any
+  save and restoration should be converted to and from the canonical weights and
+  biases.
+
+  num_layers: Specifies the number of layers in the RNN model.
+  num_units: Specifies the size of the hidden state.
+  input_size: Specifies the size of the input state.
+  num_params_weigths: number of weight parameter matrix for all layers.
+  num_params_biases: number of bias parameter vector for all layers.
+  weights: the canonical form of weights that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  biases: the canonical form of biases that can be used for saving
+      and restoration. They are more likely to be compatible across different
+      generations.
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicate whether there is a linear projection between the input and
+      The actual computation before the first layer. 'skip_input' is only allowed
+      when input_size == num_units; 'auto_select' implies 'skip_input' when
+      input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used.
+      dir = (direction == bidirectional) ? 2 : 1
+  dropout: dropout probability. When set to 0., dropout is disabled.
+  seed: the 1st part of a seed to initialize dropout.
+  seed2: the 2nd part of a seed to initialize dropout.
+  num_proj: The output dimensionality for the projection matrices. If None or 0,
+      no projection is performed.
+
+  Args:
+    num_layers: A `Tensor` of type `int32`.
+    num_units: A `Tensor` of type `int32`.
+    input_size: A `Tensor` of type `int32`.
+    params: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    num_params_weights: An `int` that is `>= 1`.
+    num_params_biases: An `int` that is `>= 1`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    num_proj: An optional `int`. Defaults to `0`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (weights, biases).
+
+    weights: A list of `num_params_weights` `Tensor` objects with the same type as `params`.
+    biases: A list of `num_params_biases` `Tensor` objects with the same type as `params`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNParamsToCanonicalV2", name, _ctx.post_execution_callbacks,
+        num_layers, num_units, input_size, params, "num_params_weights",
+        num_params_weights, "num_params_biases", num_params_biases,
+        "rnn_mode", rnn_mode, "input_mode", input_mode, "direction",
+        direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+        "num_proj", num_proj)
+      _result = _CudnnRNNParamsToCanonicalV2Output._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnn_params_to_canonical_v2_eager_fallback(
+            num_layers, num_units, input_size, params,
+            num_params_weights=num_params_weights,
+            num_params_biases=num_params_biases, rnn_mode=rnn_mode,
+            input_mode=input_mode, direction=direction, dropout=dropout,
+            seed=seed, seed2=seed2, num_proj=num_proj, name=name, ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  num_params_weights = _execute.make_int(num_params_weights, "num_params_weights")
+  num_params_biases = _execute.make_int(num_params_biases, "num_params_biases")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNParamsToCanonicalV2", num_layers=num_layers,
+                                       num_units=num_units,
+                                       input_size=input_size, params=params,
+                                       num_params_weights=num_params_weights,
+                                       num_params_biases=num_params_biases,
+                                       rnn_mode=rnn_mode,
+                                       input_mode=input_mode,
+                                       direction=direction, dropout=dropout,
+                                       seed=seed, seed2=seed2,
+                                       num_proj=num_proj, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "num_params_weights",
+            _op.get_attr("num_params_weights"), "num_params_biases",
+            _op.get_attr("num_params_biases"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "num_proj", _op.get_attr("num_proj"))
+  _execute.record_gradient(
+      "CudnnRNNParamsToCanonicalV2", _inputs_flat, _attrs, _result, name)
+  _result = [_result[:num_params_weights]] + _result[num_params_weights:]
+  _result = _result[:1] + [_result[1:]]
+  _result = _CudnnRNNParamsToCanonicalV2Output._make(_result)
+  return _result
+
+def CudnnRNNParamsToCanonicalV2(num_layers, num_units, input_size, params, num_params_weights, num_params_biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None):
+  return cudnn_rnn_params_to_canonical_v2(num_layers=num_layers, num_units=num_units, input_size=input_size, params=params, num_params_weights=num_params_weights, num_params_biases=num_params_biases, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj, name=name)
+CudnnRNNParamsToCanonicalV2.__doc__ = cudnn_rnn_params_to_canonical_v2.__doc__
+CudnnRNNParamsToCanonicalV2 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNParamsToCanonicalV2))
+tf_export("raw_ops.CudnnRNNParamsToCanonicalV2")(CudnnRNNParamsToCanonicalV2)
+
+
+def cudnn_rnn_params_to_canonical_v2_eager_fallback(num_layers, num_units, input_size, params, num_params_weights, num_params_biases, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnn_params_to_canonical_v2
+  """
+  _ctx = ctx if ctx else _context.context()
+  num_params_weights = _execute.make_int(num_params_weights, "num_params_weights")
+  num_params_biases = _execute.make_int(num_params_biases, "num_params_biases")
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  _attr_T, (params,) = _execute.args_to_matching_eager([params], _ctx)
+  num_layers = _ops.convert_to_tensor(num_layers, _dtypes.int32)
+  num_units = _ops.convert_to_tensor(num_units, _dtypes.int32)
+  input_size = _ops.convert_to_tensor(input_size, _dtypes.int32)
+  _inputs_flat = [num_layers, num_units, input_size, params]
+  _attrs = ("T", _attr_T, "num_params_weights", num_params_weights,
+  "num_params_biases", num_params_biases, "rnn_mode", rnn_mode, "input_mode",
+  input_mode, "direction", direction, "dropout", dropout, "seed", seed,
+  "seed2", seed2, "num_proj", num_proj)
+  _result = _execute.execute(b"CudnnRNNParamsToCanonicalV2",
+                             num_params_weights + num_params_biases,
+                             inputs=_inputs_flat, attrs=_attrs, ctx=_ctx,
+                             name=name)
+  _execute.record_gradient(
+      "CudnnRNNParamsToCanonicalV2", _inputs_flat, _attrs, _result, name)
+  _result = [_result[:num_params_weights]] + _result[num_params_weights:]
+  _result = _result[:1] + [_result[1:]]
+  _result = _CudnnRNNParamsToCanonicalV2Output._make(_result)
+  return _result
+
+
+_cudnn_rnnv2_outputs = ["output", "output_h", "output_c", "reserve_space",
+                       "host_reserved"]
+_CudnnRNNV2Output = _collections.namedtuple(
+    "CudnnRNNV2", _cudnn_rnnv2_outputs)
+
+
+def cudnn_rnnv2(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None):
+  r"""A RNN backed by cuDNN.
+
+  Computes the RNN from the input and initial states, with respect to the params
+  buffer. Produces one extra output "host_reserved" than CudnnRNN.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicates whether there is a linear projection between the input and
+    the actual computation before the first layer. 'skip_input' is only allowed
+    when input_size == num_units; 'auto_select' implies 'skip_input' when
+    input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: A 3-D tensor with the shape of [seq_length, batch_size, input_size].
+  input_h: A 3-D tensor with the shape of [num_layer * dir, batch_size,
+      num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  output: A 3-D tensor with the shape of [seq_length, batch_size,
+      dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  is_training: Indicates whether this operation is used for inferenece or
+    training.
+  reserve_space: An opaque tensor that can be used in backprop calculation. It
+    is only produced if is_training is true.
+  host_reserved: An opaque tensor that can be used in backprop calculation. It is
+    only produced if is_training is true. It is output on host memory rather than
+    device memory.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    is_training: An optional `bool`. Defaults to `True`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (output, output_h, output_c, reserve_space, host_reserved).
+
+    output: A `Tensor`. Has the same type as `input`.
+    output_h: A `Tensor`. Has the same type as `input`.
+    output_c: A `Tensor`. Has the same type as `input`.
+    reserve_space: A `Tensor`. Has the same type as `input`.
+    host_reserved: A `Tensor` of type `int8`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNV2", name, _ctx.post_execution_callbacks, input, input_h,
+        input_c, params, "rnn_mode", rnn_mode, "input_mode", input_mode,
+        "direction", direction, "dropout", dropout, "seed", seed, "seed2",
+        seed2, "is_training", is_training)
+      _result = _CudnnRNNV2Output._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnnv2_eager_fallback(
+            input, input_h, input_c, params, rnn_mode=rnn_mode,
+            input_mode=input_mode, direction=direction, dropout=dropout,
+            seed=seed, seed2=seed2, is_training=is_training, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNV2", input=input, input_h=input_h, input_c=input_c,
+                      params=params, rnn_mode=rnn_mode, input_mode=input_mode,
+                      direction=direction, dropout=dropout, seed=seed,
+                      seed2=seed2, is_training=is_training, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "is_training", _op.get_attr("is_training"))
+  _execute.record_gradient(
+      "CudnnRNNV2", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNV2Output._make(_result)
+  return _result
+
+def CudnnRNNV2(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None):
+  return cudnn_rnnv2(input=input, input_h=input_h, input_c=input_c, params=params, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, is_training=is_training, name=name)
+CudnnRNNV2.__doc__ = cudnn_rnnv2.__doc__
+CudnnRNNV2 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNV2))
+tf_export("raw_ops.CudnnRNNV2")(CudnnRNNV2)
+
+
+def cudnn_rnnv2_eager_fallback(input, input_h, input_c, params, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, is_training=True, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnnv2
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params], _ctx)
+  (input, input_h, input_c, params) = _inputs_T
+  _inputs_flat = [input, input_h, input_c, params]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+  "is_training", is_training)
+  _result = _execute.execute(b"CudnnRNNV2", 5, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNV2", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNV2Output._make(_result)
+  return _result
+
+
+_cudnn_rnnv3_outputs = ["output", "output_h", "output_c", "reserve_space",
+                       "host_reserved"]
+_CudnnRNNV3Output = _collections.namedtuple(
+    "CudnnRNNV3", _cudnn_rnnv3_outputs)
+
+
+def cudnn_rnnv3(input, input_h, input_c, params, sequence_lengths, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, is_training=True, time_major=True, name=None):
+  r"""A RNN backed by cuDNN.
+
+  Computes the RNN from the input and initial states, with respect to the params
+  buffer. Accepts one extra input "sequence_lengths" than CudnnRNN.
+
+  rnn_mode: Indicates the type of the RNN model.
+  input_mode: Indicates whether there is a linear projection between the input and
+    the actual computation before the first layer. 'skip_input' is only allowed
+    when input_size == num_units; 'auto_select' implies 'skip_input' when
+    input_size == num_units; otherwise, it implies 'linear_input'.
+  direction: Indicates whether a bidirectional model will be used. Should be
+    "unidirectional" or "bidirectional".
+  dropout: Dropout probability. When set to 0., dropout is disabled.
+  seed: The 1st part of a seed to initialize dropout.
+  seed2: The 2nd part of a seed to initialize dropout.
+  input: If time_major is true, this is a 3-D tensor with the shape of
+      [seq_length, batch_size, input_size]. If time_major is false, the shape is
+      [batch_size, seq_length, input_size].
+  input_h: If time_major is true, this is a 3-D tensor with the shape of
+      [num_layer * dir, batch_size, num_units]. If time_major is false, the shape
+      is [batch_size, num_layer * dir, num_units].
+  input_c: For LSTM, a 3-D tensor with the shape of
+      [num_layer * dir, batch, num_units]. For other models, it is ignored.
+  params: A 1-D tensor that contains the weights and biases in an opaque layout.
+      The size must be created through CudnnRNNParamsSize, and initialized
+      separately. Note that they might not be compatible across different
+      generations. So it is a good idea to save and restore
+  sequence_lengths: a vector of lengths of each input sequence.
+  output: If time_major is true, this is a 3-D tensor with the shape of
+      [seq_length, batch_size, dir * num_units]. If time_major is false, the
+      shape is [batch_size, seq_length, dir * num_units].
+  output_h: The same shape has input_h.
+  output_c: The same shape as input_c for LSTM. An empty tensor for other models.
+  is_training: Indicates whether this operation is used for inferenece or
+    training.
+  time_major: Indicates whether the input/output format is time major or batch
+      major.
+  reserve_space: An opaque tensor that can be used in backprop calculation. It
+    is only produced if is_training is true.
+
+  Args:
+    input: A `Tensor`. Must be one of the following types: `half`, `float32`, `float64`.
+    input_h: A `Tensor`. Must have the same type as `input`.
+    input_c: A `Tensor`. Must have the same type as `input`.
+    params: A `Tensor`. Must have the same type as `input`.
+    sequence_lengths: A `Tensor` of type `int32`.
+    rnn_mode: An optional `string` from: `"rnn_relu", "rnn_tanh", "lstm", "gru"`. Defaults to `"lstm"`.
+    input_mode: An optional `string` from: `"linear_input", "skip_input", "auto_select"`. Defaults to `"linear_input"`.
+    direction: An optional `string` from: `"unidirectional", "bidirectional"`. Defaults to `"unidirectional"`.
+    dropout: An optional `float`. Defaults to `0`.
+    seed: An optional `int`. Defaults to `0`.
+    seed2: An optional `int`. Defaults to `0`.
+    num_proj: An optional `int`. Defaults to `0`.
+    is_training: An optional `bool`. Defaults to `True`.
+    time_major: An optional `bool`. Defaults to `True`.
+    name: A name for the operation (optional).
+
+  Returns:
+    A tuple of `Tensor` objects (output, output_h, output_c, reserve_space, host_reserved).
+
+    output: A `Tensor`. Has the same type as `input`.
+    output_h: A `Tensor`. Has the same type as `input`.
+    output_c: A `Tensor`. Has the same type as `input`.
+    reserve_space: A `Tensor`. Has the same type as `input`.
+    host_reserved: A `Tensor` of type `int8`.
+  """
+  _ctx = _context._context or _context.context()
+  if _ctx is not None and _ctx._thread_local_data.is_eager:
+    try:
+      _result = _pywrap_tensorflow.TFE_Py_FastPathExecute(
+        _ctx._context_handle, _ctx._thread_local_data.device_name,
+        "CudnnRNNV3", name, _ctx.post_execution_callbacks, input, input_h,
+        input_c, params, sequence_lengths, "rnn_mode", rnn_mode, "input_mode",
+        input_mode, "direction", direction, "dropout", dropout, "seed", seed,
+        "seed2", seed2, "num_proj", num_proj, "is_training", is_training,
+        "time_major", time_major)
+      _result = _CudnnRNNV3Output._make(_result)
+      return _result
+    except _core._FallbackException:
+      try:
+        return cudnn_rnnv3_eager_fallback(
+            input, input_h, input_c, params, sequence_lengths,
+            rnn_mode=rnn_mode, input_mode=input_mode, direction=direction,
+            dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj,
+            is_training=is_training, time_major=time_major, name=name,
+            ctx=_ctx)
+      except _core._SymbolicException:
+        pass  # Add nodes to the TensorFlow graph.
+    except _core._NotOkStatusException as e:
+      if name is not None:
+        message = e.message + " name: " + name
+      else:
+        message = e.message
+      _six.raise_from(_core._status_to_exception(e.code, message), None)
+  # Add nodes to the TensorFlow graph.
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  if time_major is None:
+    time_major = True
+  time_major = _execute.make_bool(time_major, "time_major")
+  _, _, _op = _op_def_lib._apply_op_helper(
+        "CudnnRNNV3", input=input, input_h=input_h, input_c=input_c,
+                      params=params, sequence_lengths=sequence_lengths,
+                      rnn_mode=rnn_mode, input_mode=input_mode,
+                      direction=direction, dropout=dropout, seed=seed,
+                      seed2=seed2, num_proj=num_proj, is_training=is_training,
+                      time_major=time_major, name=name)
+  _result = _op.outputs[:]
+  _inputs_flat = _op.inputs
+  _attrs = ("T", _op._get_attr_type("T"), "rnn_mode",
+            _op.get_attr("rnn_mode"), "input_mode",
+            _op.get_attr("input_mode"), "direction",
+            _op.get_attr("direction"), "dropout", _op.get_attr("dropout"),
+            "seed", _op.get_attr("seed"), "seed2", _op.get_attr("seed2"),
+            "num_proj", _op.get_attr("num_proj"), "is_training",
+            _op.get_attr("is_training"), "time_major",
+            _op.get_attr("time_major"))
+  _execute.record_gradient(
+      "CudnnRNNV3", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNV3Output._make(_result)
+  return _result
+
+def CudnnRNNV3(input, input_h, input_c, params, sequence_lengths, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, is_training=True, time_major=True, name=None):
+  return cudnn_rnnv3(input=input, input_h=input_h, input_c=input_c, params=params, sequence_lengths=sequence_lengths, rnn_mode=rnn_mode, input_mode=input_mode, direction=direction, dropout=dropout, seed=seed, seed2=seed2, num_proj=num_proj, is_training=is_training, time_major=time_major, name=name)
+CudnnRNNV3.__doc__ = cudnn_rnnv3.__doc__
+CudnnRNNV3 = _doc_controls.do_not_generate_docs(_kwarg_only(CudnnRNNV3))
+tf_export("raw_ops.CudnnRNNV3")(CudnnRNNV3)
+
+
+def cudnn_rnnv3_eager_fallback(input, input_h, input_c, params, sequence_lengths, rnn_mode="lstm", input_mode="linear_input", direction="unidirectional", dropout=0, seed=0, seed2=0, num_proj=0, is_training=True, time_major=True, name=None, ctx=None):
+  r"""This is the slowpath function for Eager mode.
+  This is for function cudnn_rnnv3
+  """
+  _ctx = ctx if ctx else _context.context()
+  if rnn_mode is None:
+    rnn_mode = "lstm"
+  rnn_mode = _execute.make_str(rnn_mode, "rnn_mode")
+  if input_mode is None:
+    input_mode = "linear_input"
+  input_mode = _execute.make_str(input_mode, "input_mode")
+  if direction is None:
+    direction = "unidirectional"
+  direction = _execute.make_str(direction, "direction")
+  if dropout is None:
+    dropout = 0
+  dropout = _execute.make_float(dropout, "dropout")
+  if seed is None:
+    seed = 0
+  seed = _execute.make_int(seed, "seed")
+  if seed2 is None:
+    seed2 = 0
+  seed2 = _execute.make_int(seed2, "seed2")
+  if num_proj is None:
+    num_proj = 0
+  num_proj = _execute.make_int(num_proj, "num_proj")
+  if is_training is None:
+    is_training = True
+  is_training = _execute.make_bool(is_training, "is_training")
+  if time_major is None:
+    time_major = True
+  time_major = _execute.make_bool(time_major, "time_major")
+  _attr_T, _inputs_T = _execute.args_to_matching_eager([input, input_h, input_c, params], _ctx)
+  (input, input_h, input_c, params) = _inputs_T
+  sequence_lengths = _ops.convert_to_tensor(sequence_lengths, _dtypes.int32)
+  _inputs_flat = [input, input_h, input_c, params, sequence_lengths]
+  _attrs = ("T", _attr_T, "rnn_mode", rnn_mode, "input_mode", input_mode,
+  "direction", direction, "dropout", dropout, "seed", seed, "seed2", seed2,
+  "num_proj", num_proj, "is_training", is_training, "time_major", time_major)
+  _result = _execute.execute(b"CudnnRNNV3", 5, inputs=_inputs_flat,
+                             attrs=_attrs, ctx=_ctx, name=name)
+  _execute.record_gradient(
+      "CudnnRNNV3", _inputs_flat, _attrs, _result, name)
+  _result = _CudnnRNNV3Output._make(_result)
+  return _result
+
+def _InitOpDefLibrary(op_list_proto_bytes):
+  op_list = _op_def_pb2.OpList()
+  op_list.ParseFromString(op_list_proto_bytes)
+  _op_def_registry.register_op_list(op_list)
+  op_def_lib = _op_def_library.OpDefLibrary()
+  op_def_lib.add_op_list(op_list)
+  return op_def_lib
+# op {
+#   name: "CudnnRNN"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "is_training"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CudnnRNNBackprop"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_h_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_c_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "params_backprop"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CudnnRNNBackpropV2"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "host_reserved"
+#     type: DT_INT8
+#   }
+#   output_arg {
+#     name: "input_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_h_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_c_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "params_backprop"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CudnnRNNBackpropV3"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "sequence_lengths"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_h_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "output_c_backprop"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "host_reserved"
+#     type: DT_INT8
+#   }
+#   output_arg {
+#     name: "input_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_h_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "input_c_backprop"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "params_backprop"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "num_proj"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "time_major"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CudnnRNNCanonicalToParams"
+#   input_arg {
+#     name: "num_layers"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "num_units"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "input_size"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "weights"
+#     type_attr: "T"
+#     number_attr: "num_params"
+#   }
+#   input_arg {
+#     name: "biases"
+#     type_attr: "T"
+#     number_attr: "num_params"
+#   }
+#   output_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "num_params"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+# }
+# op {
+#   name: "CudnnRNNCanonicalToParamsV2"
+#   input_arg {
+#     name: "num_layers"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "num_units"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "input_size"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "weights"
+#     type_attr: "T"
+#     number_attr: "num_params_weights"
+#   }
+#   input_arg {
+#     name: "biases"
+#     type_attr: "T"
+#     number_attr: "num_params_biases"
+#   }
+#   output_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "num_params_weights"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "num_params_biases"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "num_proj"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+# }
+# op {
+#   name: "CudnnRNNParamsSize"
+#   input_arg {
+#     name: "num_layers"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "num_units"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "input_size"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "params_size"
+#     type_attr: "S"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "S"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_INT32
+#         type: DT_INT64
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "num_proj"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+# }
+# op {
+#   name: "CudnnRNNParamsToCanonical"
+#   input_arg {
+#     name: "num_layers"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "num_units"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "input_size"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "weights"
+#     type_attr: "T"
+#     number_attr: "num_params"
+#   }
+#   output_arg {
+#     name: "biases"
+#     type_attr: "T"
+#     number_attr: "num_params"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "num_params"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+# }
+# op {
+#   name: "CudnnRNNParamsToCanonicalV2"
+#   input_arg {
+#     name: "num_layers"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "num_units"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "input_size"
+#     type: DT_INT32
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "weights"
+#     type_attr: "T"
+#     number_attr: "num_params_weights"
+#   }
+#   output_arg {
+#     name: "biases"
+#     type_attr: "T"
+#     number_attr: "num_params_biases"
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "num_params_weights"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "num_params_biases"
+#     type: "int"
+#     has_minimum: true
+#     minimum: 1
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "num_proj"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+# }
+# op {
+#   name: "CudnnRNNV2"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "host_reserved"
+#     type: DT_INT8
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "is_training"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   is_stateful: true
+# }
+# op {
+#   name: "CudnnRNNV3"
+#   input_arg {
+#     name: "input"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_h"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "input_c"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "params"
+#     type_attr: "T"
+#   }
+#   input_arg {
+#     name: "sequence_lengths"
+#     type: DT_INT32
+#   }
+#   output_arg {
+#     name: "output"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_h"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "output_c"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "reserve_space"
+#     type_attr: "T"
+#   }
+#   output_arg {
+#     name: "host_reserved"
+#     type: DT_INT8
+#   }
+#   attr {
+#     name: "T"
+#     type: "type"
+#     allowed_values {
+#       list {
+#         type: DT_HALF
+#         type: DT_FLOAT
+#         type: DT_DOUBLE
+#       }
+#     }
+#   }
+#   attr {
+#     name: "rnn_mode"
+#     type: "string"
+#     default_value {
+#       s: "lstm"
+#     }
+#     allowed_values {
+#       list {
+#         s: "rnn_relu"
+#         s: "rnn_tanh"
+#         s: "lstm"
+#         s: "gru"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "input_mode"
+#     type: "string"
+#     default_value {
+#       s: "linear_input"
+#     }
+#     allowed_values {
+#       list {
+#         s: "linear_input"
+#         s: "skip_input"
+#         s: "auto_select"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "direction"
+#     type: "string"
+#     default_value {
+#       s: "unidirectional"
+#     }
+#     allowed_values {
+#       list {
+#         s: "unidirectional"
+#         s: "bidirectional"
+#       }
+#     }
+#   }
+#   attr {
+#     name: "dropout"
+#     type: "float"
+#     default_value {
+#       f: 0
+#     }
+#   }
+#   attr {
+#     name: "seed"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "seed2"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "num_proj"
+#     type: "int"
+#     default_value {
+#       i: 0
+#     }
+#   }
+#   attr {
+#     name: "is_training"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   attr {
+#     name: "time_major"
+#     type: "bool"
+#     default_value {
+#       b: true
+#     }
+#   }
+#   is_stateful: true
+# }
+_op_def_lib = _InitOpDefLibrary(b"\n\304\003\n\010CudnnRNN\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\032\013\n\006output\"\001T\032\r\n\010output_h\"\001T\032\r\n\010output_c\"\001T\032\022\n\rreserve_space\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\027\n\013is_training\022\004bool\032\002(\001\210\001\001\n\322\004\n\020CudnnRNNBackprop\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\022\013\n\006output\"\001T\022\r\n\010output_h\"\001T\022\r\n\010output_c\"\001T\022\024\n\017output_backprop\"\001T\022\026\n\021output_h_backprop\"\001T\022\026\n\021output_c_backprop\"\001T\022\022\n\rreserve_space\"\001T\032\023\n\016input_backprop\"\001T\032\025\n\020input_h_backprop\"\001T\032\025\n\020input_c_backprop\"\001T\032\024\n\017params_backprop\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\210\001\001\n\347\004\n\022CudnnRNNBackpropV2\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\022\013\n\006output\"\001T\022\r\n\010output_h\"\001T\022\r\n\010output_c\"\001T\022\024\n\017output_backprop\"\001T\022\026\n\021output_h_backprop\"\001T\022\026\n\021output_c_backprop\"\001T\022\022\n\rreserve_space\"\001T\022\021\n\rhost_reserved\030\006\032\023\n\016input_backprop\"\001T\032\025\n\020input_h_backprop\"\001T\032\025\n\020input_c_backprop\"\001T\032\024\n\017params_backprop\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\210\001\001\n\252\005\n\022CudnnRNNBackpropV3\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\022\024\n\020sequence_lengths\030\003\022\013\n\006output\"\001T\022\r\n\010output_h\"\001T\022\r\n\010output_c\"\001T\022\024\n\017output_backprop\"\001T\022\026\n\021output_h_backprop\"\001T\022\026\n\021output_c_backprop\"\001T\022\022\n\rreserve_space\"\001T\022\021\n\rhost_reserved\030\006\032\023\n\016input_backprop\"\001T\032\025\n\020input_h_backprop\"\001T\032\025\n\020input_c_backprop\"\001T\032\024\n\017params_backprop\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\023\n\010num_proj\022\003int\032\002\030\000\"\026\n\ntime_major\022\004bool\032\002(\001\210\001\001\n\313\003\n\031CudnnRNNCanonicalToParams\022\016\n\nnum_layers\030\003\022\r\n\tnum_units\030\003\022\016\n\ninput_size\030\003\022\030\n\007weights\"\001T*\nnum_params\022\027\n\006biases\"\001T*\nnum_params\032\013\n\006params\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"\025\n\nnum_params\022\003int(\0010\001\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\n\227\004\n\033CudnnRNNCanonicalToParamsV2\022\016\n\nnum_layers\030\003\022\r\n\tnum_units\030\003\022\016\n\ninput_size\030\003\022 \n\007weights\"\001T*\022num_params_weights\022\036\n\006biases\"\001T*\021num_params_biases\032\013\n\006params\"\001T\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"\035\n\022num_params_weights\022\003int(\0010\001\"\034\n\021num_params_biases\022\003int(\0010\001\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\023\n\010num_proj\022\003int\032\002\030\000\n\247\003\n\022CudnnRNNParamsSize\022\016\n\nnum_layers\030\003\022\r\n\tnum_units\030\003\022\016\n\ninput_size\030\003\032\020\n\013params_size\"\001S\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"\021\n\001S\022\004type:\006\n\0042\002\003\t\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\023\n\010num_proj\022\003int\032\002\030\000\n\313\003\n\031CudnnRNNParamsToCanonical\022\016\n\nnum_layers\030\003\022\r\n\tnum_units\030\003\022\016\n\ninput_size\030\003\022\013\n\006params\"\001T\032\030\n\007weights\"\001T*\nnum_params\032\027\n\006biases\"\001T*\nnum_params\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"\025\n\nnum_params\022\003int(\0010\001\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\n\227\004\n\033CudnnRNNParamsToCanonicalV2\022\016\n\nnum_layers\030\003\022\r\n\tnum_units\030\003\022\016\n\ninput_size\030\003\022\013\n\006params\"\001T\032 \n\007weights\"\001T*\022num_params_weights\032\036\n\006biases\"\001T*\021num_params_biases\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"\035\n\022num_params_weights\022\003int(\0010\001\"\034\n\021num_params_biases\022\003int(\0010\001\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\023\n\010num_proj\022\003int\032\002\030\000\n\331\003\n\nCudnnRNNV2\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\032\013\n\006output\"\001T\032\r\n\010output_h\"\001T\032\r\n\010output_c\"\001T\032\022\n\rreserve_space\"\001T\032\021\n\rhost_reserved\030\006\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\027\n\013is_training\022\004bool\032\002(\001\210\001\001\n\234\004\n\nCudnnRNNV3\022\n\n\005input\"\001T\022\014\n\007input_h\"\001T\022\014\n\007input_c\"\001T\022\013\n\006params\"\001T\022\024\n\020sequence_lengths\030\003\032\013\n\006output\"\001T\032\r\n\010output_h\"\001T\032\r\n\010output_c\"\001T\032\022\n\rreserve_space\"\001T\032\021\n\rhost_reserved\030\006\"\022\n\001T\022\004type:\007\n\0052\003\023\001\002\"=\n\010rnn_mode\022\006string\032\006\022\004lstm:!\n\037\022\010rnn_relu\022\010rnn_tanh\022\004lstm\022\003gru\"O\n\ninput_mode\022\006string\032\016\022\014linear_input:)\n\'\022\014linear_input\022\nskip_input\022\013auto_select\"H\n\tdirection\022\006string\032\020\022\016unidirectional:!\n\037\022\016unidirectional\022\rbidirectional\"\027\n\007dropout\022\005float\032\005%\000\000\000\000\"\017\n\004seed\022\003int\032\002\030\000\"\020\n\005seed2\022\003int\032\002\030\000\"\023\n\010num_proj\022\003int\032\002\030\000\"\027\n\013is_training\022\004bool\032\002(\001\"\026\n\ntime_major\022\004bool\032\002(\001\210\001\001")
