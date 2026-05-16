@@ -36,6 +36,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 EPISODES = 1000
+RENDER = False  # set True to watch a pygame window during training (much slower)
+SAVE_PATH = "cartpole_ppo.pt"
 # Steps collected per update; PPO is batch-based, not single-step like A2C.
 ROLLOUT_STEPS = 256
 # Number of times we sweep over the collected batch each update.
@@ -88,7 +90,7 @@ def compute_gae(rewards, values, dones, last_value):
 
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1")
+    env = gym.make("CartPole-v1", render_mode="human" if RENDER else None)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
@@ -181,4 +183,9 @@ if __name__ == "__main__":
             recent = ep_returns[-10:]
             print(f"update: {episode}  recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
             if len(recent) >= 10 and np.mean(recent) > 490:
+                torch.save(model.state_dict(), SAVE_PATH)
+                print(f"Saved trained model to {SAVE_PATH}")
                 sys.exit()
+
+    torch.save(model.state_dict(), SAVE_PATH)
+    print(f"Saved trained model to {SAVE_PATH}")

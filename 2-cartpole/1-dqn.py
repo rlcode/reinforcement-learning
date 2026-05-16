@@ -28,6 +28,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 EPISODES = 300
+RENDER = False  # set True to watch a pygame window during training (much slower)
+SAVE_PATH = "cartpole_dqn.pt"
 
 
 # Approximator for Q(s, .). He-uniform init is friendly to ReLU.
@@ -120,7 +122,7 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1")
+    env = gym.make("CartPole-v1", render_mode="human" if RENDER else None)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
@@ -158,4 +160,9 @@ if __name__ == "__main__":
 
                 # Early stop when consistently near max episode length.
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
+                    torch.save(agent.model.state_dict(), SAVE_PATH)
+                    print(f"Saved trained model to {SAVE_PATH}")
                     sys.exit()
+
+    torch.save(agent.model.state_dict(), SAVE_PATH)
+    print(f"Saved trained model to {SAVE_PATH}")
