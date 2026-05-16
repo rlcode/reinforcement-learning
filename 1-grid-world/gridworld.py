@@ -21,7 +21,8 @@ import time
 import numpy as np
 import pygame
 
-UNIT = 100        # pixel size of one grid cell
+UNIT = 100        # pixel size of one grid cell (tabular Env)
+DYN_UNIT = 50     # pixel size of one grid cell (DynamicEnv — smaller, more cells fit)
 WIDTH = 5         # grid width  (cells)
 HEIGHT = 5        # grid height (cells)
 FPS_DELAY = 0.03  # sleep between frames during render()
@@ -167,3 +168,172 @@ class Env:
                     text = self._font.render(f"{q:+.2f}", True, TEXT_COLOR)
                     rect = text.get_rect(center=(cx + offsets[i][0], cy + offsets[i][1]))
                     self._screen.blit(text, rect)
+
+
+class DynamicEnv:
+    """5x5 grid-world with moving obstacles, used by Deep SARSA and REINFORCE.
+
+    Differences from the static Env above:
+      - 3 obstacles instead of 2; they jump left/right one cell every 2nd step.
+      - Goal at (4, 4); obstacles initialize at (0,1), (1,2), (2,3).
+      - Episode terminates only on goal — hitting an obstacle costs -1 but
+        the episode continues (matches the original tkinter env).
+      - Reward includes an optional per-step penalty (REINFORCE uses -0.1
+        to encourage shorter paths; Deep SARSA uses 0).
+      - State is a 15-dim relative encoding (see _get_state).
+
+    Action mapping (matches the original deep-grid-world code):
+      0: up    1: down    2: right    3: left
+    """
+
+    n_actions = 4
+    action_space = ["u", "d", "r", "l"]
+    state_size = 15
+
+    def __init__(self, title="DynamicGridWorld", step_penalty=0.0, render_mode="human"):
+        self.title = title
+        self.step_penalty = step_penalty
+        # render_mode=None disables display (useful for tests / headless training).
+        self.render_mode = render_mode
+        # Agent in grid coords.
+        self.agent = [0, 0]
+        # Obstacles: each is dict(state=[x,y], direction=+1/-1, reward=-1).
+        # direction = -1 means "next move = right" (matches original code).
+        self.obstacles_init = [[0, 1], [1, 2], [2, 3]]
+        self.goal = [4, 4]
+        self.obstacles = []
+        self.counter = 0
+
+        self._screen = None
+        self._clock = None
+
+    # ---- core RL API -----------------------------------------------------
+
+    def reset(self):
+        self.agent = [0, 0]
+        self.counter = 0
+        self.obstacles = [{"state": list(p), "direction": -1} for p in self.obstacles_init]
+        if self._screen is not None:
+            self.render()
+            time.sleep(0.3)
+        return self._get_state()
+
+    def step(self, action):
+        self.counter += 1
+        # Render every step (matches the original tkinter env's behavior of
+        # calling self.render() at the top of step()).  Skips display setup
+        # if you never opened a display in this process.
+        self.render()
+        # Obstacles move every other step (matches the original env).
+        if self.counter % 2 == 1:
+            self._move_obstacles()
+
+        x, y = self.agent
+        if action == 0 and y > 0:                # up
+            y -= 1
+        elif action == 1 and y < HEIGHT - 1:     # down
+            y += 1
+        elif action == 2 and x < WIDTH - 1:      # right
+            x += 1
+        elif action == 3 and x > 0:              # left
+            x -= 1
+        self.agent = [x, y]
+
+        reward, done = self._reward_and_done()
+        reward -= self.step_penalty
+        return self._get_state(), reward, done
+
+    def _reward_and_done(self):
+        if self.agent == self.goal:
+            return 1.0, True
+        # Reward stacks if agent lands on multiple obstacles in same cell
+        # (the original env did this too — usually only one obstacle per cell).
+        r = 0.0
+        for obs in self.obstacles:
+            if obs["state"] == self.agent:
+                r -= 1.0
+        return r, False
+
+    def _move_obstacles(self):
+        for obs in self.obstacles:
+            x, y = obs["state"]
+            # Bounce at the grid edges.
+            if x == WIDTH - 1:
+                obs["direction"] = 1
+            elif x == 0:
+                obs["direction"] = -1
+            # direction == -1  => move right; direction == 1  => move left.
+            x += 1 if obs["direction"] == -1 else -1
+            obs["state"] = [x, y]
+
+    def _get_state(self):
+        """15-dim relative encoding (matches the original env).
+
+        For each obstacle (3x):  [dx, dy, -1, direction]   (4 dims)
+        For the goal      (1x):  [dx, dy,  1]              (3 dims)
+        Total: 3 * 4 + 3 = 15.
+        """
+        ax, ay = self.agent
+        s = []
+        for obs in self.obstacles:
+            ox, oy = obs["state"]
+            s.append(ox - ax)
+            s.append(oy - ay)
+            s.append(-1)
+            s.append(obs["direction"])
+        gx, gy = self.goal
+        s.append(gx - ax)
+        s.append(gy - ay)
+        s.append(1)
+        return s
+
+    # ---- rendering -------------------------------------------------------
+
+    def _ensure_display(self):
+        if self._screen is not None:
+            return
+        pygame.init()
+        pygame.display.set_caption(self.title)
+        self._screen = pygame.display.set_mode((WIDTH * DYN_UNIT, HEIGHT * DYN_UNIT))
+        self._clock = pygame.time.Clock()
+
+    def render(self):
+        if self.render_mode is None:
+            return
+        self._ensure_display()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                raise SystemExit
+
+        self._screen.fill(WHITE)
+        # Grid lines.
+        for c in range(WIDTH + 1):
+            pygame.draw.line(self._screen, GRID_LINE,
+                             (c * DYN_UNIT, 0), (c * DYN_UNIT, HEIGHT * DYN_UNIT))
+        for r in range(HEIGHT + 1):
+            pygame.draw.line(self._screen, GRID_LINE,
+                             (0, r * DYN_UNIT), (WIDTH * DYN_UNIT, r * DYN_UNIT))
+
+        # Goal.
+        gx, gy = self.goal
+        cx, cy = gx * DYN_UNIT + DYN_UNIT // 2, gy * DYN_UNIT + DYN_UNIT // 2
+        pygame.draw.circle(self._screen, GOAL_COLOR, (cx, cy), int(DYN_UNIT * 0.33))
+
+        # Obstacles.
+        for obs in self.obstacles:
+            ox, oy = obs["state"]
+            cx, cy = ox * DYN_UNIT + DYN_UNIT // 2, oy * DYN_UNIT + DYN_UNIT // 2
+            r = int(DYN_UNIT * 0.36)
+            pts = [(cx, cy - r), (cx - r, cy + r), (cx + r, cy + r)]
+            pygame.draw.polygon(self._screen, OBSTACLE_COLOR, pts)
+
+        # Agent.
+        ax, ay = self.agent
+        size = int(DYN_UNIT * 0.65)
+        cx, cy = ax * DYN_UNIT + DYN_UNIT // 2, ay * DYN_UNIT + DYN_UNIT // 2
+        rect = pygame.Rect(cx - size // 2, cy - size // 2, size, size)
+        pygame.draw.rect(self._screen, AGENT_COLOR, rect)
+
+        pygame.display.flip()
+        time.sleep(FPS_DELAY)

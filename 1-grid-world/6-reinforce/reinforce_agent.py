@@ -17,11 +17,15 @@ trick (acts like a constant baseline).
 Implementation note: we maximize expected return, i.e. minimize the
 negative log-likelihood weighted by G_t.
 """
+import os
+import sys
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from environment import Env
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gridworld import DynamicEnv  # noqa: E402
 
 EPISODES = 2500
 
@@ -102,7 +106,8 @@ class ReinforceAgent:
 
 
 if __name__ == "__main__":
-    env = Env()
+    # REINFORCE uses a per-step -0.1 penalty to encourage shorter paths.
+    env = DynamicEnv(title="REINFORCE", step_penalty=0.1)
     agent = ReinforceAgent()
     global_step = 0
 
