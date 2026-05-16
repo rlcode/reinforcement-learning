@@ -56,18 +56,28 @@ VALUE_COEF = 0.5
 ENTROPY_COEF = 0.01
 
 
+def _ortho(layer, gain):
+    """Orthogonal init — a standard PPO stability trick (CleanRL-style)."""
+    nn.init.orthogonal_(layer.weight, gain)
+    nn.init.zeros_(layer.bias)
+    return layer
+
+
 # Shared-trunk actor-critic: two-layer MLP with tanh, then policy and value heads.
 class ActorCritic(nn.Module):
     def __init__(self, state_size, action_size):
         super().__init__()
+        # gain = sqrt(2) for the tanh trunk, 0.01 for the policy head
+        # (keeps initial action distribution close to uniform), 1 for the
+        # value head.  These are the standard PPO-paper / CleanRL choices.
         self.shared = nn.Sequential(
-            nn.Linear(state_size, 64),
+            _ortho(nn.Linear(state_size, 64), gain=2 ** 0.5),
             nn.Tanh(),
-            nn.Linear(64, 64),
+            _ortho(nn.Linear(64, 64), gain=2 ** 0.5),
             nn.Tanh(),
         )
-        self.policy = nn.Linear(64, action_size)
-        self.value = nn.Linear(64, 1)
+        self.policy = _ortho(nn.Linear(64, action_size), gain=0.01)
+        self.value = _ortho(nn.Linear(64, 1), gain=1.0)
 
     def forward(self, x):
         h = self.shared(x)
@@ -143,7 +153,10 @@ if __name__ == "__main__":
             next_state, reward, terminated, truncated, _ = env.step(int(action.item()))
             done = terminated or truncated
             rew_buf[t] = reward
-            done_buf[t] = float(done)
+            # GAE mask uses *terminated* only.  Truncation (CartPole hitting
+            # 500 steps successfully) is not a real terminal, so we should
+            # still bootstrap with V(s') instead of zeroing it out.
+            done_buf[t] = float(terminated)
             ep_return += reward
 
             if done:
