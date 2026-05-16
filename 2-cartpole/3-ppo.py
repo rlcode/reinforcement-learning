@@ -29,13 +29,12 @@ Total loss combines clipped policy loss, value MSE, and an entropy bonus:
 """
 import sys
 
-import gymnasium as gym
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import argparse
+from cartpole import make_env, parse_args, run_test_loop
 
 EPISODES = 1000
 SAVE_PATH = "cartpole_ppo.pt"
@@ -91,12 +90,8 @@ def compute_gae(rewards, values, dones, last_value):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--render", action="store_true", help="show the cartpole window during training")
-    parser.add_argument("--test", action="store_true", help="load the saved checkpoint and just play (no learning)")
-    args = parser.parse_args()
-
-    env = gym.make("CartPole-v1", render_mode="human" if (args.render or args.test) else None)
+    args = parse_args()
+    env = make_env(args)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
@@ -105,19 +100,13 @@ if __name__ == "__main__":
 
     if args.test:
         model.load_state_dict(torch.load(SAVE_PATH))
-        while True:
-            state, _ = env.reset()
-            state = np.array(state, dtype=np.float32)
-            done = False; score = 0
-            while not done:
-                with torch.no_grad():
-                    logits, _ = model(torch.as_tensor(state))
-                    action = int(torch.distributions.Categorical(logits=logits).sample().item())
-                next_state, reward, terminated, truncated, _ = env.step(action)
-                done = terminated or truncated
-                state = np.array(next_state, dtype=np.float32)
-                score += reward
-            print(f"test score: {score}")
+
+        def pick(state):
+            with torch.no_grad():
+                logits, _ = model(torch.as_tensor(state))
+                return int(torch.distributions.Categorical(logits=logits).sample().item())
+
+        run_test_loop(env, pick)
 
     state, _ = env.reset()
     state = np.array(state, dtype=np.float32)

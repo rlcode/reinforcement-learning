@@ -21,13 +21,12 @@ Subtracting V_w(s) is the variance-reduction baseline; using a learned V
 """
 import sys
 
-import gymnasium as gym
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import argparse
+from cartpole import make_env, parse_args, run_test_loop
 
 EPISODES = 1000
 SAVE_PATH = "cartpole_a2c.pt"
@@ -112,12 +111,8 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--render", action="store_true", help="show the cartpole window during training")
-    parser.add_argument("--test", action="store_true", help="load the saved checkpoint and just play (no learning)")
-    args = parser.parse_args()
-
-    env = gym.make("CartPole-v1", render_mode="human" if (args.render or args.test) else None)
+    args = parse_args()
+    env = make_env(args)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
@@ -127,17 +122,7 @@ if __name__ == "__main__":
         ckpt = torch.load(SAVE_PATH)
         agent.actor.load_state_dict(ckpt["actor"])
         agent.critic.load_state_dict(ckpt["critic"])
-        while True:
-            state, _ = env.reset()
-            state = np.array(state, dtype=np.float32)
-            done = False; score = 0
-            while not done:
-                action = agent.get_action(state)
-                next_state, reward, terminated, truncated, _ = env.step(action)
-                done = terminated or truncated
-                state = np.array(next_state, dtype=np.float32)
-                score += reward
-            print(f"test score: {score}")
+        run_test_loop(env, agent.get_action)
 
     scores = []
 
