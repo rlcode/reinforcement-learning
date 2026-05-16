@@ -254,6 +254,9 @@ class GraphicDisplay:
         self.agent_pos = [0, 0]
         # Per-label click counts, available to button `enabled` predicates.
         self.clicks = {}
+        # Brief "pressed" flash so clicks feel responsive.
+        self._press_label = None
+        self._press_frames = 0
         self._screen = None
         self._values = None
         self._arrows = None
@@ -293,6 +296,9 @@ class GraphicDisplay:
                     for rect, btn in zip(self._btn_rects(), self.buttons):
                         if rect.collidepoint(e.pos) and self._btn_enabled(btn):
                             label = btn[0]
+                            self._press_label = label
+                            self._press_frames = 6
+                            self._render()  # draw the pressed state immediately
                             btn[1]()
                             self.clicks[label] = self.clicks.get(label, 0) + 1
                             break
@@ -349,13 +355,21 @@ class GraphicDisplay:
 
         for rect, btn in zip(self._btn_rects(), self.buttons):
             enabled = self._btn_enabled(btn)
-            bg = (220, 220, 220) if enabled else (245, 245, 245)
-            fg = BLACK if enabled else (170, 170, 170)
-            border = BLACK if enabled else (200, 200, 200)
+            pressed = btn[0] == self._press_label and self._press_frames > 0
+            if not enabled:
+                bg, fg, border = (245, 245, 245), (170, 170, 170), (200, 200, 200)
+            elif pressed:
+                bg, fg, border = (160, 180, 220), BLACK, BLACK  # blue tint while held
+            else:
+                bg, fg, border = (220, 220, 220), BLACK, BLACK
             pygame.draw.rect(s, bg, rect)
             pygame.draw.rect(s, border, rect, 1)
             t = self._font.render(btn[0], True, fg)
-            s.blit(t, t.get_rect(center=rect.center))
+            # Offset text slightly when pressed for a "depressed" feel.
+            center = (rect.centerx + (1 if pressed else 0), rect.centery + (1 if pressed else 0))
+            s.blit(t, t.get_rect(center=center))
+        if self._press_frames > 0:
+            self._press_frames -= 1
 
         pygame.display.flip()
 
