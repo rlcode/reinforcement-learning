@@ -190,6 +190,8 @@ class DynamicEnv:
     action_space = ["u", "d", "r", "l"]
     state_size = 15
 
+    HUD_HEIGHT = 32  # pixels reserved at the top of the window for the HUD
+
     def __init__(self, title="DynamicGridWorld", step_penalty=0.0, render_mode="human"):
         self.title = title
         self.step_penalty = step_penalty
@@ -204,14 +206,27 @@ class DynamicEnv:
         self.obstacles = []
         self.counter = 0
 
+        # HUD / feedback state.
+        self.episode = 0
+        self.score = 0.0
+        # Number of remaining frames to flash the agent red after a -1 hit.
+        self._hit_flash = 0
+
         self._screen = None
+        self._hud_font = None
+        self._popup_font = None
         self._clock = None
 
     # ---- core RL API -----------------------------------------------------
 
     def reset(self):
+        # Episode count goes up at every reset *except* the very first.
+        if self.counter > 0 or self.score != 0.0:
+            self.episode += 1
         self.agent = [0, 0]
         self.counter = 0
+        self.score = 0.0
+        self._hit_flash = 0
         self.obstacles = [{"state": list(p), "direction": -1} for p in self.obstacles_init]
         if self._screen is not None:
             self.render()
@@ -241,6 +256,10 @@ class DynamicEnv:
 
         reward, done = self._reward_and_done()
         reward -= self.step_penalty
+        self.score += reward
+        # Flash agent red for a few frames when it lands on an obstacle.
+        if reward < -self.step_penalty:
+            self._hit_flash = 4
         return self._get_state(), reward, done
 
     def _reward_and_done(self):
@@ -294,7 +313,11 @@ class DynamicEnv:
             return
         pygame.init()
         pygame.display.set_caption(self.title)
-        self._screen = pygame.display.set_mode((WIDTH * DYN_UNIT, HEIGHT * DYN_UNIT))
+        self._screen = pygame.display.set_mode(
+            (WIDTH * DYN_UNIT, HEIGHT * DYN_UNIT + self.HUD_HEIGHT)
+        )
+        self._hud_font = pygame.font.SysFont(None, 22)
+        self._popup_font = pygame.font.SysFont(None, 28)
         self._clock = pygame.time.Clock()
 
     def render(self):
@@ -307,33 +330,51 @@ class DynamicEnv:
                 raise SystemExit
 
         self._screen.fill(WHITE)
-        # Grid lines.
+        hud = self.HUD_HEIGHT  # vertical offset for the grid
+
+        # --- HUD bar at the top: "Episode: N    Score: X.X" ----------------
+        pygame.draw.rect(self._screen, (30, 30, 30),
+                         pygame.Rect(0, 0, WIDTH * DYN_UNIT, hud))
+        hud_text = f"Episode: {self.episode}    Score: {self.score:+.1f}"
+        surf = self._hud_font.render(hud_text, True, (240, 240, 240))
+        self._screen.blit(surf, (8, (hud - surf.get_height()) // 2))
+
+        # --- Grid lines (offset down by HUD) -------------------------------
         for c in range(WIDTH + 1):
             pygame.draw.line(self._screen, GRID_LINE,
-                             (c * DYN_UNIT, 0), (c * DYN_UNIT, HEIGHT * DYN_UNIT))
+                             (c * DYN_UNIT, hud),
+                             (c * DYN_UNIT, hud + HEIGHT * DYN_UNIT))
         for r in range(HEIGHT + 1):
             pygame.draw.line(self._screen, GRID_LINE,
-                             (0, r * DYN_UNIT), (WIDTH * DYN_UNIT, r * DYN_UNIT))
+                             (0, hud + r * DYN_UNIT),
+                             (WIDTH * DYN_UNIT, hud + r * DYN_UNIT))
 
-        # Goal.
+        # --- Goal ----------------------------------------------------------
         gx, gy = self.goal
-        cx, cy = gx * DYN_UNIT + DYN_UNIT // 2, gy * DYN_UNIT + DYN_UNIT // 2
+        cx, cy = gx * DYN_UNIT + DYN_UNIT // 2, hud + gy * DYN_UNIT + DYN_UNIT // 2
         pygame.draw.circle(self._screen, GOAL_COLOR, (cx, cy), int(DYN_UNIT * 0.33))
 
-        # Obstacles.
+        # --- Obstacles -----------------------------------------------------
         for obs in self.obstacles:
             ox, oy = obs["state"]
-            cx, cy = ox * DYN_UNIT + DYN_UNIT // 2, oy * DYN_UNIT + DYN_UNIT // 2
+            cx, cy = ox * DYN_UNIT + DYN_UNIT // 2, hud + oy * DYN_UNIT + DYN_UNIT // 2
             r = int(DYN_UNIT * 0.36)
             pts = [(cx, cy - r), (cx - r, cy + r), (cx + r, cy + r)]
             pygame.draw.polygon(self._screen, OBSTACLE_COLOR, pts)
 
-        # Agent.
+        # --- Agent (flash red briefly after hitting an obstacle) -----------
         ax, ay = self.agent
         size = int(DYN_UNIT * 0.65)
-        cx, cy = ax * DYN_UNIT + DYN_UNIT // 2, ay * DYN_UNIT + DYN_UNIT // 2
+        cx, cy = ax * DYN_UNIT + DYN_UNIT // 2, hud + ay * DYN_UNIT + DYN_UNIT // 2
         rect = pygame.Rect(cx - size // 2, cy - size // 2, size, size)
-        pygame.draw.rect(self._screen, AGENT_COLOR, rect)
+        color = OBSTACLE_COLOR if self._hit_flash > 0 else AGENT_COLOR
+        pygame.draw.rect(self._screen, color, rect)
+
+        # --- "-1" popup over the agent during the flash --------------------
+        if self._hit_flash > 0:
+            popup = self._popup_font.render("-1", True, OBSTACLE_COLOR)
+            self._screen.blit(popup, popup.get_rect(center=(cx, cy - size // 2 - 14)))
+            self._hit_flash -= 1
 
         pygame.display.flip()
         time.sleep(FPS_DELAY)
