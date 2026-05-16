@@ -87,6 +87,8 @@ if __name__ == "__main__":
         display.agent_pos = [0, 0]
         display.clicks.clear()
 
+    # Workflow: Calculate x several (until V stops changing) -> Print Policy -> Move.
+    # Print Policy unlocks after Calculate; Move unlocks after Print Policy.
     display.buttons = [
         ("Calculate",    on_calculate),
         ("Print Policy", on_print_policy, lambda: display.click_count("Calculate") > 0),

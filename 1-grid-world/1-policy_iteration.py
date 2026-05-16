@@ -117,6 +117,8 @@ if __name__ == "__main__":
         display.agent_pos = [0, 0]
         display.clicks.clear()
 
+    # Workflow: (Evaluate x several -> Improve) x several -> Move.
+    # Improve unlocks after Evaluate; Move unlocks after Improve.
     display.buttons = [
         ("Evaluate", on_evaluate),
         ("Improve",  on_improve, lambda: display.click_count("Evaluate") > 0),
