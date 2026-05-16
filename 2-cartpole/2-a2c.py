@@ -26,7 +26,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from env import make_env, parse_args, run_test_loop
+from env import make_env, parse_args, quit_if_window_closed, run_test_loop
 
 EPISODES = 1000
 SAVE_PATH = "cartpole_a2c.pt"
@@ -133,6 +133,7 @@ if __name__ == "__main__":
         state = np.array(state, dtype=np.float32)
 
         while not done:
+            quit_if_window_closed(env)
             action = agent.get_action(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated

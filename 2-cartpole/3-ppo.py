@@ -34,7 +34,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from env import make_env, parse_args, run_test_loop
+from env import make_env, parse_args, quit_if_window_closed, run_test_loop
 
 EPISODES = 1000
 SAVE_PATH = "cartpole_ppo.pt"
@@ -123,6 +123,7 @@ if __name__ == "__main__":
         val_buf = np.zeros(ROLLOUT_STEPS, dtype=np.float32)
 
         for t in range(ROLLOUT_STEPS):
+            quit_if_window_closed(env)
             with torch.no_grad():
                 logits, value = model(torch.as_tensor(state))
                 # Categorical handles softmax + sampling + log_prob cleanly.

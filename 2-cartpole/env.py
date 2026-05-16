@@ -30,9 +30,12 @@ def quit_if_window_closed(env):
     """Exit cleanly when the user clicks the window's X.
 
     Gymnasium's classic_control renderer pumps pygame's internal event
-    processing but doesn't act on QUIT, so without this the test loop
-    would ignore the close button.
+    processing but doesn't act on QUIT, so without this nothing would
+    happen on close.  Safe to call from headless runs too: when no
+    display is initialized the function returns immediately.
     """
+    if not pygame.display.get_init():
+        return
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             env.close()
