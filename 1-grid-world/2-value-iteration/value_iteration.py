@@ -62,44 +62,37 @@ class ValueIteration:
 if __name__ == "__main__":
     env = Env()
     value_iteration = ValueIteration(env)
-    display_ref = {"display": None}
+    display = GraphicDisplay(value_iteration, title="Value Iteration")
 
     def on_calculate():
         value_iteration.value_iteration()
-        display_ref["display"].show_values(value_iteration.value_table)
+        display.show_values(value_iteration.value_table)
 
     def on_print_policy():
-        # Build a policy table from the greedy actions implied by V.
+        # Build a policy arrow table from the greedy actions implied by V.
         policy = [[[0.0] * 4 for _ in range(env.width)] for _ in range(env.height)]
-        for x in range(env.height):
-            for y in range(env.width):
-                if [x, y] == [2, 2]:
-                    continue
-                actions = value_iteration.get_action([x, y])
-                if not actions:
-                    continue
-                p = 1.0 / len(actions)
-                for a in actions:
-                    policy[x][y][a] = p
-        display_ref["display"].show_arrows(policy)
+        for state in env.get_all_states():
+            x, y = state
+            actions = value_iteration.get_action(state)
+            if not actions:
+                continue
+            prob = 1.0 / len(actions)
+            for a in actions:
+                policy[x][y][a] = prob
+        display.show_arrows(policy)
 
     def on_move():
-        display_ref["display"].move_along_policy(value_iteration.get_action)
+        display.move_along_policy(value_iteration.get_action)
 
     def on_clear():
-        value_iteration.value_table = [[0.0] * env.width for _ in range(env.height)]
-        display_ref["display"].clear()
-        display_ref["display"].agent_pos = [0, 0]
+        value_iteration.__init__(env)
+        display.clear()
+        display.agent_pos = [0, 0]
 
-    display = GraphicDisplay(
-        value_iteration,
-        title="Value Iteration",
-        buttons=[
-            ("Calculate", on_calculate),
-            ("Print Policy", on_print_policy),
-            ("Move", on_move),
-            ("Clear", on_clear),
-        ],
-    )
-    display_ref["display"] = display
+    display.buttons = [
+        ("Calculate",    on_calculate),
+        ("Print Policy", on_print_policy),
+        ("Move",         on_move),
+        ("Clear",        on_clear),
+    ]
     display.mainloop()

@@ -101,44 +101,29 @@ class PolicyIteration:
 if __name__ == "__main__":
     env = Env()
     policy_iteration = PolicyIteration(env)
-
-    # Counters track how many times each button has been pressed.
-    state = {"eval_count": 0, "improve_count": 0}
-    display_ref = {"display": None}
+    display = GraphicDisplay(policy_iteration, title="Policy Iteration")
 
     def on_evaluate():
         policy_iteration.policy_evaluation()
-        state["eval_count"] += 1
-        display_ref["display"].show_values(policy_iteration.value_table)
+        display.show_values(policy_iteration.value_table)
 
     def on_improve():
         policy_iteration.policy_improvement()
-        state["improve_count"] += 1
-        display_ref["display"].show_arrows(policy_iteration.policy_table)
+        display.show_arrows(policy_iteration.policy_table)
 
     def on_move():
-        if state["improve_count"] == 0:
-            return  # no policy yet
-        display_ref["display"].move_along_policy(policy_iteration.get_action)
+        display.move_along_policy(policy_iteration.get_action)
 
     def on_reset():
-        policy_iteration.value_table = [[0.0] * env.width for _ in range(env.height)]
-        policy_iteration.policy_table = [[[0.25, 0.25, 0.25, 0.25]] * env.width for _ in range(env.height)]
-        policy_iteration.policy_table[2][2] = []
-        state["eval_count"] = 0
-        state["improve_count"] = 0
-        display_ref["display"].clear()
-        display_ref["display"].agent_pos = [0, 0]
+        # Re-initialize the agent and clear all overlays.
+        policy_iteration.__init__(env)
+        display.clear()
+        display.agent_pos = [0, 0]
 
-    display = GraphicDisplay(
-        policy_iteration,
-        title="Policy Iteration",
-        buttons=[
-            ("Evaluate", on_evaluate),
-            ("Improve", on_improve),
-            ("Move", on_move),
-            ("Reset", on_reset),
-        ],
-    )
-    display_ref["display"] = display
+    display.buttons = [
+        ("Evaluate", on_evaluate),
+        ("Improve",  on_improve),
+        ("Move",     on_move),
+        ("Reset",    on_reset),
+    ]
     display.mainloop()

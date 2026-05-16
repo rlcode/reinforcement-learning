@@ -451,12 +451,14 @@ class GraphicDisplay:
 
     BUTTON_BAR_HEIGHT = 50
 
-    def __init__(self, agent, title, buttons):
-        """`buttons` is a list of (label, callable) tuples (1-4 entries)."""
+    def __init__(self, agent, title, buttons=None):
+        """`buttons` is a list of (label, callable) tuples (1-4 entries).
+        Can also be assigned after construction (handlers commonly need to
+        capture the display itself, which is awkward in a single expression)."""
         self.agent = agent
         self.env = PolicyEnv()
         self.title = title
-        self.buttons = buttons
+        self.buttons = buttons or []
         # Agent grid position for the "Move" animation.
         self.agent_pos = [0, 0]
         # Display state.
