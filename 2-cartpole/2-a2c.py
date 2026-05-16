@@ -138,15 +138,14 @@ if __name__ == "__main__":
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             next_state = np.array(next_state, dtype=np.float32)
-            # Penalty on early termination (same shaping as DQN script).
-            shaped_reward = reward if not done or score == 499 else -100
+            score += reward  # raw episode length
+            # Reward shaping (matches the rlcode-kr-v2 reference and DQN).
+            shaped_reward = 0.1 if not done or score == 500 else -1
 
             agent.train_model(state, action, shaped_reward, next_state, done)
-            score += shaped_reward
             state = next_state
 
             if done:
-                score = score if score == 500.0 else score + 100
                 scores.append(score)
                 print(f"episode: {e}  score: {score}")
                 if np.mean(scores[-min(10, len(scores)):]) > 490:

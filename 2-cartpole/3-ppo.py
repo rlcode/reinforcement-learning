@@ -152,12 +152,12 @@ if __name__ == "__main__":
 
             next_state, reward, terminated, truncated, _ = env.step(int(action.item()))
             done = terminated or truncated
-            rew_buf[t] = reward
-            # GAE mask uses *terminated* only.  Truncation (CartPole hitting
-            # 500 steps successfully) is not a real terminal, so we should
-            # still bootstrap with V(s') instead of zeroing it out.
-            done_buf[t] = float(terminated)
-            ep_return += reward
+            ep_return += reward  # raw episode length (for reporting)
+            # Reward shaping (matches DQN / A2C / rlcode-kr-v2): +0.1 per
+            # surviving step, -1 on the failure step.  Without this PPO
+            # gets a very weak signal on CartPole and oscillates.
+            rew_buf[t] = 0.1 if not done or ep_return == 500 else -1
+            done_buf[t] = float(done)
 
             if done:
                 ep_returns.append(ep_return)

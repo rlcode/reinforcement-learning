@@ -148,21 +148,21 @@ if __name__ == "__main__":
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             next_state = np.array(next_state, dtype=np.float32)
-            # Reward shaping: heavy penalty for early termination encourages
-            # balancing rather than treating any +1 as success.
-            shaped_reward = reward if not done or score == 499 else -100
+            score += reward  # raw episode length so far
+            # Reward shaping (matches the rlcode-kr-v2 reference): a small
+            # +0.1 for each step that did not end the episode in failure,
+            # -1 for the failure step itself.  Well-scaled magnitudes keep
+            # Q-values from exploding.
+            shaped_reward = 0.1 if not done or score == 500 else -1
 
             agent.append_sample(state, action, shaped_reward, next_state, done)
             # Train at every environment step.
             agent.train_model()
-            score += shaped_reward
             state = next_state
 
             if done:
                 # Update target network once per episode.
                 agent.update_target_model()
-                # Undo the shaping penalty for the displayed score.
-                score = score if score == 500 else score + 100
                 scores.append(score)
                 print(f"episode: {e}  score: {score}  memory: {len(agent.memory)}  epsilon: {agent.epsilon:.4f}")
 
