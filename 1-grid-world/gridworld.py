@@ -4,7 +4,7 @@ import time
 
 import pygame
 
-UNIT, DYN_UNIT, WIDTH, HEIGHT, FPS_DELAY = 100, 50, 5, 5, 0.03
+UNIT, DYN_UNIT, WIDTH, HEIGHT, FPS_DELAY = 100, 100, 5, 5, 0.03
 WHITE, BLACK, GRID_LINE = (255, 255, 255), (0, 0, 0), (200, 200, 200)
 AGENT_COLOR, OBSTACLE_COLOR, GOAL_COLOR = (60, 120, 220), (220, 60, 60), (60, 200, 100)
 TEXT_COLOR = (40, 40, 40)
@@ -162,10 +162,13 @@ class DynamicEnv:
         self.goal = [4, 4]
         self.obstacles = []
         self.counter, self.episode, self.score, self._hit = 0, 0, 0.0, 0
+        self.last_score = None
         self._screen = None
 
     def reset(self):
-        if self.counter > 0 or self.score != 0.0:
+        # Capture the prior episode's final score before wiping.
+        if self.counter > 0:
+            self.last_score = self.score
             self.episode += 1
         self.agent, self.counter, self.score, self._hit = [0, 0], 0, 0.0, 0
         self.obstacles = [{"state": list(p), "direction": -1} for p in self.obstacles_init]
@@ -216,8 +219,10 @@ class DynamicEnv:
         s, hud = self._screen, self.HUD
         s.fill(WHITE)
         pygame.draw.rect(s, (30, 30, 30), pygame.Rect(0, 0, WIDTH * DYN_UNIT, hud))
-        t = self._hud_font.render(f"Episode: {self.episode}    Score: {self.score:+.1f}",
-                                  True, (240, 240, 240))
+        last = f"{self.last_score:+.1f}" if self.last_score is not None else "—"
+        t = self._hud_font.render(
+            f"Episode: {self.episode}   Score: {self.score:+.1f}   Last Score: {last}",
+            True, (240, 240, 240))
         s.blit(t, (8, (hud - t.get_height()) // 2))
         _grid_lines(s, DYN_UNIT, y_off=hud)
         _circle(s, *self.goal, unit=DYN_UNIT, color=GOAL_COLOR, y_off=hud)
