@@ -85,11 +85,12 @@ if __name__ == "__main__":
         value_iteration.__init__(env)
         display.clear()
         display.agent_pos = [0, 0]
+        display.clicks.clear()
 
     display.buttons = [
         ("Calculate",    on_calculate),
-        ("Print Policy", on_print_policy),
-        ("Move",         on_move),
+        ("Print Policy", on_print_policy, lambda: display.click_count("Calculate") > 0),
+        ("Move",         on_move,         lambda: display.click_count("Print Policy") > 0),
         ("Clear",        on_clear),
     ]
     display.mainloop()

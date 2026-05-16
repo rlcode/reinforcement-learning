@@ -112,15 +112,15 @@ if __name__ == "__main__":
         display.move_along_policy(policy_iteration.get_action)
 
     def on_reset():
-        # Re-initialize the agent and clear all overlays.
         policy_iteration.__init__(env)
         display.clear()
         display.agent_pos = [0, 0]
+        display.clicks.clear()
 
     display.buttons = [
         ("Evaluate", on_evaluate),
-        ("Improve",  on_improve),
-        ("Move",     on_move),
+        ("Improve",  on_improve, lambda: display.click_count("Evaluate") > 0),
+        ("Move",     on_move,    lambda: display.click_count("Improve") > 0),
         ("Reset",    on_reset),
     ]
     display.mainloop()

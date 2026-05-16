@@ -238,9 +238,11 @@ class PolicyEnv:
 class GraphicDisplay:
     """Pygame button-driven viewer for policy / value iteration.
 
-    Set `display.buttons = [(label, handler), ...]` (up to 4).  Set
-    `show_values(V)` / `show_arrows(policy_table)` to overlay; `clear()`
-    to remove. `move_along_policy(picker)` animates greedy follow-through.
+    Set `display.buttons = [(label, handler[, enabled]), ...]` (up to 4).
+    `enabled` is an optional zero-arg callable returning bool; when it
+    returns False the button is greyed out and clicks are ignored.
+    `show_values(V)` / `show_arrows(policy_table)` overlay; `clear()`
+    removes them. `move_along_policy(picker)` animates greedy moves.
     """
     BAR = 50
 
@@ -250,9 +252,14 @@ class GraphicDisplay:
         self.title = title
         self.buttons = buttons or []
         self.agent_pos = [0, 0]
+        # Per-label click counts, available to button `enabled` predicates.
+        self.clicks = {}
         self._screen = None
         self._values = None
         self._arrows = None
+
+    def click_count(self, label):
+        return self.clicks.get(label, 0)
 
     def show_values(self, v): self._values = v
     def show_arrows(self, p): self._arrows = p
@@ -283,11 +290,19 @@ class GraphicDisplay:
                 if e.type == pygame.QUIT:
                     pygame.quit(); return
                 if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                    for r, (_, h) in zip(self._btn_rects(), self.buttons):
-                        if r.collidepoint(e.pos):
-                            h(); break
+                    for rect, btn in zip(self._btn_rects(), self.buttons):
+                        if rect.collidepoint(e.pos) and self._btn_enabled(btn):
+                            label = btn[0]
+                            btn[1]()
+                            self.clicks[label] = self.clicks.get(label, 0) + 1
+                            break
             self._render()
             time.sleep(0.03)
+
+    @staticmethod
+    def _btn_enabled(btn):
+        # Button tuple is (label, handler) or (label, handler, enabled_fn).
+        return btn[2]() if len(btn) >= 3 else True
 
     def _btn_rects(self):
         n = max(len(self.buttons), 1)
@@ -332,10 +347,14 @@ class GraphicDisplay:
                         if p > 0:
                             self._arrow(cx, cy, cx + edge[i][0], cy + edge[i][1])
 
-        for rect, (label, _) in zip(self._btn_rects(), self.buttons):
-            pygame.draw.rect(s, (220, 220, 220), rect)
-            pygame.draw.rect(s, BLACK, rect, 1)
-            t = self._font.render(label, True, BLACK)
+        for rect, btn in zip(self._btn_rects(), self.buttons):
+            enabled = self._btn_enabled(btn)
+            bg = (220, 220, 220) if enabled else (245, 245, 245)
+            fg = BLACK if enabled else (170, 170, 170)
+            border = BLACK if enabled else (200, 200, 200)
+            pygame.draw.rect(s, bg, rect)
+            pygame.draw.rect(s, border, rect, 1)
+            t = self._font.render(btn[0], True, fg)
             s.blit(t, t.get_rect(center=rect.center))
 
         pygame.display.flip()
