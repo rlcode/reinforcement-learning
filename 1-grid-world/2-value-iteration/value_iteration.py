@@ -61,12 +61,12 @@ class ValueIteration:
 
 if __name__ == "__main__":
     env = Env()
-    vi = ValueIteration(env)
+    value_iteration = ValueIteration(env)
     display_ref = {"display": None}
 
     def on_calculate():
-        vi.value_iteration()
-        display_ref["display"].show_values(vi.value_table)
+        value_iteration.value_iteration()
+        display_ref["display"].show_values(value_iteration.value_table)
 
     def on_print_policy():
         # Build a policy table from the greedy actions implied by V.
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             for y in range(env.width):
                 if [x, y] == [2, 2]:
                     continue
-                actions = vi.get_action([x, y])
+                actions = value_iteration.get_action([x, y])
                 if not actions:
                     continue
                 p = 1.0 / len(actions)
@@ -84,15 +84,15 @@ if __name__ == "__main__":
         display_ref["display"].show_arrows(policy)
 
     def on_move():
-        display_ref["display"].move_along_policy(vi.get_action)
+        display_ref["display"].move_along_policy(value_iteration.get_action)
 
     def on_clear():
-        vi.value_table = [[0.0] * env.width for _ in range(env.height)]
+        value_iteration.value_table = [[0.0] * env.width for _ in range(env.height)]
         display_ref["display"].clear()
         display_ref["display"].agent_pos = [0, 0]
 
     display = GraphicDisplay(
-        vi,
+        value_iteration,
         title="Value Iteration",
         buttons=[
             ("Calculate", on_calculate),

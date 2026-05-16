@@ -100,38 +100,38 @@ class PolicyIteration:
 
 if __name__ == "__main__":
     env = Env()
-    pi = PolicyIteration(env)
+    policy_iteration = PolicyIteration(env)
 
     # Counters track how many times each button has been pressed.
     state = {"eval_count": 0, "improve_count": 0}
     display_ref = {"display": None}
 
     def on_evaluate():
-        pi.policy_evaluation()
+        policy_iteration.policy_evaluation()
         state["eval_count"] += 1
-        display_ref["display"].show_values(pi.value_table)
+        display_ref["display"].show_values(policy_iteration.value_table)
 
     def on_improve():
-        pi.policy_improvement()
+        policy_iteration.policy_improvement()
         state["improve_count"] += 1
-        display_ref["display"].show_arrows(pi.policy_table)
+        display_ref["display"].show_arrows(policy_iteration.policy_table)
 
     def on_move():
         if state["improve_count"] == 0:
             return  # no policy yet
-        display_ref["display"].move_along_policy(pi.get_action)
+        display_ref["display"].move_along_policy(policy_iteration.get_action)
 
     def on_reset():
-        pi.value_table = [[0.0] * env.width for _ in range(env.height)]
-        pi.policy_table = [[[0.25, 0.25, 0.25, 0.25]] * env.width for _ in range(env.height)]
-        pi.policy_table[2][2] = []
+        policy_iteration.value_table = [[0.0] * env.width for _ in range(env.height)]
+        policy_iteration.policy_table = [[[0.25, 0.25, 0.25, 0.25]] * env.width for _ in range(env.height)]
+        policy_iteration.policy_table[2][2] = []
         state["eval_count"] = 0
         state["improve_count"] = 0
         display_ref["display"].clear()
         display_ref["display"].agent_pos = [0, 0]
 
     display = GraphicDisplay(
-        pi,
+        policy_iteration,
         title="Policy Iteration",
         buttons=[
             ("Evaluate", on_evaluate),
