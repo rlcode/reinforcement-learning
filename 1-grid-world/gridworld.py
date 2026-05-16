@@ -68,19 +68,17 @@ class Env:
         self.obstacles = [[1, 2], [2, 1]]
         self.goal = [2, 2]
         self.q_overlay = None  # set by print_value_all; rendered on next render()
-        self.episode = 0
-        self.score = 0
-        self._steps_in_ep = 0  # used to decide whether reset() opens a new episode
+        self.episode = 0       # current episode index
+        self.steps = 0         # steps taken in the current episode
+        self.last_reward = None  # terminal reward from the previous episode
         self._screen = None
 
     def reset(self):
-        # Only count a new episode after the first reset (or after some
-        # steps have actually happened in the previous one).
-        if self._steps_in_ep > 0:
+        # Open a new episode (skipped at the very first reset).
+        if self.steps > 0:
             self.episode += 1
         self.agent = [0, 0]
-        self.score = 0
-        self._steps_in_ep = 0
+        self.steps = 0
         if self._screen is not None:
             self.render()
             time.sleep(0.3)
@@ -93,12 +91,12 @@ class Env:
         elif action == 2 and x > 0: x -= 1
         elif action == 3 and x < WIDTH - 1: x += 1
         self.agent = [x, y]
-        self._steps_in_ep += 1
+        self.steps += 1
         if self.agent == self.goal:
-            self.score += 100
+            self.last_reward = 100
             return list(self.agent), 100, True
         if self.agent in self.obstacles:
-            self.score += -100
+            self.last_reward = -100
             return list(self.agent), -100, True
         return list(self.agent), 0, False
 
@@ -116,8 +114,10 @@ class Env:
         s.fill(WHITE)
         # HUD bar.
         pygame.draw.rect(s, (30, 30, 30), pygame.Rect(0, 0, WIDTH * UNIT, hud))
+        last = f"{self.last_reward:+d}" if self.last_reward is not None else "—"
         t = self._hud_font.render(
-            f"Episode: {self.episode}    Score: {self.score:+d}", True, (240, 240, 240))
+            f"Episode: {self.episode}   Steps: {self.steps}   Last: {last}",
+            True, (240, 240, 240))
         s.blit(t, (8, (hud - t.get_height()) // 2))
         # Grid + landmarks.
         _grid_lines(s, UNIT, y_off=hud)
