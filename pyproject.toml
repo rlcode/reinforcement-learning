@@ -11,5 +11,5 @@ dependencies = [
     "numpy>=2.3,<2.4",
     "matplotlib>=3.10,<3.11",
     "pygame>=2.6,<3",
-    "opencv-python>=4.13,<4.14",
+    "opencv-python-headless>=4.13,<4.14",
 ]
