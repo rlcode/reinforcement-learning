@@ -36,10 +36,13 @@ import torch.optim as optim
 
 from env import make_env, parse_args, quit_if_window_closed, run_test_loop
 
-EPISODES = 1000
+EPISODES = 1500
 SAVE_PATH = "cartpole_ppo.pt"
 # Steps collected per update; PPO is batch-based, not single-step like A2C.
-ROLLOUT_STEPS = 256
+# 256 is too small for a single env on CartPole — GAE gets noisy and PPO
+# oscillates.  1024 (with 4 epochs / 64 minibatches) is closer to the
+# CleanRL single-env reference and gives much steadier learning.
+ROLLOUT_STEPS = 1024
 # Number of times we sweep over the collected batch each update.
 EPOCHS = 4
 MINIBATCH_SIZE = 64
