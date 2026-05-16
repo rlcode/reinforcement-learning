@@ -1,6 +1,6 @@
 <p align="center"><img width="90%" src="images/Reinforcement-Learning.png"></p>
 
-Minimal single-file reinforcement learning algorithms in **PyTorch**.  A personal modernization of the 2017 [rlcode/reinforcement-learning](https://github.com/rlcode/reinforcement-learning) repo.
+From the basics to deep reinforcement learning, this repo provides easy-to-read code examples. One file for each algorithm. Please feel free to create a Pull Request, or open an issue!
 
 ## Algorithms
 
@@ -44,3 +44,15 @@ cd 2-cartpole && uv run python 1-dqn.py --render
 # CartPole — replay a trained checkpoint
 cd 2-cartpole && uv run python 1-dqn.py --test
 ```
+
+## Updates
+
+Modernized from the 2017 original:
+
+- **Framework**: Keras + TensorFlow 1.0 → PyTorch 2.11
+- **Env**: gym 0.8 → gymnasium 1.2
+- **Rendering**: tkinter → pygame (cross-platform with no system Tk)
+- **Tooling**: `requirements.txt` → `pyproject.toml` + `uv`
+- **Scope**: pruned to 9 core algorithms; dropped Monte Carlo / DDQN / A3C / Atari / mountaincar; added PPO
+- **Layout**: flat `1-grid-world/3-sarsa.py` instead of nested `1-grid-world/4-sarsa/sarsa_agent.py`
+- **Docs**: each algorithm file now opens with a paper citation and the core update equation
