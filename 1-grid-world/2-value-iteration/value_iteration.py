@@ -1,5 +1,8 @@
-# -*- coding: utf-8 -*-
-from environment import GraphicDisplay, Env
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gridworld import GraphicDisplay, PolicyEnv as Env  # noqa: E402
 
 class ValueIteration:
     def __init__(self, env):
@@ -58,6 +61,45 @@ class ValueIteration:
 
 if __name__ == "__main__":
     env = Env()
-    value_iteration = ValueIteration(env)
-    grid_world = GraphicDisplay(value_iteration)
-    grid_world.mainloop()
+    vi = ValueIteration(env)
+    display_ref = {"display": None}
+
+    def on_calculate():
+        vi.value_iteration()
+        display_ref["display"].show_values(vi.value_table)
+
+    def on_print_policy():
+        # Build a policy table from the greedy actions implied by V.
+        policy = [[[0.0] * 4 for _ in range(env.width)] for _ in range(env.height)]
+        for x in range(env.height):
+            for y in range(env.width):
+                if [x, y] == [2, 2]:
+                    continue
+                actions = vi.get_action([x, y])
+                if not actions:
+                    continue
+                p = 1.0 / len(actions)
+                for a in actions:
+                    policy[x][y][a] = p
+        display_ref["display"].show_arrows(policy)
+
+    def on_move():
+        display_ref["display"].move_along_policy(vi.get_action)
+
+    def on_clear():
+        vi.value_table = [[0.0] * env.width for _ in range(env.height)]
+        display_ref["display"].clear()
+        display_ref["display"].agent_pos = [0, 0]
+
+    display = GraphicDisplay(
+        vi,
+        title="Value Iteration",
+        buttons=[
+            ("Calculate", on_calculate),
+            ("Print Policy", on_print_policy),
+            ("Move", on_move),
+            ("Clear", on_clear),
+        ],
+    )
+    display_ref["display"] = display
+    display.mainloop()

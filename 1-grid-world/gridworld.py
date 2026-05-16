@@ -378,3 +378,264 @@ class DynamicEnv:
 
         pygame.display.flip()
         time.sleep(FPS_DELAY)
+
+
+# ---------------------------------------------------------------------------
+# Policy / Value Iteration support (Dynamic Programming).
+# ---------------------------------------------------------------------------
+
+# Action indices used by the DP algorithms.
+#   0: up    1: down    2: left    3: right
+# Coordinate convention: state is [x, y] where x is the *row* (0 = top) and
+# y is the *column* (0 = left).  This matches the original repo's code.
+DP_ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+
+class PolicyEnv:
+    """Pure-data env for policy/value iteration.
+
+    No rendering, no time, no agent — just the MDP: states, transitions,
+    rewards.  Layout matches the original tkinter-based code:
+        Goal      at (2, 2): reward +1, terminal
+        Obstacles at (1, 2) and (2, 1): reward -1
+    """
+
+    transition_probability = 1
+    possible_actions = [0, 1, 2, 3]
+
+    def __init__(self):
+        self.width = WIDTH
+        self.height = HEIGHT
+        self.reward = [[0.0] * self.width for _ in range(self.height)]
+        self.reward[2][2] = 1.0
+        self.reward[1][2] = -1.0
+        self.reward[2][1] = -1.0
+        # Useful to the agents:
+        self.all_state = [[x, y] for x in range(self.width) for y in range(self.height)]
+
+    def get_all_states(self):
+        return self.all_state
+
+    def state_after_action(self, state, action_index):
+        dx, dy = DP_ACTIONS[action_index]
+        return self._check_boundary([state[0] + dx, state[1] + dy])
+
+    @staticmethod
+    def _check_boundary(state):
+        state[0] = max(0, min(WIDTH - 1, state[0]))
+        state[1] = max(0, min(HEIGHT - 1, state[1]))
+        return state
+
+    def get_reward(self, state, action):
+        ns = self.state_after_action(state, action)
+        return self.reward[ns[0]][ns[1]]
+
+    def get_transition_prob(self, state, action):
+        return self.transition_probability
+
+
+class GraphicDisplay:
+    """Pygame button-driven viewer for policy / value iteration.
+
+    Visual elements:
+      - 5x5 grid (100 px cells), goal/obstacle markers, agent square.
+      - Reward labels ("R : 1.0" / "R : -1.0") in the relevant cells.
+      - Optional V(s) text in each cell (set via show_values).
+      - Optional policy arrows in each cell (set via show_arrows).
+      - A row of 4 buttons at the bottom; the caller passes
+        (label, handler) tuples.
+
+    Click handling: the mainloop polls pygame events; clicking a button's
+    rect calls the corresponding handler.
+    """
+
+    BUTTON_BAR_HEIGHT = 50
+
+    def __init__(self, agent, title, buttons):
+        """`buttons` is a list of (label, callable) tuples (1-4 entries)."""
+        self.agent = agent
+        self.env = PolicyEnv()
+        self.title = title
+        self.buttons = buttons
+        # Agent grid position for the "Move" animation.
+        self.agent_pos = [0, 0]
+        # Display state.
+        self._screen = None
+        self._font = None
+        self._small_font = None
+        self._value_table = None     # 2-D list to overlay, or None
+        # Policy overlay: per-cell list of (action_index_set,) or weighted probs.
+        self._policy_arrows = None   # policy_table[row][col] = [p_up, p_down, p_left, p_right]
+
+    # ---- public API used by the algorithm's button handlers --------------
+
+    def show_values(self, value_table):
+        """Overlay a V(s) table (value_table[row][col]) on the grid."""
+        self._value_table = value_table
+
+    def show_arrows(self, policy_table):
+        """Overlay policy arrows.  policy_table[row][col] is a 4-list of
+        probabilities (up, down, left, right); any positive entry draws an
+        arrow in that direction."""
+        self._policy_arrows = policy_table
+
+    def clear(self):
+        self._value_table = None
+        self._policy_arrows = None
+
+    def move_along_policy(self, action_picker):
+        """Animate the agent moving along the greedy policy.
+
+        `action_picker(state) -> int | list[int] | None`:
+          - int:        the action to take
+          - list[int]:  pick one (used by value-iteration's tied actions)
+          - None/[]:    stop (terminal state reached)
+        """
+        self.agent_pos = [0, 0]
+        while True:
+            self._render()
+            pygame.time.wait(200)
+            action = action_picker(list(self.agent_pos))
+            if action is None or action == [] or action == 0.0:
+                break
+            if isinstance(action, list):
+                if not action:
+                    break
+                action = action[0]  # tie-break: pick the first
+            dx, dy = DP_ACTIONS[action]
+            self.agent_pos = [
+                max(0, min(WIDTH - 1, self.agent_pos[0] + dx)),
+                max(0, min(HEIGHT - 1, self.agent_pos[1] + dy)),
+            ]
+
+    # ---- mainloop --------------------------------------------------------
+
+    def mainloop(self):
+        self._ensure_display()
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self._dispatch_click(event.pos)
+            self._render()
+            time.sleep(0.03)
+        pygame.quit()
+
+    # ---- internals -------------------------------------------------------
+
+    def _ensure_display(self):
+        if self._screen is not None:
+            return
+        pygame.init()
+        pygame.display.set_caption(self.title)
+        height = HEIGHT * UNIT + self.BUTTON_BAR_HEIGHT
+        self._screen = pygame.display.set_mode((WIDTH * UNIT, height))
+        self._font = pygame.font.SysFont(None, 22)
+        self._small_font = pygame.font.SysFont(None, 16)
+
+    def _button_rects(self):
+        bar_y = HEIGHT * UNIT + 8
+        bar_h = self.BUTTON_BAR_HEIGHT - 16
+        slot_w = (WIDTH * UNIT) // max(len(self.buttons), 1)
+        rects = []
+        for i, _ in enumerate(self.buttons):
+            r = pygame.Rect(i * slot_w + 8, bar_y, slot_w - 16, bar_h)
+            rects.append(r)
+        return rects
+
+    def _dispatch_click(self, pos):
+        for rect, (label, handler) in zip(self._button_rects(), self.buttons):
+            if rect.collidepoint(pos):
+                handler()
+                return
+
+    def _render(self):
+        self._screen.fill(WHITE)
+        self._draw_grid()
+        self._draw_reward_cells()
+        self._draw_value_overlay()
+        self._draw_policy_arrows()
+        self._draw_agent()
+        self._draw_buttons()
+        pygame.display.flip()
+
+    def _draw_grid(self):
+        for c in range(WIDTH + 1):
+            pygame.draw.line(self._screen, GRID_LINE,
+                             (c * UNIT, 0), (c * UNIT, HEIGHT * UNIT))
+        for r in range(HEIGHT + 1):
+            pygame.draw.line(self._screen, GRID_LINE,
+                             (0, r * UNIT), (WIDTH * UNIT, r * UNIT))
+
+    def _cell_center(self, row, col):
+        # Convention: state = [row, col]; on screen, col -> x, row -> y.
+        return (col * UNIT + UNIT // 2, row * UNIT + UNIT // 2)
+
+    def _draw_reward_cells(self):
+        # Triangles at (1,2) and (2,1); circle at (2,2).
+        cx, cy = self._cell_center(2, 2)
+        pygame.draw.circle(self._screen, GOAL_COLOR, (cx, cy), int(UNIT * 0.33))
+        for rr, cc in [(1, 2), (2, 1)]:
+            cx, cy = self._cell_center(rr, cc)
+            r = int(UNIT * 0.36)
+            pygame.draw.polygon(self._screen, OBSTACLE_COLOR,
+                                [(cx, cy - r), (cx - r, cy + r), (cx + r, cy + r)])
+        # "R : ±1.0" reward labels (top-left corner of each cell).
+        for rr, cc, txt in [(2, 2, "R : +1.0"), (1, 2, "R : -1.0"), (2, 1, "R : -1.0")]:
+            x = cc * UNIT + 6
+            y = rr * UNIT + 4
+            surf = self._small_font.render(txt, True, TEXT_COLOR)
+            self._screen.blit(surf, (x, y))
+
+    def _draw_value_overlay(self):
+        if self._value_table is None:
+            return
+        for r in range(HEIGHT):
+            for c in range(WIDTH):
+                v = self._value_table[r][c]
+                surf = self._font.render(f"{v:.2f}", True, TEXT_COLOR)
+                cx, cy = self._cell_center(r, c)
+                self._screen.blit(surf, surf.get_rect(center=(cx, cy + UNIT // 4)))
+
+    def _draw_policy_arrows(self):
+        if self._policy_arrows is None:
+            return
+        for r in range(HEIGHT):
+            for c in range(WIDTH):
+                probs = self._policy_arrows[r][c]
+                if not probs:
+                    continue
+                cx, cy = self._cell_center(r, c)
+                # Up, Down, Left, Right offsets (point toward cell edge).
+                arrows = [(0, -UNIT * 0.32), (0, UNIT * 0.32),
+                          (-UNIT * 0.32, 0), (UNIT * 0.32, 0)]
+                for i, p in enumerate(probs):
+                    if p > 0:
+                        self._draw_arrow(cx, cy, cx + arrows[i][0], cy + arrows[i][1])
+
+    def _draw_arrow(self, x0, y0, x1, y1):
+        pygame.draw.line(self._screen, BLACK, (x0, y0), (x1, y1), 2)
+        # Tiny arrowhead: short perpendicular segments.
+        import math
+        ang = math.atan2(y1 - y0, x1 - x0)
+        head = 6
+        for sign in (-1, 1):
+            a = ang + sign * 2.5
+            pygame.draw.line(self._screen, BLACK, (x1, y1),
+                             (x1 - head * math.cos(a), y1 - head * math.sin(a)), 2)
+
+    def _draw_agent(self):
+        size = int(UNIT * 0.55)
+        cx, cy = self._cell_center(self.agent_pos[0], self.agent_pos[1])
+        rect = pygame.Rect(cx - size // 2, cy - size // 2, size, size)
+        # Hollow blue outline so the V/arrows underneath stay visible.
+        pygame.draw.rect(self._screen, AGENT_COLOR, rect, 3)
+
+    def _draw_buttons(self):
+        for rect, (label, _) in zip(self._button_rects(), self.buttons):
+            pygame.draw.rect(self._screen, (220, 220, 220), rect)
+            pygame.draw.rect(self._screen, BLACK, rect, 1)
+            surf = self._font.render(label, True, BLACK)
+            self._screen.blit(surf, surf.get_rect(center=rect.center))

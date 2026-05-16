@@ -1,6 +1,9 @@
-# -*- coding: utf-8 -*-
+import os
 import random
-from environment import GraphicDisplay, Env
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gridworld import GraphicDisplay, PolicyEnv as Env  # noqa: E402
 
 
 class PolicyIteration:
@@ -97,6 +100,45 @@ class PolicyIteration:
 
 if __name__ == "__main__":
     env = Env()
-    policy_iteration = PolicyIteration(env)
-    grid_world = GraphicDisplay(policy_iteration)
-    grid_world.mainloop()
+    pi = PolicyIteration(env)
+
+    # Counters track how many times each button has been pressed.
+    state = {"eval_count": 0, "improve_count": 0}
+    display_ref = {"display": None}
+
+    def on_evaluate():
+        pi.policy_evaluation()
+        state["eval_count"] += 1
+        display_ref["display"].show_values(pi.value_table)
+
+    def on_improve():
+        pi.policy_improvement()
+        state["improve_count"] += 1
+        display_ref["display"].show_arrows(pi.policy_table)
+
+    def on_move():
+        if state["improve_count"] == 0:
+            return  # no policy yet
+        display_ref["display"].move_along_policy(pi.get_action)
+
+    def on_reset():
+        pi.value_table = [[0.0] * env.width for _ in range(env.height)]
+        pi.policy_table = [[[0.25, 0.25, 0.25, 0.25]] * env.width for _ in range(env.height)]
+        pi.policy_table[2][2] = []
+        state["eval_count"] = 0
+        state["improve_count"] = 0
+        display_ref["display"].clear()
+        display_ref["display"].agent_pos = [0, 0]
+
+    display = GraphicDisplay(
+        pi,
+        title="Policy Iteration",
+        buttons=[
+            ("Evaluate", on_evaluate),
+            ("Improve", on_improve),
+            ("Move", on_move),
+            ("Reset", on_reset),
+        ],
+    )
+    display_ref["display"] = display
+    display.mainloop()
