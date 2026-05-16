@@ -10,6 +10,6 @@ dependencies = [
     "ale-py>=0.11,<0.12",
     "numpy>=2.3,<2.4",
     "matplotlib>=3.10,<3.11",
-    "pillow>=10,<11",
+    "pygame>=2.6,<3",
     "opencv-python>=4.13,<4.14",
 ]
