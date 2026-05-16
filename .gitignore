@@ -5,4 +5,5 @@
 __pycache__
 .venv/
 *.egg-info/
+.python-version
 ./Code 2. Cartpole/6. A3C/Cartpole_A3C.pgy
