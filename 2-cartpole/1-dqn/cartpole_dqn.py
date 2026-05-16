@@ -1,169 +1,125 @@
-import sys
-import gym
-import pylab
 import random
-import numpy as np
+import sys
 from collections import deque
-from keras.layers import Dense
-from keras.optimizers import Adam
-from keras.models import Sequential
+
+import gymnasium as gym
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
 EPISODES = 300
 
 
-# DQN Agent for the Cartpole
-# it uses Neural Network to approximate q function
-# and replay memory & target q network
+class QNetwork(nn.Module):
+    def __init__(self, state_size, action_size):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_size, 24),
+            nn.ReLU(),
+            nn.Linear(24, 24),
+            nn.ReLU(),
+            nn.Linear(24, action_size),
+        )
+        for m in self.net:
+            if isinstance(m, nn.Linear):
+                nn.init.kaiming_uniform_(m.weight, nonlinearity="relu")
+                nn.init.zeros_(m.bias)
+
+    def forward(self, x):
+        return self.net(x)
+
+
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        # if you want to see Cartpole learning, then change to True
-        self.render = False
-        self.load_model = False
-
-        # get size of state and action
         self.state_size = state_size
         self.action_size = action_size
 
-        # These are hyper parameters for the DQN
         self.discount_factor = 0.99
-        self.learning_rate = 0.001
+        self.learning_rate = 1e-3
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
-        # create replay memory using deque
         self.memory = deque(maxlen=2000)
 
-        # create main model and target model
-        self.model = self.build_model()
-        self.target_model = self.build_model()
-
-        # initialize target model
+        self.model = QNetwork(state_size, action_size)
+        self.target_model = QNetwork(state_size, action_size)
         self.update_target_model()
 
-        if self.load_model:
-            self.model.load_weights("./save_model/cartpole_dqn.h5")
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.loss_fn = nn.MSELoss()
 
-    # approximate Q function using Neural Network
-    # state is input and Q Value of each action is output of network
-    def build_model(self):
-        model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu',
-                        kernel_initializer='he_uniform'))
-        model.add(Dense(24, activation='relu',
-                        kernel_initializer='he_uniform'))
-        model.add(Dense(self.action_size, activation='linear',
-                        kernel_initializer='he_uniform'))
-        model.summary()
-        model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
-        return model
-
-    # after some time interval update the target model to be same with model
     def update_target_model(self):
-        self.target_model.set_weights(self.model.get_weights())
+        self.target_model.load_state_dict(self.model.state_dict())
 
-    # get action from model using epsilon-greedy policy
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
-        else:
-            q_value = self.model.predict(state)
-            return np.argmax(q_value[0])
+        with torch.no_grad():
+            q = self.model(torch.as_tensor(state, dtype=torch.float32))
+        return int(torch.argmax(q).item())
 
-    # save sample <s,a,r,s'> to the replay memory
     def append_sample(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    # pick samples randomly from replay memory (with batch_size)
     def train_model(self):
         if len(self.memory) < self.train_start:
             return
-        batch_size = min(self.batch_size, len(self.memory))
-        mini_batch = random.sample(self.memory, batch_size)
+        batch = random.sample(self.memory, self.batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
 
-        update_input = np.zeros((batch_size, self.state_size))
-        update_target = np.zeros((batch_size, self.state_size))
-        action, reward, done = [], [], []
+        states = torch.as_tensor(np.array(states), dtype=torch.float32)
+        actions = torch.as_tensor(actions, dtype=torch.long)
+        rewards = torch.as_tensor(rewards, dtype=torch.float32)
+        next_states = torch.as_tensor(np.array(next_states), dtype=torch.float32)
+        dones = torch.as_tensor(dones, dtype=torch.float32)
 
-        for i in range(self.batch_size):
-            update_input[i] = mini_batch[i][0]
-            action.append(mini_batch[i][1])
-            reward.append(mini_batch[i][2])
-            update_target[i] = mini_batch[i][3]
-            done.append(mini_batch[i][4])
+        q_pred = self.model(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        with torch.no_grad():
+            q_next = self.target_model(next_states).max(dim=1).values
+            target = rewards + (1.0 - dones) * self.discount_factor * q_next
 
-        target = self.model.predict(update_input)
-        target_val = self.target_model.predict(update_target)
-
-        for i in range(self.batch_size):
-            # Q Learning: get maximum Q value at s' from target model
-            if done[i]:
-                target[i][action[i]] = reward[i]
-            else:
-                target[i][action[i]] = reward[i] + self.discount_factor * (
-                    np.amax(target_val[i]))
-
-        # and do the model fit!
-        self.model.fit(update_input, target, batch_size=self.batch_size,
-                       epochs=1, verbose=0)
+        loss = self.loss_fn(q_pred, target)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
 
 if __name__ == "__main__":
-    # In case of CartPole-v1, maximum length of episode is 500
-    env = gym.make('CartPole-v1')
-    # get size of state and action from environment
+    env = gym.make("CartPole-v1")
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
     agent = DQNAgent(state_size, action_size)
-
-    scores, episodes = [], []
+    scores = []
 
     for e in range(EPISODES):
         done = False
         score = 0
-        state = env.reset()
-        state = np.reshape(state, [1, state_size])
+        state, _ = env.reset()
+        state = np.array(state, dtype=np.float32)
 
         while not done:
-            if agent.render:
-                env.render()
-
-            # get action for the current state and go one step in environment
             action = agent.get_action(state)
-            next_state, reward, done, info = env.step(action)
-            next_state = np.reshape(next_state, [1, state_size])
-            # if an action make the episode end, then gives penalty of -100
-            reward = reward if not done or score == 499 else -100
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            done = terminated or truncated
+            next_state = np.array(next_state, dtype=np.float32)
+            shaped_reward = reward if not done or score == 499 else -100
 
-            # save the sample <s, a, r, s'> to the replay memory
-            agent.append_sample(state, action, reward, next_state, done)
-            # every time step do the training
+            agent.append_sample(state, action, shaped_reward, next_state, done)
             agent.train_model()
-            score += reward
+            score += shaped_reward
             state = next_state
 
             if done:
-                # every episode update the target model to be same with model
                 agent.update_target_model()
-
-                # every episode, plot the play time
                 score = score if score == 500 else score + 100
                 scores.append(score)
-                episodes.append(e)
-                pylab.plot(episodes, scores, 'b')
-                pylab.savefig("./save_graph/cartpole_dqn.png")
-                print("episode:", e, "  score:", score, "  memory length:",
-                      len(agent.memory), "  epsilon:", agent.epsilon)
+                print(f"episode: {e}  score: {score}  memory: {len(agent.memory)}  epsilon: {agent.epsilon:.4f}")
 
-                # if the mean of scores of last 10 episode is bigger than 490
-                # stop training
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
                     sys.exit()
-
-        # save the model
-        if e % 50 == 0:
-            agent.model.save_weights("./save_model/cartpole_dqn.h5")

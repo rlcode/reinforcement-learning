@@ -1,129 +1,98 @@
-import copy
-import pylab
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
 from environment import Env
-from keras.layers import Dense
-from keras.optimizers import Adam
-from keras.models import Sequential
-from keras import backend as K
 
 EPISODES = 2500
 
 
-# this is REINFORCE Agent for GridWorld
+class PolicyNetwork(nn.Module):
+    def __init__(self, state_size, action_size):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_size, 24),
+            nn.ReLU(),
+            nn.Linear(24, 24),
+            nn.ReLU(),
+            nn.Linear(24, action_size),
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
 class ReinforceAgent:
     def __init__(self):
-        self.load_model = True
-        # actions which agent can do
         self.action_space = [0, 1, 2, 3, 4]
-        # get size of state and action
         self.action_size = len(self.action_space)
         self.state_size = 15
         self.discount_factor = 0.99
-        self.learning_rate = 0.001
+        self.learning_rate = 1e-3
 
-        self.model = self.build_model()
-        self.optimizer = self.optimizer()
+        self.model = PolicyNetwork(self.state_size, self.action_size)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.states, self.actions, self.rewards = [], [], []
 
-        if self.load_model:
-            self.model.load_weights('./save_model/reinforce_trained.h5')
-
-    # state is input and probability of each action(policy) is output of network
-    def build_model(self):
-        model = Sequential()
-        model.add(Dense(24, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(24, activation='relu'))
-        model.add(Dense(self.action_size, activation='softmax'))
-        model.summary()
-        return model
-
-    # create error function and training function to update policy network
-    def optimizer(self):
-        action = K.placeholder(shape=[None, 5])
-        discounted_rewards = K.placeholder(shape=[None, ])
-
-        # Calculate cross entropy error function
-        action_prob = K.sum(action * self.model.output, axis=1)
-        cross_entropy = K.log(action_prob) * discounted_rewards
-        loss = -K.sum(cross_entropy)
-
-        # create training function
-        optimizer = Adam(lr=self.learning_rate)
-        updates = optimizer.get_updates(self.model.trainable_weights, [],
-                                        loss)
-        train = K.function([self.model.input, action, discounted_rewards], [],
-                           updates=updates)
-
-        return train
-
-    # get action from policy network
     def get_action(self, state):
-        policy = self.model.predict(state)[0]
-        return np.random.choice(self.action_size, 1, p=policy)[0]
+        with torch.no_grad():
+            logits = self.model(torch.as_tensor(state, dtype=torch.float32))
+            probs = torch.softmax(logits, dim=-1).numpy()
+        return int(np.random.choice(self.action_size, p=probs))
 
-    # calculate discounted rewards
     def discount_rewards(self, rewards):
-        discounted_rewards = np.zeros_like(rewards)
-        running_add = 0
-        for t in reversed(range(0, len(rewards))):
-            running_add = running_add * self.discount_factor + rewards[t]
-            discounted_rewards[t] = running_add
-        return discounted_rewards
+        discounted = np.zeros_like(rewards, dtype=np.float32)
+        running = 0.0
+        for t in reversed(range(len(rewards))):
+            running = running * self.discount_factor + rewards[t]
+            discounted[t] = running
+        return discounted
 
-    # save states, actions and rewards for an episode
     def append_sample(self, state, action, reward):
-        self.states.append(state[0])
+        self.states.append(state)
+        self.actions.append(action)
         self.rewards.append(reward)
-        act = np.zeros(self.action_size)
-        act[action] = 1
-        self.actions.append(act)
 
-    # update policy neural network
     def train_model(self):
-        discounted_rewards = np.float32(self.discount_rewards(self.rewards))
-        discounted_rewards -= np.mean(discounted_rewards)
-        discounted_rewards /= np.std(discounted_rewards)
+        returns = self.discount_rewards(np.array(self.rewards, dtype=np.float32))
+        returns = (returns - returns.mean()) / (returns.std() + 1e-8)
 
-        self.optimizer([self.states, self.actions, discounted_rewards])
+        states = torch.as_tensor(np.array(self.states), dtype=torch.float32)
+        actions = torch.as_tensor(self.actions, dtype=torch.long)
+        returns_t = torch.as_tensor(returns, dtype=torch.float32)
+
+        logits = self.model(states)
+        log_probs = torch.log_softmax(logits, dim=-1)
+        chosen = log_probs.gather(1, actions.unsqueeze(1)).squeeze(1)
+        loss = -(chosen * returns_t).sum()
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
         self.states, self.actions, self.rewards = [], [], []
 
 
 if __name__ == "__main__":
     env = Env()
     agent = ReinforceAgent()
-
     global_step = 0
-    scores, episodes = [], []
 
     for e in range(EPISODES):
         done = False
         score = 0
-        # fresh env
-        state = env.reset()
-        state = np.reshape(state, [1, 15])
+        state = np.array(env.reset(), dtype=np.float32)
 
         while not done:
             global_step += 1
-            # get action for the current state and go one step in environment
             action = agent.get_action(state)
             next_state, reward, done = env.step(action)
-            next_state = np.reshape(next_state, [1, 15])
+            next_state = np.array(next_state, dtype=np.float32)
 
             agent.append_sample(state, action, reward)
             score += reward
-            state = copy.deepcopy(next_state)
+            state = next_state
 
             if done:
-                # update policy neural network for each episode
                 agent.train_model()
-                scores.append(score)
-                episodes.append(e)
-                score = round(score, 2)
-                print("episode:", e, "  score:", score, "  time_step:",
-                      global_step)
-
-        if e % 100 == 0:
-            pylab.plot(episodes, scores, 'b')
-            pylab.savefig("./save_graph/reinforce.png")
-            agent.model.save_weights("./save_model/reinforce.h5")
+                print(f"episode: {e}  score: {round(score, 2)}  steps: {global_step}")
