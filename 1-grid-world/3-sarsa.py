@@ -2,7 +2,7 @@ import numpy as np
 import random
 from collections import defaultdict
 
-from gridworld import Env
+from env import Env
 
 
 # SARSA agent learns every time step from the sample <s, a, r, s', a'>

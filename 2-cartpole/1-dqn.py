@@ -26,7 +26,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from cartpole import make_env, parse_args, run_test_loop
+from env import make_env, parse_args, run_test_loop
 
 EPISODES = 300
 SAVE_PATH = "cartpole_dqn.pt"

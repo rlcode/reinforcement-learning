@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from gridworld import DynamicEnv
+from env import DynamicEnv
 
 EPISODES = 2500
 

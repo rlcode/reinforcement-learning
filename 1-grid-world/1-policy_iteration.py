@@ -1,6 +1,6 @@
 import random
 
-from gridworld import GraphicDisplay, PolicyEnv as Env
+from env import GraphicDisplay, PolicyEnv as Env
 
 
 class PolicyIteration:
