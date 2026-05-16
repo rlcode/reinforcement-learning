@@ -13,16 +13,14 @@ and minimizes the squared TD error via gradient descent:
 
     L(theta) = ( Q_theta(s)[a] - (r + gamma * Q_theta(s')[a']) )^2
 """
-import os
 import random
-import sys
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gridworld import DynamicEnv  # noqa: E402
+from gridworld import DynamicEnv
 
 EPISODES = 1000
 

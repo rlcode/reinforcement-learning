@@ -17,15 +17,12 @@ trick (acts like a constant baseline).
 Implementation note: we maximize expected return, i.e. minimize the
 negative log-likelihood weighted by G_t.
 """
-import os
-import sys
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gridworld import DynamicEnv  # noqa: E402
+from gridworld import DynamicEnv
 
 EPISODES = 2500
 

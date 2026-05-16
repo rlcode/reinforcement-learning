@@ -1,11 +1,8 @@
-import os
-import sys
 import numpy as np
 import random
 from collections import defaultdict
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gridworld import Env  # noqa: E402
+from gridworld import Env
 
 
 # SARSA agent learns every time step from the sample <s, a, r, s', a'>

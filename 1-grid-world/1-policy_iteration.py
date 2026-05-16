@@ -1,9 +1,6 @@
-import os
 import random
-import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gridworld import GraphicDisplay, PolicyEnv as Env  # noqa: E402
+from gridworld import GraphicDisplay, PolicyEnv as Env
 
 
 class PolicyIteration:

@@ -1,8 +1,5 @@
-import os
-import sys
+from gridworld import GraphicDisplay, PolicyEnv as Env
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gridworld import GraphicDisplay, PolicyEnv as Env  # noqa: E402
 
 class ValueIteration:
     def __init__(self, env):
