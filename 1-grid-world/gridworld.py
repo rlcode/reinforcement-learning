@@ -336,9 +336,11 @@ class GraphicDisplay:
         pygame.display.flip()
 
     def _arrow(self, x0, y0, x1, y1):
+        # Line from cell center to edge, then two short segments forming
+        # the arrowhead — each ~30 degrees off the backward direction.
         pygame.draw.line(self._screen, BLACK, (x0, y0), (x1, y1), 2)
         ang = math.atan2(y1 - y0, x1 - x0)
         for sign in (-1, 1):
-            a = ang + sign * 2.5
+            a = ang + sign * 0.5
             pygame.draw.line(self._screen, BLACK, (x1, y1),
-                             (x1 - 6 * math.cos(a), y1 - 6 * math.sin(a)), 2)
+                             (x1 - 8 * math.cos(a), y1 - 8 * math.sin(a)), 2)
