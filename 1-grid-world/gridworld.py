@@ -114,9 +114,12 @@ class Env:
         s.fill(WHITE)
         # HUD bar.
         pygame.draw.rect(s, (30, 30, 30), pygame.Rect(0, 0, WIDTH * UNIT, hud))
+        # Steps display rounds down to the nearest 5 so the number doesn't
+        # flicker every frame (real step count is still in self.steps).
+        steps_shown = (self.steps // 5) * 5
         last = f"{self.last_reward:+d}" if self.last_reward is not None else "—"
         t = self._hud_font.render(
-            f"Episode: {self.episode}   Steps: {self.steps}   Last: {last}",
+            f"Episode: {self.episode}   Steps: {steps_shown}   Last Score: {last}",
             True, (240, 240, 240))
         s.blit(t, (8, (hud - t.get_height()) // 2))
         # Grid + landmarks.
