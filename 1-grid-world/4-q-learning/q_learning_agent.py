@@ -1,7 +1,11 @@
+import os
+import sys
 import numpy as np
 import random
-from environment import Env
 from collections import defaultdict
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gridworld import Env  # noqa: E402
 
 class QLearningAgent:
     def __init__(self, actions):
