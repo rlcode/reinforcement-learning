@@ -262,6 +262,11 @@ class GraphicDisplay:
         self.agent_pos = [0, 0]
         while True:
             self._render(); pygame.time.wait(200)
+            r, c = self.agent_pos
+            # Stop at the goal cell — picker may not be defined there
+            # (policy iteration's get_action crashes on the terminal state).
+            if self.env.reward[r][c] > 0:
+                break
             a = picker(list(self.agent_pos))
             if a is None or a == [] or a == 0.0: break
             if isinstance(a, list): a = a[0]
