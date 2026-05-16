@@ -17,7 +17,7 @@ Loss (per minibatch sample):
 
     L(theta) = ( Q_theta(s)[a] - y )^2
 """
-import os
+import argparse
 import random
 import sys
 from collections import deque
@@ -30,10 +30,6 @@ import torch.optim as optim
 
 EPISODES = 300
 SAVE_PATH = "cartpole_dqn.pt"
-# RENDER=1  -> open a pygame window during training (much slower)
-# TEST=1    -> load SAVE_PATH and just play (no learning); implies RENDER
-RENDER = os.environ.get("RENDER") == "1"
-TEST = os.environ.get("TEST") == "1"
 
 
 # Approximator for Q(s, .). He-uniform init is friendly to ReLU.
@@ -126,13 +122,18 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1", render_mode="human" if (RENDER or TEST) else None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--render", action="store_true", help="show the cartpole window during training")
+    parser.add_argument("--test", action="store_true", help="load the saved checkpoint and just play (no learning)")
+    args = parser.parse_args()
+
+    env = gym.make("CartPole-v1", render_mode="human" if (args.render or args.test) else None)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
     agent = DQNAgent(state_size, action_size)
 
-    if TEST:
+    if args.test:
         agent.model.load_state_dict(torch.load(SAVE_PATH))
         agent.epsilon = 0.0  # fully greedy
         while True:

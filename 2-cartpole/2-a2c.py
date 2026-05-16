@@ -27,14 +27,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import os
+import argparse
 
 EPISODES = 1000
 SAVE_PATH = "cartpole_a2c.pt"
-# RENDER=1  -> open a pygame window during training (much slower)
-# TEST=1    -> load SAVE_PATH and just play (no learning); implies RENDER
-RENDER = os.environ.get("RENDER") == "1"
-TEST = os.environ.get("TEST") == "1"
 
 
 # Policy network: outputs logits over actions.
@@ -116,13 +112,18 @@ class A2CAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1", render_mode="human" if (RENDER or TEST) else None)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--render", action="store_true", help="show the cartpole window during training")
+    parser.add_argument("--test", action="store_true", help="load the saved checkpoint and just play (no learning)")
+    args = parser.parse_args()
+
+    env = gym.make("CartPole-v1", render_mode="human" if (args.render or args.test) else None)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
     agent = A2CAgent(state_size, action_size)
 
-    if TEST:
+    if args.test:
         ckpt = torch.load(SAVE_PATH)
         agent.actor.load_state_dict(ckpt["actor"])
         agent.critic.load_state_dict(ckpt["critic"])
