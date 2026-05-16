@@ -60,6 +60,7 @@ def _triangle(surf, x, y, unit, color, y_off=0):
 class Env:
     """Static 5x5 grid for tabular SARSA / Q-learning.  agent=[col,row]."""
     n_actions = 4
+    HUD = 32
 
     def __init__(self, title="GridWorld"):
         self.title = title
@@ -67,10 +68,19 @@ class Env:
         self.obstacles = [[1, 2], [2, 1]]
         self.goal = [2, 2]
         self.q_overlay = None  # set by print_value_all; rendered on next render()
+        self.episode = 0
+        self.score = 0
+        self._steps_in_ep = 0  # used to decide whether reset() opens a new episode
         self._screen = None
 
     def reset(self):
+        # Only count a new episode after the first reset (or after some
+        # steps have actually happened in the previous one).
+        if self._steps_in_ep > 0:
+            self.episode += 1
         self.agent = [0, 0]
+        self.score = 0
+        self._steps_in_ep = 0
         if self._screen is not None:
             self.render()
             time.sleep(0.3)
@@ -83,8 +93,13 @@ class Env:
         elif action == 2 and x > 0: x -= 1
         elif action == 3 and x < WIDTH - 1: x += 1
         self.agent = [x, y]
-        if self.agent == self.goal: return list(self.agent), 100, True
-        if self.agent in self.obstacles: return list(self.agent), -100, True
+        self._steps_in_ep += 1
+        if self.agent == self.goal:
+            self.score += 100
+            return list(self.agent), 100, True
+        if self.agent in self.obstacles:
+            self.score += -100
+            return list(self.agent), -100, True
         return list(self.agent), 0, False
 
     def print_value_all(self, q_table):
@@ -92,16 +107,24 @@ class Env:
 
     def render(self):
         if self._screen is None:
-            self._screen = _open(self.title, (WIDTH * UNIT, HEIGHT * UNIT))
+            self._screen = _open(self.title, (WIDTH * UNIT, HEIGHT * UNIT + self.HUD))
             self._font = pygame.font.SysFont(None, 18)
+            self._hud_font = pygame.font.SysFont(None, 22)
         _pump_events()
         s = self._screen
+        hud = self.HUD
         s.fill(WHITE)
-        _grid_lines(s, UNIT)
+        # HUD bar.
+        pygame.draw.rect(s, (30, 30, 30), pygame.Rect(0, 0, WIDTH * UNIT, hud))
+        t = self._hud_font.render(
+            f"Episode: {self.episode}    Score: {self.score:+d}", True, (240, 240, 240))
+        s.blit(t, (8, (hud - t.get_height()) // 2))
+        # Grid + landmarks.
+        _grid_lines(s, UNIT, y_off=hud)
         for ox, oy in self.obstacles:
-            _triangle(s, ox, oy, UNIT, OBSTACLE_COLOR)
-        _circle(s, *self.goal, unit=UNIT, color=GOAL_COLOR)
-        _square(s, *self.agent, unit=UNIT, color=AGENT_COLOR)
+            _triangle(s, ox, oy, UNIT, OBSTACLE_COLOR, y_off=hud)
+        _circle(s, *self.goal, unit=UNIT, color=GOAL_COLOR, y_off=hud)
+        _square(s, *self.agent, unit=UNIT, color=AGENT_COLOR, y_off=hud)
         if self.q_overlay is not None:
             offsets = [(0, -UNIT // 2 + 10), (0, UNIT // 2 - 10),
                        (-UNIT // 2 + 15, 0), (UNIT // 2 - 15, 0)]
@@ -109,7 +132,7 @@ class Env:
                 for y in range(HEIGHT):
                     qs = self.q_overlay.get(str([x, y]))
                     if qs is None: continue
-                    cx, cy = _center(x, y, UNIT)
+                    cx, cy = _center(x, y, UNIT, y_off=hud)
                     for i, q in enumerate(qs):
                         t = self._font.render(f"{q:+.2f}", True, TEXT_COLOR)
                         s.blit(t, t.get_rect(center=(cx + offsets[i][0], cy + offsets[i][1])))
