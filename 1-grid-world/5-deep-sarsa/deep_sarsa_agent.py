@@ -1,3 +1,18 @@
+"""Deep SARSA agent for the GridWorld.
+
+SARSA (Rummery & Niranjan, 1994) is an on-policy TD control method.
+Update rule for the action-value function:
+
+    Q(s, a) <- Q(s, a) + alpha * [r + gamma * Q(s', a') - Q(s, a)]
+
+The "next action a'" is the action actually taken in the next state under
+the current (epsilon-greedy) policy, which makes SARSA on-policy.
+
+Deep SARSA replaces the table Q(s, a) with a neural network Q_theta(s),
+and minimizes the squared TD error via gradient descent:
+
+    L(theta) = ( Q_theta(s)[a] - (r + gamma * Q_theta(s')[a']) )^2
+"""
 import random
 import numpy as np
 import torch
@@ -8,6 +23,7 @@ from environment import Env
 EPISODES = 1000
 
 
+# Approximator for Q(s, .): state in R^15 -> Q-values in R^5 (one per action).
 class QNetwork(nn.Module):
     def __init__(self, state_size, action_size):
         super().__init__()
@@ -30,6 +46,8 @@ class DeepSARSAgent:
         self.state_size = 15
         self.discount_factor = 0.99
         self.learning_rate = 1e-3
+
+        # Epsilon-greedy exploration schedule.
         self.epsilon = 1.0
         self.epsilon_decay = 0.9999
         self.epsilon_min = 0.01
@@ -38,6 +56,7 @@ class DeepSARSAgent:
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.loss_fn = nn.MSELoss()
 
+    # Epsilon-greedy: with prob epsilon pick random, else argmax_a Q(s, a).
     def get_action(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
@@ -45,6 +64,7 @@ class DeepSARSAgent:
             q_values = self.model(torch.as_tensor(state, dtype=torch.float32))
         return int(torch.argmax(q_values).item())
 
+    # One-step SARSA update using the actually-taken next action a'.
     def train_model(self, state, action, reward, next_state, next_action, done):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
@@ -52,7 +72,12 @@ class DeepSARSAgent:
         state_t = torch.as_tensor(state, dtype=torch.float32)
         next_state_t = torch.as_tensor(next_state, dtype=torch.float32)
 
+        # Q(s, a) — keep gradient flow.
         q_pred = self.model(state_t)[action]
+
+        # TD target: r if terminal else r + gamma * Q(s', a').
+        # The target is treated as a constant (no_grad), otherwise the network
+        # would learn to drive its own target down and training would diverge.
         with torch.no_grad():
             if done:
                 target = torch.tensor(float(reward))
@@ -78,9 +103,11 @@ if __name__ == "__main__":
 
         while not done:
             global_step += 1
+            # Take an action under the current policy.
             action = agent.get_action(state)
             next_state, reward, done = env.step(action)
             next_state = np.array(next_state, dtype=np.float32)
+            # SARSA needs the next action a' to form the target — sample it now.
             next_action = agent.get_action(next_state)
             agent.train_model(state, action, reward, next_state, next_action, done)
             state = next_state
