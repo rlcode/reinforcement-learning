@@ -35,9 +35,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+import os
+
 EPISODES = 1000
-RENDER = False  # set True to watch a pygame window during training (much slower)
 SAVE_PATH = "cartpole_ppo.pt"
+# RENDER=1  -> open a pygame window during training (much slower)
+# TEST=1    -> load SAVE_PATH and just play (no learning); implies RENDER
+RENDER = os.environ.get("RENDER") == "1"
+TEST = os.environ.get("TEST") == "1"
 # Steps collected per update; PPO is batch-based, not single-step like A2C.
 ROLLOUT_STEPS = 256
 # Number of times we sweep over the collected batch each update.
@@ -90,12 +95,28 @@ def compute_gae(rewards, values, dones, last_value):
 
 
 if __name__ == "__main__":
-    env = gym.make("CartPole-v1", render_mode="human" if RENDER else None)
+    env = gym.make("CartPole-v1", render_mode="human" if (RENDER or TEST) else None)
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
 
     model = ActorCritic(state_size, action_size)
     optimizer = optim.Adam(model.parameters(), lr=LR)
+
+    if TEST:
+        model.load_state_dict(torch.load(SAVE_PATH))
+        while True:
+            state, _ = env.reset()
+            state = np.array(state, dtype=np.float32)
+            done = False; score = 0
+            while not done:
+                with torch.no_grad():
+                    logits, _ = model(torch.as_tensor(state))
+                    action = int(torch.distributions.Categorical(logits=logits).sample().item())
+                next_state, reward, terminated, truncated, _ = env.step(action)
+                done = terminated or truncated
+                state = np.array(next_state, dtype=np.float32)
+                score += reward
+            print(f"test score: {score}")
 
     state, _ = env.reset()
     state = np.array(state, dtype=np.float32)
