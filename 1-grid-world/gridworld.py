@@ -307,6 +307,12 @@ class GraphicDisplay:
             s.blit(label, (col * UNIT + 6, row * UNIT + 4))
         s.blit(self._small.render("R : +1.0", True, TEXT_COLOR), (2 * UNIT + 6, 2 * UNIT + 4))
 
+        # Agent first (filled), so V text and arrows render on top of it.
+        r, c = self.agent_pos
+        sz = int(UNIT * 0.55)
+        cx, cy = c * UNIT + UNIT // 2, r * UNIT + UNIT // 2
+        pygame.draw.rect(s, AGENT_COLOR, pygame.Rect(cx - sz // 2, cy - sz // 2, sz, sz))
+
         if self._values is not None:
             for r in range(HEIGHT):
                 for c in range(WIDTH):
@@ -325,12 +331,6 @@ class GraphicDisplay:
                     for i, p in enumerate(probs):
                         if p > 0:
                             self._arrow(cx, cy, cx + edge[i][0], cy + edge[i][1])
-
-        # Agent: hollow outline so V/arrows show through.
-        r, c = self.agent_pos
-        sz = int(UNIT * 0.55)
-        cx, cy = c * UNIT + UNIT // 2, r * UNIT + UNIT // 2
-        pygame.draw.rect(s, AGENT_COLOR, pygame.Rect(cx - sz // 2, cy - sz // 2, sz, sz), 3)
 
         for rect, (label, _) in zip(self._btn_rects(), self.buttons):
             pygame.draw.rect(s, (220, 220, 220), rect)
