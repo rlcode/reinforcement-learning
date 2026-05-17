@@ -1,55 +1,58 @@
 <p align="center"><img width="90%" src="images/Reinforcement-Learning.png"></p>
 
---------------------------------------------------------------------------------
+From the basics to deep reinforcement learning, this repo provides easy-to-read code examples. One file for each algorithm. Please feel free to create a Pull Request, or open an issue!
 
-> Minimal and clean examples of reinforcement learning algorithms presented by [RLCode](https://rlcode.github.io) team. [[한국어]](https://github.com/rlcode/reinforcement-learning-kr)
->
-> Maintainers - [Woongwon](https://github.com/dnddnjs), [Youngmoo](https://github.com/zzing0907), [Hyeokreal](https://github.com/Hyeokreal), [Uiryeong](https://github.com/wooridle), [Keon](https://github.com/keon)
+## Algorithms
 
-From the basics to deep reinforcement learning, this repo provides easy-to-read code examples. One file for each algorithm.
-Please feel free to create a [Pull Request](https://github.com/rlcode/reinforcement-learning/pulls), or open an [issue](https://github.com/rlcode/reinforcement-learning/issues)!
+**Grid World** ([`1-grid-world/`](./1-grid-world))
 
-## Dependencies
-1. Python 3.5
-2. Tensorflow 1.0.0
-3. Keras
-4. numpy
-5. pandas
-6. matplot
-7. pillow
-8. Skimage
-9. h5py
+1. Policy Iteration  — [`1-policy_iteration.py`](./1-grid-world/1-policy_iteration.py)
+2. Value Iteration   — [`2-value_iteration.py`](./1-grid-world/2-value_iteration.py)
+3. SARSA             — [`3-sarsa.py`](./1-grid-world/3-sarsa.py)
+4. Q-Learning        — [`4-q_learning.py`](./1-grid-world/4-q_learning.py)
+5. Deep SARSA        — [`5-deep_sarsa.py`](./1-grid-world/5-deep_sarsa.py)
+6. REINFORCE         — [`6-reinforce.py`](./1-grid-world/6-reinforce.py)
 
-### Install Requirements
+**CartPole** ([`2-cartpole/`](./2-cartpole))
+
+7. DQN  — [`1-dqn.py`](./2-cartpole/1-dqn.py)
+8. A2C  — [`2-a2c.py`](./2-cartpole/2-a2c.py)
+9. PPO  — [`3-ppo.py`](./2-cartpole/3-ppo.py)
+
+## Setup
+
+Requires Python 3.11 and [uv](https://docs.astral.sh/uv/).
+
+```bash
+git clone <this repo>
+cd reinforcement-learning
+uv sync
 ```
-pip install -r requirements.txt
+
+## Running
+
+```bash
+# Grid World
+cd 1-grid-world && uv run python 3-sarsa.py
+
+# CartPole — train
+cd 2-cartpole && uv run python 1-dqn.py
+
+# CartPole — watch training (slower)
+cd 2-cartpole && uv run python 1-dqn.py --render
+
+# CartPole — replay a trained checkpoint
+cd 2-cartpole && uv run python 1-dqn.py --test
 ```
 
-## Table of Contents
+## Updates
 
-**Grid World** - Mastering the basics of reinforcement learning in the simplified world called "Grid World"
+Modernized from the 2017 original:
 
-- [Policy Iteration](./1-grid-world/1-policy-iteration)
-- [Value Iteration](./1-grid-world/2-value-iteration)
-- [Monte Carlo](./1-grid-world/3-monte-carlo)
-- [SARSA](./1-grid-world/4-sarsa)
-- [Q-Learning](./1-grid-world/5-q-learning)
-- [Deep SARSA](./1-grid-world/6-deep-sarsa)
-- [REINFORCE](./1-grid-world/7-reinforce)
-
-**CartPole** - Applying deep reinforcement learning on basic Cartpole game.
-
-- [Deep Q Network](./2-cartpole/1-dqn)
-- [Double Deep Q Network](./2-cartpole/2-double-dqn)
-- [Policy Gradient](./2-cartpole/3-reinforce)
-- [Actor Critic (A2C)](./2-cartpole/4-actor-critic)
-- [Asynchronous Advantage Actor Critic (A3C)](./2-cartpole/5-a3c)
-
-**Atari** - Mastering Atari games with Deep Reinforcement Learning
-
-- **Breakout** - [DQN](./3-atari/1-breakout/breakout_dqn.py), [DDQN](./3-atari/1-breakout/breakout_ddqn.py) [Dueling DDQN](./3-atari/1-breakout/breakout_ddqn.py) [A3C](./3-atari/1-breakout/breakout_a3c.py)
-- **Pong** - [Policy Gradient](./3-atari/2-pong/pong_reinforce.py)
-
-**OpenAI GYM** - [WIP]
-
-- Mountain Car - [DQN](./4-gym/1-mountaincar)
+- **Framework**: Keras + TensorFlow 1.0 → PyTorch 2.11
+- **Env**: gym 0.8 → gymnasium 1.2
+- **Rendering**: tkinter → pygame (cross-platform with no system Tk)
+- **Tooling**: `requirements.txt` → `pyproject.toml` + `uv`
+- **Scope**: pruned to 9 core algorithms; dropped Monte Carlo / DDQN / A3C / Atari / mountaincar; added PPO
+- **Layout**: flat `1-grid-world/3-sarsa.py` instead of nested `1-grid-world/4-sarsa/sarsa_agent.py`
+- **Docs**: each algorithm file now opens with a paper citation and the core update equation

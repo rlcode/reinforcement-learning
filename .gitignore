@@ -3,4 +3,8 @@
 .idea/
 .DS_Store
 __pycache__
+.venv/
+*.egg-info/
+.python-version
+*.pt
 ./Code 2. Cartpole/6. A3C/Cartpole_A3C.pgy

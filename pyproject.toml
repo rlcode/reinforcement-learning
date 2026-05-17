@@ -1,0 +1,15 @@
+[project]
+name = "reinforcement-learning"
+version = "0.1.0"
+description = "Minimal PyTorch reimplementation of classic RL algorithms"
+requires-python = "==3.11.*"
+dependencies = [
+    "torch>=2.11,<2.12",
+    "torchvision>=0.26,<0.27",
+    "gymnasium[atari]>=1.2,<1.3",
+    "ale-py>=0.11,<0.12",
+    "numpy>=2.3,<2.4",
+    "matplotlib>=3.10,<3.11",
+    "pygame>=2.6,<3",
+    "opencv-python-headless>=4.13,<4.14",
+]
