@@ -17,7 +17,7 @@ from env import make_env, make_vec_env, parse_args, pick_device, run_test_loop
 
 
 SAVE_PATH = "atari_ppo.pt"
-TOTAL_FRAMES = 1_000_000
+TOTAL_FRAMES = 5_000_000
 N_ENVS = 8
 ROLLOUT_STEPS = 128            # batch = N_ENVS * ROLLOUT_STEPS = 1024
 EPOCHS = 4
