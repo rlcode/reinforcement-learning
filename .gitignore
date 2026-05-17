@@ -7,4 +7,5 @@ __pycache__
 *.egg-info/
 .python-version
 *.pt
+wandb/
 ./Code 2. Cartpole/6. A3C/Cartpole_A3C.pgy

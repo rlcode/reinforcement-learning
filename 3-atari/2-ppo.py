@@ -93,6 +93,16 @@ if __name__ == "__main__":
     model = ActorCritic(n_actions).to(device)
     optimizer = optim.Adam(model.parameters(), lr=LR, eps=1e-5)
 
+    if args.wandb:
+        import wandb
+        wandb.init(project="rl-atari-ppo", config={
+            "env": args.env, "n_envs": N_ENVS, "rollout_steps": ROLLOUT_STEPS,
+            "total_frames": TOTAL_FRAMES, "epochs": EPOCHS,
+            "minibatch_size": MINIBATCH_SIZE, "clip_coef": CLIP_COEF,
+            "gamma": GAMMA, "gae_lambda": GAE_LAMBDA, "lr": LR,
+            "value_coef": VALUE_COEF, "entropy_coef": ENTROPY_COEF,
+        })
+
     print(f"device: {device},  env: {args.env},  actions: {n_actions},  n_envs: {N_ENVS}")
 
     batch_size = ROLLOUT_STEPS * N_ENVS
@@ -152,6 +162,8 @@ if __name__ == "__main__":
 
         # --- PPO updates ---
         idx = np.arange(batch_size)
+        pl_sum = vl_sum = ent_sum = 0.0
+        n_mb = 0
         for _ in range(EPOCHS):
             np.random.shuffle(idx)
             for start in range(0, batch_size, MINIBATCH_SIZE):
@@ -173,10 +185,26 @@ if __name__ == "__main__":
                 nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
                 optimizer.step()
 
+                pl_sum += policy_loss.item()
+                vl_sum += value_loss.item()
+                ent_sum += entropy.item()
+                n_mb += 1
+
+        global_step = update * frames_per_update
         if ep_returns:
             recent = ep_returns[-20:]
-            print(f"update: {update:>4}  frames: {update * frames_per_update:>8}  "
+            print(f"update: {update:>4}  frames: {global_step:>8}  "
                   f"recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
+        if args.wandb:
+            log = {
+                "global_step": global_step,
+                "policy_loss": pl_sum / n_mb,
+                "value_loss": vl_sum / n_mb,
+                "entropy": ent_sum / n_mb,
+            }
+            if ep_returns:
+                log["recent_mean_return"] = float(np.mean(ep_returns[-20:]))
+            wandb.log(log, step=global_step)
 
     torch.save(model.state_dict(), SAVE_PATH)
     print(f"Saved trained model to {SAVE_PATH}")

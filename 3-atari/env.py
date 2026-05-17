@@ -45,6 +45,8 @@ def parse_args():
                    help="load the saved checkpoint and just play (no learning)")
     p.add_argument("--device", choices=["auto", "cpu", "cuda", "mps"], default="auto",
                    help="override the auto-selected torch device")
+    p.add_argument("--wandb", action="store_true",
+                   help="log metrics to Weights & Biases")
     return p.parse_args()
 
 

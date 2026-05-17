@@ -12,4 +12,5 @@ dependencies = [
     "matplotlib>=3.10,<3.11",
     "pygame>=2.6,<3",
     "opencv-python-headless>=4.13,<4.14",
+    "wandb>=0.27.0",
 ]
