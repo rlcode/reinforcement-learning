@@ -17,6 +17,18 @@ import torch
 
 gym.register_envs(ale_py)
 
+
+# Breakout (and a few other games) require pressing FIRE to launch the ball
+# after each reset / life loss. AtariPreprocessing only does NOOPs, so without
+# this the agent wastes a lot of frames waiting for a random FIRE.
+class FireResetEnv(gym.Wrapper):
+    def reset(self, **kwargs):
+        self.env.reset(**kwargs)
+        obs, _, terminated, truncated, _ = self.env.step(1)  # FIRE
+        if terminated or truncated:
+            obs, _ = self.env.reset(**kwargs)
+        return obs, {}
+
 ENV_IDS = {
     "breakout": "ALE/Breakout-v5",
     "pong":     "ALE/Pong-v5",
@@ -47,10 +59,12 @@ def make_env(args):
         noop_max=30,
         frame_skip=4,
         screen_size=84,
-        terminal_on_life_loss=False,
+        terminal_on_life_loss=True,
         grayscale_obs=True,
         scale_obs=False,        # keep uint8; we normalize in the model
     )
+    if "FIRE" in env.unwrapped.get_action_meanings():
+        env = FireResetEnv(env)
     env = gym.wrappers.FrameStackObservation(env, stack_size=4)
     return env
 
