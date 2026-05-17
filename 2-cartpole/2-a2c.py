@@ -19,7 +19,6 @@ Updates (one-step, online — like a TD(0) actor-critic):
 Subtracting V_w(s) is the variance-reduction baseline; using a learned V
 (rather than the Monte-Carlo return) is what makes this *actor-critic*.
 """
-import sys
 
 import numpy as np
 import torch
@@ -125,8 +124,11 @@ if __name__ == "__main__":
         run_test_loop(env, agent.get_action)
 
     scores = []
+    solved = False
 
     for e in range(EPISODES):
+        if solved:
+            break
         done = False
         score = 0
         state, _ = env.reset()
@@ -149,10 +151,8 @@ if __name__ == "__main__":
                 scores.append(score)
                 print(f"episode: {e}  score: {score}")
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    torch.save({"actor": agent.actor.state_dict(),
-                                "critic": agent.critic.state_dict()}, SAVE_PATH)
-                    print(f"Saved trained model to {SAVE_PATH}")
-                    sys.exit()
+                    solved = True
+                    break
 
     torch.save({"actor": agent.actor.state_dict(),
                 "critic": agent.critic.state_dict()}, SAVE_PATH)
