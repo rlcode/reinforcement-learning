@@ -25,7 +25,7 @@ from env import make_env, parse_args, pick_device, quit_if_window_closed, run_te
 SAVE_PATH = "atari_dqn.pt"
 TOTAL_FRAMES = 1_000_000        # bump to ~10M for paper-quality results
 BUFFER_CAPACITY = 100_000       # bump to 1M with enough RAM
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 GAMMA = 0.99
 LR = 1e-4
 LEARN_START = 10_000            # frames of pure exploration before training begins
