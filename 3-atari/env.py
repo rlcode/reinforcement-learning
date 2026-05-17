@@ -69,6 +69,11 @@ def make_env(args):
     return env
 
 
+def make_vec_env(args, n_envs):
+    """Bundle n_envs copies of make_env into a SyncVectorEnv."""
+    return gym.vector.SyncVectorEnv([lambda: make_env(args) for _ in range(n_envs)])
+
+
 def pick_device(arg="auto"):
     if arg != "auto":
         return torch.device(arg)
