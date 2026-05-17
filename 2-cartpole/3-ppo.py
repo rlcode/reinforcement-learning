@@ -27,7 +27,6 @@ Total loss combines clipped policy loss, value MSE, and an entropy bonus:
 
     L = L^CLIP - c_v * MSE(V, returns) + c_e * H[pi]
 """
-import sys
 
 import numpy as np
 import torch
@@ -211,9 +210,7 @@ if __name__ == "__main__":
             recent = ep_returns[-10:]
             print(f"update: {episode}  recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
             if len(recent) >= 10 and np.mean(recent) > 490:
-                torch.save(model.state_dict(), SAVE_PATH)
-                print(f"Saved trained model to {SAVE_PATH}")
-                sys.exit()
+                break
 
     torch.save(model.state_dict(), SAVE_PATH)
     print(f"Saved trained model to {SAVE_PATH}")

@@ -18,7 +18,6 @@ Loss (per minibatch sample):
     L(theta) = ( Q_theta(s)[a] - y )^2
 """
 import random
-import sys
 from collections import deque
 
 import numpy as np
@@ -135,8 +134,11 @@ if __name__ == "__main__":
         run_test_loop(env, agent.get_action)
 
     scores = []
+    solved = False
 
     for e in range(EPISODES):
+        if solved:
+            break
         done = False
         score = 0
         state, _ = env.reset()
@@ -168,9 +170,8 @@ if __name__ == "__main__":
 
                 # Early stop when consistently near max episode length.
                 if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    torch.save(agent.model.state_dict(), SAVE_PATH)
-                    print(f"Saved trained model to {SAVE_PATH}")
-                    sys.exit()
+                    solved = True
+                    break
 
     torch.save(agent.model.state_dict(), SAVE_PATH)
     print(f"Saved trained model to {SAVE_PATH}")
