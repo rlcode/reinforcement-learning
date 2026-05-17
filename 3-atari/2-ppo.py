@@ -5,21 +5,21 @@ Schulman et al., 2017: "Proximal Policy Optimization Algorithms"
 cartpole PPO, but with the Nature CNN as the shared trunk and the
 DeepMind reward clipping that keeps the value function stable.
 
-Single-env rollout for simplicity — real Atari PPO typically uses 8
-parallel envs (CleanRL).  Bump TOTAL_FRAMES well past the default for
-paper-quality results.
+Rollout uses 8 parallel envs via SyncVectorEnv (CleanRL convention).
+Bump TOTAL_FRAMES well past the default for paper-quality results.
 """
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from env import make_env, parse_args, pick_device, quit_if_window_closed, run_test_loop
+from env import make_env, make_vec_env, parse_args, pick_device, run_test_loop
 
 
 SAVE_PATH = "atari_ppo.pt"
-TOTAL_FRAMES = 1_000_000
-ROLLOUT_STEPS = 1024
+TOTAL_FRAMES = 5_000_000
+N_ENVS = 8
+ROLLOUT_STEPS = 128            # batch = N_ENVS * ROLLOUT_STEPS = 1024
 EPOCHS = 4
 MINIBATCH_SIZE = 256
 CLIP_COEF = 0.1
@@ -73,83 +73,88 @@ def compute_gae(rewards, values, dones, last_value):
 if __name__ == "__main__":
     args = parse_args()
     device = pick_device(args.device)
-    env = make_env(args)
-    n_actions = env.action_space.n
-    obs_shape = env.observation_space.shape  # (4, 84, 84)
+
+    if args.test:
+        env = make_env(args)
+        n_actions = env.action_space.n
+        model = ActorCritic(n_actions).to(device)
+        model.load_state_dict(torch.load(SAVE_PATH, map_location=device))
+        def policy_action(obs):
+            with torch.no_grad():
+                t = torch.as_tensor(np.asarray(obs), device=device).unsqueeze(0)
+                logits, _ = model(t)
+                return int(torch.distributions.Categorical(logits=logits).sample().item())
+        run_test_loop(env, policy_action)
+
+    envs = make_vec_env(args, N_ENVS)
+    n_actions = envs.single_action_space.n
+    obs_shape = envs.single_observation_space.shape  # (4, 84, 84)
 
     model = ActorCritic(n_actions).to(device)
     optimizer = optim.Adam(model.parameters(), lr=LR, eps=1e-5)
 
-    def policy_action(obs):
-        with torch.no_grad():
-            t = torch.as_tensor(np.asarray(obs), device=device).unsqueeze(0)
-            logits, _ = model(t)
-            return int(torch.distributions.Categorical(logits=logits).sample().item())
+    print(f"device: {device},  env: {args.env},  actions: {n_actions},  n_envs: {N_ENVS}")
 
-    if args.test:
-        model.load_state_dict(torch.load(SAVE_PATH, map_location=device))
-        run_test_loop(env, policy_action)
-
-    print(f"device: {device},  env: {args.env},  actions: {n_actions}")
-
-    n_updates = TOTAL_FRAMES // ROLLOUT_STEPS
-    obs, _ = env.reset()
-    ep_return = 0.0
+    batch_size = ROLLOUT_STEPS * N_ENVS
+    frames_per_update = batch_size
+    n_updates = TOTAL_FRAMES // frames_per_update
+    obs, _ = envs.reset()
+    ep_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)
     ep_returns = []
 
     for update in range(1, n_updates + 1):
-        obs_buf  = np.zeros((ROLLOUT_STEPS, *obs_shape), dtype=np.uint8)
-        act_buf  = np.zeros(ROLLOUT_STEPS, dtype=np.int64)
-        logp_buf = np.zeros(ROLLOUT_STEPS, dtype=np.float32)
-        rew_buf  = np.zeros(ROLLOUT_STEPS, dtype=np.float32)
-        done_buf = np.zeros(ROLLOUT_STEPS, dtype=np.float32)
-        val_buf  = np.zeros(ROLLOUT_STEPS, dtype=np.float32)
+        obs_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS, *obs_shape), dtype=np.uint8)
+        act_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.int64)
+        logp_buf = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.float32)
+        rew_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.float32)
+        done_buf = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.float32)
+        val_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.float32)
 
         # --- Rollout ---
         for t in range(ROLLOUT_STEPS):
-            quit_if_window_closed(env)
             with torch.no_grad():
-                obs_t = torch.as_tensor(np.asarray(obs), device=device).unsqueeze(0)
+                obs_t = torch.as_tensor(np.asarray(obs), device=device)
                 logits, value = model(obs_t)
                 dist = torch.distributions.Categorical(logits=logits)
                 action = dist.sample()
                 logp = dist.log_prob(action)
 
             obs_buf[t]  = np.asarray(obs)
-            act_buf[t]  = int(action.item())
-            logp_buf[t] = float(logp.item())
-            val_buf[t]  = float(value.item())
+            act_buf[t]  = action.cpu().numpy()
+            logp_buf[t] = logp.cpu().numpy()
+            val_buf[t]  = value.cpu().numpy()
 
-            next_obs, reward, terminated, truncated, _ = env.step(int(action.item()))
-            done = terminated or truncated
-            ep_return += reward
-            rew_buf[t]  = float(np.sign(reward))  # DeepMind reward clipping
-            done_buf[t] = float(done)
+            next_obs, reward, terminated, truncated, _ = envs.step(act_buf[t])
+            done = np.logical_or(terminated, truncated)
+            ep_returns_per_env += reward
+            rew_buf[t]  = np.sign(reward).astype(np.float32)  # DeepMind reward clipping
+            done_buf[t] = done.astype(np.float32)
 
-            if done:
-                ep_returns.append(ep_return)
-                ep_return = 0.0
-                next_obs, _ = env.reset()
+            for i in range(N_ENVS):
+                if done[i]:
+                    ep_returns.append(float(ep_returns_per_env[i]))
+                    ep_returns_per_env[i] = 0.0
             obs = next_obs
 
         # --- GAE ---
         with torch.no_grad():
-            obs_t = torch.as_tensor(np.asarray(obs), device=device).unsqueeze(0)
+            obs_t = torch.as_tensor(np.asarray(obs), device=device)
             _, last_value = model(obs_t)
-        advantages, returns = compute_gae(rew_buf, val_buf, done_buf, last_value.item())
+        advantages, returns = compute_gae(rew_buf, val_buf, done_buf, last_value.cpu().numpy())
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-        obs_t      = torch.as_tensor(obs_buf, device=device)
-        act_t      = torch.as_tensor(act_buf, device=device)
-        old_logp_t = torch.as_tensor(logp_buf, device=device)
-        adv_t      = torch.as_tensor(advantages, device=device)
-        ret_t      = torch.as_tensor(returns, device=device)
+        # Flatten (T, N_ENVS, ...) -> (T*N_ENVS, ...)
+        obs_t      = torch.as_tensor(obs_buf.reshape(batch_size, *obs_shape), device=device)
+        act_t      = torch.as_tensor(act_buf.reshape(batch_size), device=device)
+        old_logp_t = torch.as_tensor(logp_buf.reshape(batch_size), device=device)
+        adv_t      = torch.as_tensor(advantages.reshape(batch_size), device=device)
+        ret_t      = torch.as_tensor(returns.reshape(batch_size), device=device)
 
         # --- PPO updates ---
-        idx = np.arange(ROLLOUT_STEPS)
+        idx = np.arange(batch_size)
         for _ in range(EPOCHS):
             np.random.shuffle(idx)
-            for start in range(0, ROLLOUT_STEPS, MINIBATCH_SIZE):
+            for start in range(0, batch_size, MINIBATCH_SIZE):
                 mb = idx[start:start + MINIBATCH_SIZE]
                 logits, values = model(obs_t[mb])
                 dist = torch.distributions.Categorical(logits=logits)
@@ -170,7 +175,7 @@ if __name__ == "__main__":
 
         if ep_returns:
             recent = ep_returns[-20:]
-            print(f"update: {update:>4}  frames: {update * ROLLOUT_STEPS:>8}  "
+            print(f"update: {update:>4}  frames: {update * frames_per_update:>8}  "
                   f"recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
 
     torch.save(model.state_dict(), SAVE_PATH)
