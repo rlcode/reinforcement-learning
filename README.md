@@ -47,14 +47,15 @@ cd 2-cartpole && uv run python 1-dqn.py --test
 
 ### Logging to Weights & Biases (Atari only)
 
-The Atari PPO script can stream `recent_mean_return`, losses, and entropy to your own [Weights & Biases](https://wandb.ai/) account. One-time login, then pass `--wandb`:
+Both Atari scripts (`1-dqn.py`, `2-ppo.py`) can stream training metrics to your own [Weights & Biases](https://wandb.ai/) account. One-time login, then pass `--wandb`:
 
 ```bash
 uv run wandb login   # paste the API key from https://wandb.ai/authorize
 cd 3-atari && uv run python 2-ppo.py --env breakout --wandb
+cd 3-atari && uv run python 1-dqn.py --env breakout --wandb
 ```
 
-Each run lands in *your* `rl-atari-ppo` project — nothing is shared by default. Omit `--wandb` and the script runs without ever touching the network.
+Runs land in *your* `rl-atari-ppo` / `rl-atari-dqn` project — nothing is shared by default. Omit `--wandb` and the script runs without ever touching the network.
 
 ## Updates
 

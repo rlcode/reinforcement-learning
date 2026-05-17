@@ -117,6 +117,17 @@ if __name__ == "__main__":
         online.load_state_dict(torch.load(SAVE_PATH, map_location=device))
         run_test_loop(env, greedy_action)
 
+    if args.wandb:
+        import wandb
+        wandb.init(project="rl-atari-dqn", config={
+            "env": args.env, "total_frames": TOTAL_FRAMES,
+            "buffer_capacity": BUFFER_CAPACITY, "batch_size": BATCH_SIZE,
+            "gamma": GAMMA, "lr": LR, "learn_start": LEARN_START,
+            "train_every": TRAIN_EVERY, "target_update_every": TARGET_UPDATE_EVERY,
+            "epsilon_start": EPSILON_START, "epsilon_end": EPSILON_END,
+            "epsilon_decay_frames": EPSILON_DECAY_FRAMES,
+        })
+
     print(f"device: {device},  env: {args.env},  actions: {n_actions}")
 
     buffer = ReplayBuffer(BUFFER_CAPACITY, env.observation_space.shape)
@@ -124,6 +135,7 @@ if __name__ == "__main__":
     ep_return = 0.0
     recent_returns = deque(maxlen=20)
     train_step = 0
+    last_loss = 0.0
 
     for frame in range(1, TOTAL_FRAMES + 1):
         quit_if_window_closed(env)
@@ -161,6 +173,7 @@ if __name__ == "__main__":
             # Gradient clipping — DeepMind uses global norm 10.
             nn.utils.clip_grad_norm_(online.parameters(), 10.0)
             optimizer.step()
+            last_loss = loss.item()
 
             train_step += 1
             if train_step % TARGET_UPDATE_EVERY == 0:
@@ -168,9 +181,17 @@ if __name__ == "__main__":
 
         # Logging.
         if frame % 10_000 == 0:
-            mean = np.mean(recent_returns) if recent_returns else 0.0
+            mean = float(np.mean(recent_returns)) if recent_returns else 0.0
             print(f"frame: {frame:>8}  eps: {epsilon(frame):.3f}  "
                   f"recent_mean_return: {mean:.1f}  buffer: {buffer.size}")
+            if args.wandb:
+                wandb.log({
+                    "global_step": frame,
+                    "recent_mean_return": mean,
+                    "epsilon": epsilon(frame),
+                    "loss": last_loss,
+                    "buffer_size": buffer.size,
+                }, step=frame)
 
     torch.save(online.state_dict(), SAVE_PATH)
     print(f"Saved trained model to {SAVE_PATH}")
