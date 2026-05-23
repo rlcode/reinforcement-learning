@@ -109,8 +109,10 @@ if __name__ == "__main__":
     frames_per_update = batch_size
     n_updates = TOTAL_FRAMES // frames_per_update
     obs, _ = envs.reset()
-    ep_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)
+    ep_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)    # per-life (resets every life loss)
+    game_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)  # per-game (resets only on real game-over)
     ep_returns = []
+    game_returns = []
 
     for update in range(1, n_updates + 1):
         # Linear LR anneal from LR -> 0 over the run (CleanRL convention).
@@ -139,16 +141,22 @@ if __name__ == "__main__":
             logp_buf[t] = logp.cpu().numpy()
             val_buf[t]  = value.cpu().numpy()
 
-            next_obs, reward, terminated, truncated, _ = envs.step(act_buf[t])
+            next_obs, reward, terminated, truncated, info = envs.step(act_buf[t])
             done = np.logical_or(terminated, truncated)
             ep_returns_per_env += reward
+            game_returns_per_env += reward
             rew_buf[t]  = np.sign(reward).astype(np.float32)  # DeepMind reward clipping
             done_buf[t] = done.astype(np.float32)
 
+            # LifeLossTerminalEnv tags each step's info with game_over (True only on real game-over).
+            game_over = info.get("game_over", done)
             for i in range(N_ENVS):
                 if done[i]:
                     ep_returns.append(float(ep_returns_per_env[i]))
                     ep_returns_per_env[i] = 0.0
+                    if bool(game_over[i]):
+                        game_returns.append(float(game_returns_per_env[i]))
+                        game_returns_per_env[i] = 0.0
             obs = next_obs
 
         # --- GAE ---
@@ -208,9 +216,11 @@ if __name__ == "__main__":
 
         global_step = update * frames_per_update
         if ep_returns:
-            recent = ep_returns[-20:]
+            life_mean = float(np.mean(ep_returns[-20:]))
+            game_mean = float(np.mean(game_returns[-20:])) if game_returns else 0.0
             print(f"update: {update:>4}  frames: {global_step:>8}  "
-                  f"recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
+                  f"per_life: {life_mean:.1f}  per_game: {game_mean:.1f}  "
+                  f"lives: {len(ep_returns)}  games: {len(game_returns)}")
         if args.wandb:
             log = {
                 "global_step": global_step,
@@ -221,6 +231,8 @@ if __name__ == "__main__":
             }
             if ep_returns:
                 log["recent_mean_return"] = float(np.mean(ep_returns[-20:]))
+            if game_returns:
+                log["recent_mean_game_return"] = float(np.mean(game_returns[-20:]))
             wandb.log(log, step=global_step)
 
     torch.save(model.state_dict(), SAVE_PATH)

@@ -11,7 +11,6 @@ hit DeepMind-paper scores.  Bump TOTAL_FRAMES and BUFFER_CAPACITY for
 serious training.
 """
 import random
-import sys
 from collections import deque
 
 import numpy as np
@@ -23,17 +22,17 @@ from env import make_env, parse_args, pick_device, quit_if_window_closed, run_te
 
 
 SAVE_PATH = "atari_dqn.pt"
-TOTAL_FRAMES = 1_000_000        # bump to ~10M for paper-quality results
-BUFFER_CAPACITY = 100_000       # bump to 1M with enough RAM
-BATCH_SIZE = 64
+TOTAL_FRAMES = 10_000_000       # Nature uses 50M agent steps; 10M is laptop-friendly
+BUFFER_CAPACITY = 1_000_000     # Nature standard; ~7GB RAM (uint8, single frames stacked at sample time)
+BATCH_SIZE = 32
 GAMMA = 0.99
 LR = 1e-4
-LEARN_START = 10_000            # frames of pure exploration before training begins
+LEARN_START = 80_000            # frames of pure exploration before training begins
 TRAIN_EVERY = 4
-TARGET_UPDATE_EVERY = 1_000     # in training steps, not env steps
+TARGET_UPDATE_EVERY = 250       # in training steps, not env steps (~1k env frames)
 EPSILON_START = 1.0
-EPSILON_END = 0.05
-EPSILON_DECAY_FRAMES = 250_000  # linear decay from start to end over this many frames
+EPSILON_END = 0.01
+EPSILON_DECAY_FRAMES = 1_000_000  # linear decay from start to end over this many frames
 
 
 # Standard Nature CNN.
@@ -57,34 +56,59 @@ class QNetwork(nn.Module):
 
 
 class ReplayBuffer:
-    """Uint8 replay buffer — far more memory-efficient than storing floats."""
+    """Single-frame uint8 buffer — stacks of 4 are reconstructed at sample time,
+    cutting RAM ~4x vs. storing the full stack per slot."""
 
-    def __init__(self, capacity, obs_shape):
+    def __init__(self, capacity, frame_shape=(84, 84), stack=4):
         self.capacity = capacity
-        self.obs      = np.zeros((capacity, *obs_shape), dtype=np.uint8)
-        self.next_obs = np.zeros((capacity, *obs_shape), dtype=np.uint8)
-        self.actions  = np.zeros(capacity, dtype=np.int64)
-        self.rewards  = np.zeros(capacity, dtype=np.float32)
-        self.dones    = np.zeros(capacity, dtype=np.float32)
+        self.stack = stack
+        self.frames  = np.zeros((capacity, *frame_shape), dtype=np.uint8)
+        self.actions = np.zeros(capacity, dtype=np.int64)
+        self.rewards = np.zeros(capacity, dtype=np.float32)
+        self.dones   = np.zeros(capacity, dtype=np.float32)
         self.idx = 0
         self.size = 0
 
-    def push(self, obs, action, reward, next_obs, done):
-        self.obs[self.idx] = obs
+    def push(self, frame, action, reward, done):
+        self.frames[self.idx] = frame
         self.actions[self.idx] = action
         self.rewards[self.idx] = reward
-        self.next_obs[self.idx] = next_obs
         self.dones[self.idx] = float(done)
         self.idx = (self.idx + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
 
+    def _stack(self, idx):
+        # Gather frames[idx-stack+1 .. idx]; newest at last channel.
+        offsets = np.arange(self.stack)
+        gather = (idx[:, None] - (self.stack - 1) + offsets[None, :]) % self.capacity
+        out = self.frames[gather]
+        # Zero out frames sitting before an episode boundary inside the stack.
+        # dones at the (stack-1) older positions mark where a prior episode ended.
+        older = self.dones[gather[:, :-1]].astype(bool)
+        # Once we cross any done walking newest→oldest, everything older is invalid.
+        invalid = np.cumsum(older[:, ::-1], axis=1)[:, ::-1] > 0
+        mask = np.concatenate([~invalid, np.ones((idx.shape[0], 1), dtype=bool)], axis=1)
+        return out * mask[:, :, None, None]
+
     def sample(self, batch_size, device):
-        idx = np.random.randint(0, self.size, size=batch_size)
+        # Reject indices whose stack would straddle the write head (stale frames).
+        while True:
+            if self.size < self.capacity:
+                if self.size < self.stack + 2:
+                    raise RuntimeError("buffer too small to sample yet")
+                idx = np.random.randint(self.stack - 1, self.size - 1, size=batch_size)
+                break
+            idx = np.random.randint(0, self.capacity, size=batch_size)
+            dist = (self.idx - 1 - idx) % self.capacity
+            if np.all(dist >= self.stack):
+                break
+        states      = self._stack(idx)
+        next_states = self._stack((idx + 1) % self.capacity)
         return (
-            torch.as_tensor(self.obs[idx], device=device),
+            torch.as_tensor(states, device=device),
             torch.as_tensor(self.actions[idx], device=device),
             torch.as_tensor(self.rewards[idx], device=device),
-            torch.as_tensor(self.next_obs[idx], device=device),
+            torch.as_tensor(next_states, device=device),
             torch.as_tensor(self.dones[idx], device=device),
         )
 
@@ -130,10 +154,12 @@ if __name__ == "__main__":
 
     print(f"device: {device},  env: {args.env},  actions: {n_actions}")
 
-    buffer = ReplayBuffer(BUFFER_CAPACITY, env.observation_space.shape)
+    buffer = ReplayBuffer(BUFFER_CAPACITY)
     obs, _ = env.reset()
-    ep_return = 0.0
+    ep_return = 0.0       # accumulates within one life (LifeLossTerminalEnv ends an "episode" per life)
+    game_return = 0.0     # accumulates across all 5 lives until real game-over
     recent_returns = deque(maxlen=20)
+    recent_game_returns = deque(maxlen=20)
     train_step = 0
     last_loss = 0.0
 
@@ -146,18 +172,23 @@ if __name__ == "__main__":
         else:
             action = greedy_action(obs)
 
-        next_obs, reward, terminated, truncated, _ = env.step(action)
+        next_obs, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
         # Reward clipping (DeepMind standard) — keeps Q-values from blowing up
         # when one game has rewards in tens and another in hundreds.
         clipped = np.sign(reward)
-        buffer.push(np.asarray(obs), action, clipped, np.asarray(next_obs), done)
+        # FrameStack gives (4, 84, 84); store just the newest frame and stack at sample time.
+        buffer.push(np.asarray(obs)[-1], action, clipped, done)
 
         ep_return += reward
+        game_return += reward
         obs = next_obs
         if done:
             recent_returns.append(ep_return)
             ep_return = 0.0
+            if info.get("game_over", True):
+                recent_game_returns.append(game_return)
+                game_return = 0.0
             obs, _ = env.reset()
 
         # Training.
@@ -182,12 +213,14 @@ if __name__ == "__main__":
         # Logging.
         if frame % 10_000 == 0:
             mean = float(np.mean(recent_returns)) if recent_returns else 0.0
+            game_mean = float(np.mean(recent_game_returns)) if recent_game_returns else 0.0
             print(f"frame: {frame:>8}  eps: {epsilon(frame):.3f}  "
-                  f"recent_mean_return: {mean:.1f}  buffer: {buffer.size}")
+                  f"per_life: {mean:.1f}  per_game: {game_mean:.1f}  buffer: {buffer.size}")
             if args.wandb:
                 wandb.log({
                     "global_step": frame,
                     "recent_mean_return": mean,
+                    "recent_mean_game_return": game_mean,
                     "epsilon": epsilon(frame),
                     "loss": last_loss,
                     "buffer_size": buffer.size,
