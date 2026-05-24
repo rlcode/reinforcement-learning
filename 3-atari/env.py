@@ -29,6 +29,39 @@ class FireResetEnv(gym.Wrapper):
             obs, _ = self.env.reset(**kwargs)
         return obs, {}
 
+
+# Treats each life as its own episode for bootstrapping (so Q-targets / GAE don't
+# value-chain across deaths) but only resets the real game when all lives are
+# gone. Without this, every life loss triggers a full env.reset() — burning
+# frames on noop_max + FIRE and breaking long-horizon credit assignment.
+class LifeLossTerminalEnv(gym.Wrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        self.lives = 0
+        self.game_over = True
+
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
+        self.game_over = terminated or truncated
+        lives = info.get("lives", 0)
+        if 0 < lives < self.lives:
+            terminated = True
+        self.lives = lives
+        info["game_over"] = self.game_over
+        return obs, reward, terminated, truncated, info
+
+    def reset(self, **kwargs):
+        if self.game_over:
+            obs, info = self.env.reset(**kwargs)
+        else:
+            # Fake terminal from a life loss — advance one frame instead of
+            # resetting so the game keeps its remaining lives.
+            obs, _, terminated, truncated, info = self.env.step(0)
+            if terminated or truncated:
+                obs, info = self.env.reset(**kwargs)
+        self.lives = info.get("lives", 0)
+        return obs, info
+
 ENV_IDS = {
     "breakout": "ALE/Breakout-v5",
     "pong":     "ALE/Pong-v5",
@@ -61,12 +94,13 @@ def make_env(args):
         noop_max=30,
         frame_skip=4,
         screen_size=84,
-        terminal_on_life_loss=True,
+        terminal_on_life_loss=False,  # handled by LifeLossTerminalEnv below
         grayscale_obs=True,
         scale_obs=False,        # keep uint8; we normalize in the model
     )
     if "FIRE" in env.unwrapped.get_action_meanings():
         env = FireResetEnv(env)
+    env = LifeLossTerminalEnv(env)
     env = gym.wrappers.FrameStackObservation(env, stack_size=4)
     return env
 

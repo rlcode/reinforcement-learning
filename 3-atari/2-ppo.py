@@ -17,7 +17,7 @@ from env import make_env, make_vec_env, parse_args, pick_device, run_test_loop
 
 
 SAVE_PATH = "atari_ppo.pt"
-TOTAL_FRAMES = 5_000_000
+TOTAL_FRAMES = 10_000_000
 N_ENVS = 8
 ROLLOUT_STEPS = 128            # batch = N_ENVS * ROLLOUT_STEPS = 1024
 EPOCHS = 4
@@ -109,10 +109,17 @@ if __name__ == "__main__":
     frames_per_update = batch_size
     n_updates = TOTAL_FRAMES // frames_per_update
     obs, _ = envs.reset()
-    ep_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)
+    ep_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)    # per-life (resets every life loss)
+    game_returns_per_env = np.zeros(N_ENVS, dtype=np.float32)  # per-game (resets only on real game-over)
     ep_returns = []
+    game_returns = []
 
     for update in range(1, n_updates + 1):
+        # Linear LR anneal from LR -> 0 over the run (CleanRL convention).
+        lr_now = LR * (1.0 - (update - 1) / n_updates)
+        for g in optimizer.param_groups:
+            g["lr"] = lr_now
+
         obs_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS, *obs_shape), dtype=np.uint8)
         act_buf  = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.int64)
         logp_buf = np.zeros((ROLLOUT_STEPS, N_ENVS), dtype=np.float32)
@@ -134,16 +141,22 @@ if __name__ == "__main__":
             logp_buf[t] = logp.cpu().numpy()
             val_buf[t]  = value.cpu().numpy()
 
-            next_obs, reward, terminated, truncated, _ = envs.step(act_buf[t])
+            next_obs, reward, terminated, truncated, info = envs.step(act_buf[t])
             done = np.logical_or(terminated, truncated)
             ep_returns_per_env += reward
+            game_returns_per_env += reward
             rew_buf[t]  = np.sign(reward).astype(np.float32)  # DeepMind reward clipping
             done_buf[t] = done.astype(np.float32)
 
+            # LifeLossTerminalEnv tags each step's info with game_over (True only on real game-over).
+            game_over = info.get("game_over", done)
             for i in range(N_ENVS):
                 if done[i]:
                     ep_returns.append(float(ep_returns_per_env[i]))
                     ep_returns_per_env[i] = 0.0
+                    if bool(game_over[i]):
+                        game_returns.append(float(game_returns_per_env[i]))
+                        game_returns_per_env[i] = 0.0
             obs = next_obs
 
         # --- GAE ---
@@ -151,12 +164,12 @@ if __name__ == "__main__":
             obs_t = torch.as_tensor(np.asarray(obs), device=device)
             _, last_value = model(obs_t)
         advantages, returns = compute_gae(rew_buf, val_buf, done_buf, last_value.cpu().numpy())
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
         # Flatten (T, N_ENVS, ...) -> (T*N_ENVS, ...)
         obs_t      = torch.as_tensor(obs_buf.reshape(batch_size, *obs_shape), device=device)
         act_t      = torch.as_tensor(act_buf.reshape(batch_size), device=device)
         old_logp_t = torch.as_tensor(logp_buf.reshape(batch_size), device=device)
+        old_val_t  = torch.as_tensor(val_buf.reshape(batch_size), device=device)
         adv_t      = torch.as_tensor(advantages.reshape(batch_size), device=device)
         ret_t      = torch.as_tensor(returns.reshape(batch_size), device=device)
 
@@ -173,11 +186,22 @@ if __name__ == "__main__":
                 new_logp = dist.log_prob(act_t[mb])
                 entropy = dist.entropy().mean()
 
+                # Advantage normalization per minibatch (CleanRL convention).
+                mb_adv = adv_t[mb]
+                mb_adv = (mb_adv - mb_adv.mean()) / (mb_adv.std() + 1e-8)
+
                 ratio = (new_logp - old_logp_t[mb]).exp()
-                unclipped = ratio * adv_t[mb]
-                clipped = torch.clamp(ratio, 1 - CLIP_COEF, 1 + CLIP_COEF) * adv_t[mb]
+                unclipped = ratio * mb_adv
+                clipped = torch.clamp(ratio, 1 - CLIP_COEF, 1 + CLIP_COEF) * mb_adv
                 policy_loss = -torch.min(unclipped, clipped).mean()
-                value_loss = (values - ret_t[mb]).pow(2).mean()
+
+                # Value loss with clipping around the old value prediction.
+                v_clipped = old_val_t[mb] + torch.clamp(
+                    values - old_val_t[mb], -CLIP_COEF, CLIP_COEF)
+                vl_unclipped = (values - ret_t[mb]).pow(2)
+                vl_clipped   = (v_clipped - ret_t[mb]).pow(2)
+                value_loss = 0.5 * torch.max(vl_unclipped, vl_clipped).mean()
+
                 loss = policy_loss + VALUE_COEF * value_loss - ENTROPY_COEF * entropy
 
                 optimizer.zero_grad()
@@ -192,18 +216,23 @@ if __name__ == "__main__":
 
         global_step = update * frames_per_update
         if ep_returns:
-            recent = ep_returns[-20:]
+            life_mean = float(np.mean(ep_returns[-20:]))
+            game_mean = float(np.mean(game_returns[-20:])) if game_returns else 0.0
             print(f"update: {update:>4}  frames: {global_step:>8}  "
-                  f"recent_mean_return: {np.mean(recent):.1f}  episodes: {len(ep_returns)}")
+                  f"per_life: {life_mean:.1f}  per_game: {game_mean:.1f}  "
+                  f"lives: {len(ep_returns)}  games: {len(game_returns)}")
         if args.wandb:
             log = {
                 "global_step": global_step,
                 "policy_loss": pl_sum / n_mb,
                 "value_loss": vl_sum / n_mb,
                 "entropy": ent_sum / n_mb,
+                "lr": lr_now,
             }
             if ep_returns:
                 log["recent_mean_return"] = float(np.mean(ep_returns[-20:]))
+            if game_returns:
+                log["recent_mean_game_return"] = float(np.mean(game_returns[-20:]))
             wandb.log(log, step=global_step)
 
     torch.save(model.state_dict(), SAVE_PATH)
