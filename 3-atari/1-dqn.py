@@ -23,7 +23,7 @@ from env import make_env, parse_args, pick_device, quit_if_window_closed, run_te
 
 SAVE_PATH = "atari_dqn.pt"
 TOTAL_FRAMES = 10_000_000       # Nature uses 50M agent steps; 10M is laptop-friendly
-BUFFER_CAPACITY = 1_000_000     # Nature standard; ~7GB RAM (uint8, single frames stacked at sample time)
+BUFFER_CAPACITY = 500_000       # ~3.5GB RAM (uint8, single frames stacked at sample time); sized for 8GB Macs
 BATCH_SIZE = 32
 GAMMA = 0.99
 LR = 1e-4

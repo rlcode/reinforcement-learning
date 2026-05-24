@@ -9,3 +9,8 @@ __pycache__
 *.pt
 wandb/
 ./Code 2. Cartpole/6. A3C/Cartpole_A3C.pgy
+# Local scratch scripts
+scripts/
+
+# Local-only docs (not for github)
+docs/
