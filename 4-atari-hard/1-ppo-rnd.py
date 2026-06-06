@@ -38,10 +38,10 @@ from env import make_vec_env, parse_args, pick_device
 
 SAVE_PATH = "atari_ppo_rnd.pt"
 TOTAL_FRAMES = 10_000_000
-N_ENVS = 8
-ROLLOUT_STEPS = 128            # batch = 1024
+N_ENVS = 128                   # envpool: max trajectory diversity; swap-heavy on 8 GB
+ROLLOUT_STEPS = 128            # batch = N_ENVS * ROLLOUT_STEPS = 16384
 EPOCHS = 4
-MINIBATCH_SIZE = 256
+MINIBATCH_SIZE = 2048          # 8 minibatches per epoch at batch=16384
 CLIP_COEF = 0.1
 GAMMA_EXT = 0.999              # sparse-reward games need long horizons
 GAMMA_INT = 0.99               # curiosity is short-horizon by nature
@@ -50,9 +50,13 @@ LR = 1e-4
 EXT_COEF = 2.0
 INT_COEF = 1.0
 VALUE_COEF = 0.5
-ENTROPY_COEF = 0.001           # lower than vanilla PPO: RND carries some entropy duty
+ENTROPY_COEF = 0.01            # paper uses 0.001 (assumes 1B+ frames); at 10M frames the
+                               # policy entropy collapsed by ~50% before any breakthrough,
+                               # so we use the standard PPO value to keep exploration alive
 MAX_GRAD_NORM = 0.5
-PREDICTOR_UPDATE_PROPORTION = 0.25
+PREDICTOR_UPDATE_PROPORTION = 0.05  # paper default 0.25 saturates the predictor in ~500k
+                                     # frames at our scale, killing the intrinsic signal; slow it
+                                     # down 5x so novelty stays alive long enough to matter
 OBS_NORM_WARMUP_ROLLOUTS = 50  # 50 * ROLLOUT_STEPS random transitions before training
 
 
@@ -167,18 +171,19 @@ def compute_gae(rewards, values, nonterminals, last_value, gamma, lam):
 def warmup_obs_rms(envs, obs_rms, n_steps):
     """Step a random agent so obs running stats are realistic before training.
     Without this, the first intrinsic rewards are wildly scaled and the
-    predictor never recovers."""
+    predictor never recovers.
+
+    Updates obs_rms incrementally each step to avoid building a multi-GB list
+    of frames when N_ENVS is large."""
     print(f"warmup: stepping random agent for {n_steps} env steps to seed obs RMS...")
     obs, _ = envs.reset()
-    collected = []
+    n_actions = envs.action_space.n
     for _ in range(n_steps):
-        actions = np.array([envs.single_action_space.sample() for _ in range(envs.num_envs)])
+        actions = np.random.randint(0, n_actions, size=envs.num_envs, dtype=np.int32)
         next_obs, _, _, _, _ = envs.step(actions)
-        # FrameStackObservation gives (n_envs, 4, 84, 84); keep the newest frame per env.
-        last = np.asarray(next_obs)[:, -1, :, :]
-        collected.append(last)
+        # FrameStackObservation gives (n_envs, 4, 84, 84); update RMS with newest frames only.
+        obs_rms.update(np.asarray(next_obs)[:, -1, :, :])
         obs = next_obs
-    obs_rms.update(np.concatenate(collected, axis=0))
     print(f"  obs_rms seeded with {obs_rms.count:.0f} samples, "
           f"mean={obs_rms.mean.mean():.2f}, std={np.sqrt(obs_rms.var).mean():.2f}")
     return obs
@@ -188,8 +193,8 @@ if __name__ == "__main__":
     args = parse_args()
     device = pick_device(args.device)
     envs = make_vec_env(args, N_ENVS)
-    n_actions = envs.single_action_space.n
-    obs_shape = envs.single_observation_space.shape  # (4, 84, 84)
+    n_actions = envs.action_space.n
+    obs_shape = envs.observation_space.shape  # (4, 84, 84) — envpool single-env spec
 
     model = ActorCriticRND(n_actions).to(device)
     rnd_target = RNDTarget().to(device)
@@ -258,7 +263,7 @@ if __name__ == "__main__":
             val_ext_buf[t] = v_ext.cpu().numpy()
             val_int_buf[t] = v_int.cpu().numpy()
 
-            next_obs, reward, terminated, truncated, _ = envs.step(act_buf[t])
+            next_obs, reward, terminated, truncated, _ = envs.step(act_buf[t].astype(np.int32))
             done = np.logical_or(terminated, truncated)
             ep_returns_per_env += reward
             rew_ext_buf[t] = np.sign(reward).astype(np.float32)

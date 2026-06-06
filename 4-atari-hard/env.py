@@ -1,30 +1,50 @@
 """Atari hard-exploration env setup.
 
-Same preprocessing pipeline as 3-atari (frameskip 4, 84x84 grayscale,
-framestack 4, sticky actions via the v5 env id), but without
-LifeLossTerminalEnv: hard-exploration agents need uninterrupted long
-trajectories so the intrinsic-reward chain can credit far-future novelty.
-The underlying env still ends naturally on real game-over.
+Two backends:
 
-Default game is Montezuma's Revenge — the canonical hard-exploration
-benchmark.
+* `make_vec_env` returns an **envpool** vector env (C++, multithreaded). RND
+  on Montezuma needs many parallel envs for the first key to be found by
+  chance; SyncVectorEnv at 8-16 envs plateaus the policy in the first room
+  forever. envpool gets us 64-128 envs at ~15k env-steps/s on an M3 with
+  ~1.3 GB overhead, vs ~1.5k step/s and ballooning memory in Sync.
+
+* `make_env` is still the gymnasium pipeline so `--test` can pop a window
+  for human-mode rendering (envpool has no render mode).
+
+Same preprocessing on both: frameskip 4, 84x84 grayscale, stack 4, sticky
+actions (`repeat_action_probability=0.25`), full game-length episodes
+(life loss does NOT terminate the episode — intrinsic returns need to
+chain across deaths).
+
+Default game is Montezuma's Revenge.
 """
 import argparse
 import sys
+import types
 
-import ale_py
-import gymnasium as gym
-import numpy as np
-import pygame
-import torch
+# envpool eagerly imports a procgen submodule that links against homebrew
+# Qt5 on macOS. We don't use procgen — stub both modules before import so
+# the rest of envpool loads cleanly on arm64 Macs without brew install qt@5.
+sys.modules["envpool.procgen.procgen_envpool"] = types.ModuleType("stub")
+sys.modules["envpool.procgen.registration"] = types.ModuleType("stub")
+
+import ale_py  # noqa: E402  (kept for the --test single-env path)
+import envpool  # noqa: E402
+import gymnasium as gym  # noqa: E402
+import numpy as np  # noqa: E402
+import pygame  # noqa: E402
+import torch  # noqa: E402
 
 gym.register_envs(ale_py)
 
 
+# Gymnasium / ALE id (used by make_env / --test rendering) paired with the
+# envpool task name (used by make_vec_env). envpool uses short names without
+# the "ALE/" namespace.
 ENV_IDS = {
-    "montezuma":   "ALE/MontezumaRevenge-v5",
-    "pitfall":     "ALE/Pitfall-v5",
-    "private_eye": "ALE/PrivateEye-v5",
+    "montezuma":   ("ALE/MontezumaRevenge-v5", "MontezumaRevenge-v5"),
+    "pitfall":     ("ALE/Pitfall-v5",          "Pitfall-v5"),
+    "private_eye": ("ALE/PrivateEye-v5",       "PrivateEye-v5"),
 }
 
 
@@ -33,7 +53,7 @@ def parse_args():
     p.add_argument("--env", choices=list(ENV_IDS), default="montezuma",
                    help="which hard-exploration Atari game to train on")
     p.add_argument("--render", action="store_true",
-                   help="open a window during training (much slower)")
+                   help="open a window during training (single-env --test only)")
     p.add_argument("--test", action="store_true",
                    help="load the saved checkpoint and just play (no learning)")
     p.add_argument("--device", choices=["auto", "cpu", "cuda", "mps"], default="auto",
@@ -44,30 +64,43 @@ def parse_args():
 
 
 def make_env(args):
-    """Create a hard-exploration Atari env with the standard preprocessing.
+    """Single gymnasium env with the standard Atari preprocessing.
 
-    No FireResetEnv (Montezuma & friends don't need FIRE to launch) and no
-    LifeLossTerminalEnv (we want full game-length episodes so intrinsic
-    returns can chain across lives)."""
-    env_id = ENV_IDS[args.env]
-    env = gym.make(env_id, frameskip=1,
+    Used for `--test` rendering; envpool has no human render mode."""
+    gym_id, _ = ENV_IDS[args.env]
+    env = gym.make(gym_id, frameskip=1,
                    render_mode="human" if (args.render or args.test) else None)
     env = gym.wrappers.AtariPreprocessing(
-        env,
-        noop_max=30,
-        frame_skip=4,
-        screen_size=84,
-        terminal_on_life_loss=False,
-        grayscale_obs=True,
-        scale_obs=False,
+        env, noop_max=30, frame_skip=4, screen_size=84,
+        terminal_on_life_loss=False, grayscale_obs=True, scale_obs=False,
     )
     env = gym.wrappers.FrameStackObservation(env, stack_size=4)
     return env
 
 
-def make_vec_env(args, n_envs):
-    """Bundle n_envs copies of make_env into a SyncVectorEnv."""
-    return gym.vector.SyncVectorEnv([lambda: make_env(args) for _ in range(n_envs)])
+def make_vec_env(args, n_envs, seed=0):
+    """envpool vector env. Returns (n_envs, 4, 84, 84) uint8 obs and accepts
+    int32 actions of shape (n_envs,). `info` is a single dict of per-env
+    arrays; `info["terminated"]` is the real game-over signal (lives==0).
+
+    envpool's `observation_space` / `action_space` are already the single-env
+    spaces (no `single_*` aliases like gymnasium vector envs)."""
+    _, pool_id = ENV_IDS[args.env]
+    return envpool.make_gymnasium(
+        pool_id,
+        num_envs=n_envs,
+        seed=seed,
+        stack_num=4,
+        frame_skip=4,
+        gray_scale=True,
+        img_height=84, img_width=84,
+        noop_max=30,
+        episodic_life=False,          # life loss does not end the episode
+        use_fire_reset=True,          # auto-FIRE on reset for games that need it
+        repeat_action_probability=0.25,  # v5-equivalent sticky actions
+        reward_clip=False,            # we sign-clip in the training loop
+        max_episode_steps=27_000,     # standard Atari time limit
+    )
 
 
 def pick_device(arg="auto"):
@@ -90,7 +123,7 @@ def quit_if_window_closed(env):
 
 
 def run_test_loop(env, get_action):
-    """Replay episodes forever using the supplied action picker."""
+    """Replay episodes forever using the supplied action picker (single env)."""
     while True:
         obs, _ = env.reset()
         done = False
