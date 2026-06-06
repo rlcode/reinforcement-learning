@@ -43,7 +43,7 @@ Trained on a **Mac Studio (Apple M4 Max, 64 GB)** — different hardware from th
 
 | Algorithm  | Params | Train time | Final mean (per-game) | Frames          | W&B |
 |------------|--------|------------|-----------------------|-----------------|-----|
-| PPO + RND  | 3.90M  | ~3.4h      | ~3120 (single seed)   | 65M agent steps | [report](https://wandb.ai/rlcode/rl-atari-hard-ppo-rnd) |
+| PPO + RND  | 3.90M  | ~3.4h      | ~3120 (single seed)   | 65M agent steps | [report](https://api.wandb.ai/links/rlcode/3j0nfk9s) |
 
 > Random Network Distillation (Burda et al. 2018) for hard exploration. With 512 envs the first key is found reliably (~327k steps) and the extrinsic value bootstraps around 10M steps; with 128 envs the same code never scored in 50M steps — parallel breadth is what cracks the first-key bottleneck. Stopped at ~65M agent steps after the score plateaued **above the paper's PPO baseline (2497)**; not run to a fixed budget. Still far below RND's headline 8152, which used 128–1024 envs × 1.97B frames (~30× more experience). `Params` = trainable weights (actor-critic 1.69M + RND predictor 2.20M; the frozen RND target adds 1.68M). Single seed, so no ± std — a 3-seed run is the next step for a defensible number.
 
