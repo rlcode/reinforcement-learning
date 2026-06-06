@@ -28,13 +28,30 @@ states drop to near zero. Five things make RND actually work:
 
 Combined advantage: A = ext_coef * A_ext + int_coef * A_int.
 """
+import json
+import os
+import random
+import statistics
+import time
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 from env import make_vec_env, parse_args, pick_device
-import run_io
+
+
+def seed_all(seed):
+    random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
+
+
+def atomic_save(state, path):
+    """tmp -> rename so a mid-write crash never corrupts the checkpoint."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.tmp"
+    torch.save(state, tmp)
+    os.replace(tmp, path)
 
 
 SAVE_PATH = "atari_ppo_rnd.pt"
@@ -192,13 +209,13 @@ def warmup_obs_rms(envs, obs_rms, n_steps):
 
 if __name__ == "__main__":
     args = parse_args()
-    # 하네스 구동 오버라이드 (없으면 in-file 상수 유지)
+    # CLI overrides for the in-file constants (omit to keep defaults)
     if args.n_envs:
         N_ENVS = args.n_envs
     if args.total_frames:
         TOTAL_FRAMES = args.total_frames
     if args.seed is not None:
-        run_io.seed_all(args.seed)
+        seed_all(args.seed)
     device = pick_device(args.device)
     envs = make_vec_env(args, N_ENVS, seed=args.seed or 0)
     n_actions = envs.action_space.n
@@ -216,7 +233,15 @@ if __name__ == "__main__":
         lr=LR, eps=1e-5,
     )
 
-    writer = run_io.RunWriter(args.run_dir, ckpt_every=args.ckpt_every)
+    # 산출물: run-dir에 metrics.jsonl(구조화 로그) + ckpt/(주기·마일스톤·best) + final.json.
+    # --run-dir 없으면 전부 생략 — 스크립트는 그대로 standalone 동작.
+    run_dir = args.run_dir
+    ckpt_dir = os.path.join(run_dir, "ckpt") if run_dir else None
+    if ckpt_dir:
+        os.makedirs(ckpt_dir, exist_ok=True)
+    metrics_f = open(os.path.join(run_dir, "metrics.jsonl"), "a", buffering=1) if run_dir else None
+    log_t0, log_last_frames = time.time(), 0
+    ckpt_last, milestone_last, best_gate = 0, 0, float("-inf")
     start_update = 0  # resume이 갱신
 
     if args.wandb:
@@ -259,7 +284,12 @@ if __name__ == "__main__":
         }
 
     # --- resume (정규화기·optimizer·update 카운터 복원) ---
-    resume_path = run_io.resolve_resume(args.resume, args.run_dir)
+    resume_path = None
+    if args.resume == "auto" and ckpt_dir:
+        cand = os.path.join(ckpt_dir, "latest.pt")
+        resume_path = cand if os.path.exists(cand) else None
+    elif args.resume and args.resume != "auto":
+        resume_path = args.resume if os.path.exists(args.resume) else None
     if resume_path:
         ckpt = torch.load(resume_path, map_location=device, weights_only=False)
         model.load_state_dict(ckpt["actor_critic"])
@@ -421,24 +451,32 @@ if __name__ == "__main__":
                   f"recent_mean_return: {recent:.1f}  episodes: {len(ep_returns)}  "
                   f"int_reward_mean: {rew_int_buf.mean():.3f}  lr: {lr_now:.2e}")
 
-        # --- 하네스 계약: metrics.jsonl (watch.py 트립와이어 소비) + 주기 체크포인트 ---
+        # --- 구조화 로그 (metrics.jsonl, 한 줄=한 업데이트) + 주기/마일스톤/best 체크포인트 ---
         loss_mean = (pl_sum + vl_sum + rnd_sum) / max(n_mb, 1)
-        writer.log(global_step, {
-            "game_return_mean_lastK": float(np.mean(ep_returns[-100:])) if ep_returns else 0.0,
-            "ep_return_mean": float(np.mean(ep_returns[-20:])) if ep_returns else 0.0,
-            "game_return_count": len(ep_returns),
-            "entropy": ent_sum / max(n_mb, 1),
-            "approx_kl": kl_sum / max(n_mb, 1),
-            "policy_loss": pl_sum / max(n_mb, 1),
-            "value_loss": vl_sum / max(n_mb, 1),
-            "predictor_loss": rnd_sum / max(n_mb, 1),
-            "int_rew_mean": float(rew_int_buf.mean()),
-            "int_rew_std": float(rew_int_buf.std()),
-            "lr": lr_now,
-            "nan_flag": int(not np.isfinite(loss_mean)),
-        })
-        writer.maybe_ckpt(global_step, _state_fn,
-                          gate_metric=float(np.mean(ep_returns[-100:])) if ep_returns else None)
+        gate = float(np.mean(ep_returns[-100:])) if ep_returns else None
+        if metrics_f:
+            now = time.time()
+            sps = (global_step - log_last_frames) / max(now - log_t0, 1e-9)
+            metrics_f.write(json.dumps({
+                "ts": round(now, 1), "frames": global_step, "sps": round(sps, 1),
+                "game_return_mean_lastK": gate if gate is not None else 0.0,
+                "ep_return_mean": float(np.mean(ep_returns[-20:])) if ep_returns else 0.0,
+                "game_return_count": len(ep_returns),
+                "entropy": ent_sum / max(n_mb, 1), "approx_kl": kl_sum / max(n_mb, 1),
+                "policy_loss": pl_sum / max(n_mb, 1), "value_loss": vl_sum / max(n_mb, 1),
+                "predictor_loss": rnd_sum / max(n_mb, 1),
+                "int_rew_mean": float(rew_int_buf.mean()), "int_rew_std": float(rew_int_buf.std()),
+                "lr": lr_now, "nan_flag": int(not np.isfinite(loss_mean)),
+            }) + "\n")
+            log_t0, log_last_frames = now, global_step
+        if ckpt_dir and args.ckpt_every:
+            if global_step - ckpt_last >= args.ckpt_every:
+                atomic_save(_state_fn(), os.path.join(ckpt_dir, "latest.pt")); ckpt_last = global_step
+            if global_step - milestone_last >= 5_000_000:
+                atomic_save(_state_fn(), os.path.join(ckpt_dir, f"step_{global_step // 1_000_000}M.pt"))
+                milestone_last = global_step
+            if gate is not None and gate > best_gate:
+                best_gate = gate; atomic_save(_state_fn(), os.path.join(ckpt_dir, "best.pt"))
         if args.wandb:
             log = {
                 "global_step": global_step,
@@ -457,9 +495,19 @@ if __name__ == "__main__":
                 log["recent_mean_return"] = float(np.mean(ep_returns[-20:]))
             wandb.log(log, step=global_step)
 
-    # 종료: 표준 체크포인트(latest) + 게이트 수치(final.json) + 기존 SAVE_PATH 호환
-    writer.save_final_ckpt(_state_fn)
-    writer.final(global_step, ep_returns, k=100)
+    # 종료: 최종 체크포인트 + 결과 요약(final.json) + 기존 SAVE_PATH 호환
+    if ckpt_dir:
+        atomic_save(_state_fn(), os.path.join(ckpt_dir, "latest.pt"))
+    if run_dir:
+        tail = [float(r) for r in ep_returns[-100:]]
+        mean = statistics.fmean(tail) if tail else float("nan")
+        std = statistics.pstdev(tail) if len(tail) > 1 else 0.0
+        with open(os.path.join(run_dir, "final.json"), "w") as f:
+            json.dump({"frames_total": global_step, "frames_unit": "agent_steps",
+                       "gate_metric": "game_return_mean_lastK", "K": 100,
+                       "value_mean": mean, "value_std": std, "episodes_counted": len(tail)}, f, indent=1)
+        if metrics_f:
+            metrics_f.close()
     torch.save({
         "actor_critic": model.state_dict(),
         "rnd_predictor": rnd_predictor.state_dict(),
