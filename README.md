@@ -33,11 +33,19 @@ Trained on a **MacBook Pro 14" (Apple M3, 8 GB unified memory)**, macOS 26.2, Py
 | Algorithm | Params | Train time | Final mean (per-game) | Peak RAM | CPU% | GPU% | W&B |
 |-----------|--------|------------|-----------------------|----------|------|------|-----|
 | DQN       | 1.69M  | ~9h        | 93.5 ± 9.6            | 5.27 GB  | ~60  | ~55  | [report](https://api.wandb.ai/links/rlcode/ljkn7ahp) |
-| PPO       | 1.69M  | ~3.5h      | _TBD_¹                | 1.98 GB  | ~62  | ~55  | [report](https://api.wandb.ai/links/rlcode/jbdsbn6t) |
+| PPO       | 1.69M  | ~3.8h      | 261.9 ± 6.4           | 1.98 GB  | ~62  | ~55  | [report](https://api.wandb.ai/links/rlcode/jbdsbn6t) |
 
 > Single seed per row, mean ± std over the final 20 logged episodes. `Params` counts only trainable network weights. `CPU%` is the single-process value reported by Activity Monitor (sum across cores, so >100% means multi-core use); `GPU%` is the same column for the Apple GPU. Sticky actions (`repeat_action_probability=0.25`) make absolute scores lower than the deterministic `*-v4` environments often cited in older papers.
->
-> ¹ Most recent PPO run predates the `LifeLossTerminalEnv` fix and reports only per-life return (final 20: 27.2 ± 3.2). Per-game number will be filled in after the next training run.
+
+### Atari — Montezuma's Revenge (hard exploration, PPO + RND)
+
+Trained on a **Mac Studio (Apple M4 Max, 64 GB)** — different hardware from the Breakout rows above. `ALE/MontezumaRevenge-v5` with sticky actions, **512 parallel environments** (envpool), single seed. Score = mean per-game return over the last 100 training episodes.
+
+| Algorithm  | Params | Train time | Final mean (per-game) | Frames          | W&B |
+|------------|--------|------------|-----------------------|-----------------|-----|
+| PPO + RND  | 3.90M  | ~3.4h      | ~3120 (single seed)   | 65M agent steps | [report](https://api.wandb.ai/links/rlcode/3j0nfk9s) |
+
+> Random Network Distillation (Burda et al. 2018) for hard exploration. With 512 envs the first key is found reliably (~327k steps) and the extrinsic value bootstraps around 10M steps; with 128 envs the same code never scored in 50M steps — parallel breadth is what cracks the first-key bottleneck. Stopped at ~65M agent steps after the score plateaued **above the paper's PPO baseline (2497)**; not run to a fixed budget. Still far below RND's headline 8152, which used 128–1024 envs × 1.97B frames (~30× more experience). `Params` = trainable weights (actor-critic 1.69M + RND predictor 2.20M; the frozen RND target adds 1.68M). Single seed, so no ± std — a 3-seed run is the next step for a defensible number.
 
 ## Setup
 

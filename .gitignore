@@ -15,3 +15,6 @@ scripts/
 
 # Local-only docs (not for github)
 docs/
+
+# Local-only collaboration principles for Claude
+CLAUDE.md
