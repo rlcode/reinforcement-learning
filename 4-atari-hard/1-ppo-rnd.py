@@ -34,6 +34,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from env import make_vec_env, parse_args, pick_device
+import run_io
 
 
 SAVE_PATH = "atari_ppo_rnd.pt"
@@ -191,8 +192,15 @@ def warmup_obs_rms(envs, obs_rms, n_steps):
 
 if __name__ == "__main__":
     args = parse_args()
+    # 하네스 구동 오버라이드 (없으면 in-file 상수 유지)
+    if args.n_envs:
+        N_ENVS = args.n_envs
+    if args.total_frames:
+        TOTAL_FRAMES = args.total_frames
+    if args.seed is not None:
+        run_io.seed_all(args.seed)
     device = pick_device(args.device)
-    envs = make_vec_env(args, N_ENVS)
+    envs = make_vec_env(args, N_ENVS, seed=args.seed or 0)
     n_actions = envs.action_space.n
     obs_shape = envs.observation_space.shape  # (4, 84, 84) — envpool single-env spec
 
@@ -207,6 +215,9 @@ if __name__ == "__main__":
         list(model.parameters()) + list(rnd_predictor.parameters()),
         lr=LR, eps=1e-5,
     )
+
+    writer = run_io.RunWriter(args.run_dir, ckpt_every=args.ckpt_every)
+    start_update = 0  # resume이 갱신
 
     if args.wandb:
         import wandb
@@ -234,7 +245,36 @@ if __name__ == "__main__":
     ep_returns = []  # extrinsic (raw, unclipped) per-game returns
     int_filter = np.zeros(N_ENVS, dtype=np.float64)  # discounted intrinsic returns for RMS
 
-    for update in range(1, n_updates + 1):
+    def _state_fn():
+        """체크포인트 상태 — 정규화기·int_filter·update까지 포함해야 resume이 거짓말 안 한다."""
+        return {
+            "actor_critic": model.state_dict(),
+            "rnd_predictor": rnd_predictor.state_dict(),
+            "rnd_target": rnd_target.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "obs_rms": {"mean": obs_rms.mean, "var": obs_rms.var, "count": obs_rms.count},
+            "int_ret_rms": {"mean": int_ret_rms.mean, "var": int_ret_rms.var, "count": int_ret_rms.count},
+            "int_filter": int_filter, "update": update,
+            "ep_returns": ep_returns[-200:],
+        }
+
+    # --- resume (정규화기·optimizer·update 카운터 복원) ---
+    resume_path = run_io.resolve_resume(args.resume, args.run_dir)
+    if resume_path:
+        ckpt = torch.load(resume_path, map_location=device, weights_only=False)
+        model.load_state_dict(ckpt["actor_critic"])
+        rnd_predictor.load_state_dict(ckpt["rnd_predictor"])
+        rnd_target.load_state_dict(ckpt["rnd_target"])
+        optimizer.load_state_dict(ckpt["optimizer"])
+        for rms, saved in [(obs_rms, ckpt["obs_rms"]), (int_ret_rms, ckpt["int_ret_rms"])]:
+            rms.mean, rms.var, rms.count = saved["mean"], saved["var"], saved["count"]
+        int_filter = ckpt["int_filter"]
+        ep_returns = list(ckpt["ep_returns"])
+        start_update = ckpt["update"]
+        print(f"resumed from {resume_path} at update {start_update}")
+
+    global_step = start_update * batch_size  # 루프가 안 돌아도 final()이 참조 가능
+    for update in range(start_update + 1, n_updates + 1):
         lr_now = LR * (1.0 - (update - 1) / n_updates)
         for g in optimizer.param_groups:
             g["lr"] = lr_now
@@ -321,7 +361,7 @@ if __name__ == "__main__":
 
         # --- PPO + RND updates ---
         idx = np.arange(batch_size)
-        pl_sum = vl_sum = ent_sum = rnd_sum = 0.0
+        pl_sum = vl_sum = ent_sum = rnd_sum = kl_sum = 0.0
         n_mb = 0
         for _ in range(EPOCHS):
             np.random.shuffle(idx)
@@ -335,7 +375,10 @@ if __name__ == "__main__":
                 mb_adv = adv_t[mb]
                 mb_adv = (mb_adv - mb_adv.mean()) / (mb_adv.std() + 1e-8)
 
-                ratio = (new_logp - old_logp_t[mb]).exp()
+                logratio = new_logp - old_logp_t[mb]
+                ratio = logratio.exp()
+                with torch.no_grad():  # 진단용 approx KL (트립와이어 — watch.py)
+                    kl_sum += ((ratio - 1) - logratio).mean().item()
                 unclipped = ratio * mb_adv
                 clipped = torch.clamp(ratio, 1 - CLIP_COEF, 1 + CLIP_COEF) * mb_adv
                 policy_loss = -torch.min(unclipped, clipped).mean()
@@ -377,6 +420,25 @@ if __name__ == "__main__":
             print(f"update: {update:>4}  frames: {global_step:>8}  "
                   f"recent_mean_return: {recent:.1f}  episodes: {len(ep_returns)}  "
                   f"int_reward_mean: {rew_int_buf.mean():.3f}  lr: {lr_now:.2e}")
+
+        # --- 하네스 계약: metrics.jsonl (watch.py 트립와이어 소비) + 주기 체크포인트 ---
+        loss_mean = (pl_sum + vl_sum + rnd_sum) / max(n_mb, 1)
+        writer.log(global_step, {
+            "game_return_mean_lastK": float(np.mean(ep_returns[-100:])) if ep_returns else 0.0,
+            "ep_return_mean": float(np.mean(ep_returns[-20:])) if ep_returns else 0.0,
+            "game_return_count": len(ep_returns),
+            "entropy": ent_sum / max(n_mb, 1),
+            "approx_kl": kl_sum / max(n_mb, 1),
+            "policy_loss": pl_sum / max(n_mb, 1),
+            "value_loss": vl_sum / max(n_mb, 1),
+            "predictor_loss": rnd_sum / max(n_mb, 1),
+            "int_rew_mean": float(rew_int_buf.mean()),
+            "int_rew_std": float(rew_int_buf.std()),
+            "lr": lr_now,
+            "nan_flag": int(not np.isfinite(loss_mean)),
+        })
+        writer.maybe_ckpt(global_step, _state_fn,
+                          gate_metric=float(np.mean(ep_returns[-100:])) if ep_returns else None)
         if args.wandb:
             log = {
                 "global_step": global_step,
@@ -395,6 +457,9 @@ if __name__ == "__main__":
                 log["recent_mean_return"] = float(np.mean(ep_returns[-20:]))
             wandb.log(log, step=global_step)
 
+    # 종료: 표준 체크포인트(latest) + 게이트 수치(final.json) + 기존 SAVE_PATH 호환
+    writer.save_final_ckpt(_state_fn)
+    writer.final(global_step, ep_returns, k=100)
     torch.save({
         "actor_critic": model.state_dict(),
         "rnd_predictor": rnd_predictor.state_dict(),

@@ -60,6 +60,19 @@ def parse_args():
                    help="override the auto-selected torch device")
     p.add_argument("--wandb", action="store_true",
                    help="log metrics to Weights & Biases")
+    # --- 하네스 구동 플래그 (전부 선택 — 없으면 standalone 동작 그대로) ---
+    p.add_argument("--seed", type=int, default=None,
+                   help="reproducibility seed (np/torch/envpool)")
+    p.add_argument("--total-frames", type=int, default=None,
+                   help="override the in-file TOTAL_FRAMES budget (agent steps)")
+    p.add_argument("--n-envs", type=int, default=None,
+                   help="override the in-file N_ENVS (e.g. smaller for a smoke run)")
+    p.add_argument("--run-dir", type=str, default=None,
+                   help="harness run directory: write metrics.jsonl / ckpt / final.json here")
+    p.add_argument("--ckpt-every", type=int, default=None,
+                   help="periodic checkpoint interval in agent steps (resume-safe)")
+    p.add_argument("--resume", type=str, default=None,
+                   help="'auto' (run-dir/ckpt/latest.pt) or a checkpoint path")
     return p.parse_args()
 
 
