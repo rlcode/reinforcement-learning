@@ -96,12 +96,13 @@ class ExperienceLog:
     <dir>/chunk_NNNNN.npz (compressed — rewards/dones are almost all zero).
     With dir=None (probes/tests) full chunks stay in RAM instead."""
 
-    def __init__(self, log_dir, chunk_size=EXPLOG_CHUNK):
+    def __init__(self, log_dir, chunk_size=EXPLOG_CHUNK, ancestor_dir=None):
         self.dir = log_dir
         if log_dir:
             os.makedirs(log_dir, exist_ok=True)
         self.chunk_size = chunk_size
-        self.count = 0
+        self.ancestor = ancestor_dir   # explog dir of the run we resumed FROM:
+        self.count = 0                 # chunks flushed before the resume live there
         self.n_flushed = 0
         self._ram_chunks = []          # dir=None mode only
         self._cache = {}               # chunk_idx -> loaded arrays (reconstruction)
@@ -137,12 +138,25 @@ class ExperienceLog:
         self.n_flushed += 1
         self._new_chunk()
 
+    def _chunk_path(self, chunk_idx):
+        """A flushed chunk lives in our own dir, or (after a cross-run-dir
+        resume) in the ancestor run's explog dir."""
+        own = os.path.join(self.dir, f"chunk_{chunk_idx:05d}.npz")
+        if os.path.exists(own):
+            return own
+        if self.ancestor:
+            anc = os.path.join(self.ancestor, f"chunk_{chunk_idx:05d}.npz")
+            if os.path.exists(anc):
+                return anc
+        raise RuntimeError(f"explog chunk {chunk_idx} not found in {self.dir}"
+                           + (f" or {self.ancestor}" if self.ancestor else ""))
+
     def _chunk(self, chunk_idx):
         if chunk_idx == self.n_flushed:
             return {"prev": self.prev, "act": self.act}
         if self.dir:
             if chunk_idx not in self._cache:
-                z = np.load(os.path.join(self.dir, f"chunk_{chunk_idx:05d}.npz"))
+                z = np.load(self._chunk_path(chunk_idx))
                 self._cache[chunk_idx] = {"prev": z["prev"], "act": z["act"]}
             return self._cache[chunk_idx]
         return self._ram_chunks[chunk_idx]
@@ -167,11 +181,10 @@ class ExperienceLog:
 
     def load_state(self, st):
         assert st["chunk_size"] == self.chunk_size, "explog chunk_size mismatch"
-        if self.dir:  # flushed chunks must actually exist on disk
+        if self.dir:  # flushed chunks must be reachable (own dir or ancestor's)
+            self.n_flushed = st["n_flushed"]
             for i in range(st["n_flushed"]):
-                path = os.path.join(self.dir, f"chunk_{i:05d}.npz")
-                if not os.path.exists(path):
-                    raise RuntimeError(f"explog chunk missing for resume: {path}")
+                self._chunk_path(i)  # raises loudly if a chunk is missing
         self.count, self.n_flushed = st["count"], st["n_flushed"]
         self._new_chunk()
         n = len(st["cur_prev"])
@@ -336,7 +349,12 @@ if __name__ == "__main__":
 
     logger = RunLogger(args.run_dir, args.ckpt_every)
     explog_dir = os.path.join(args.run_dir, "explog") if args.run_dir else None
-    explog = ExperienceLog(explog_dir)
+    # cross-run-dir resume: flushed explog chunks live next to the checkpoint
+    # we resume from (the harness relaunches into a fresh run dir)
+    resume_path = logger.resolve_resume(args.resume)
+    ancestor = (os.path.join(os.path.dirname(os.path.dirname(resume_path)), "explog")
+                if resume_path else None)
+    explog = ExperienceLog(explog_dir, ancestor_dir=ancestor)
     archive = Archive()
     frames = 0
     batch = 0
@@ -347,7 +365,6 @@ if __name__ == "__main__":
                 "rng": rng.bit_generator.state}
 
     # --- resume or seed the root cell ---
-    resume_path = logger.resolve_resume(args.resume)
     if resume_path:
         import torch
         ckpt = torch.load(resume_path, map_location="cpu", weights_only=False)
