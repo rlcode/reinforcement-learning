@@ -1,9 +1,11 @@
 """Go-Explore env setup (restore-based exploration on raw gymnasium ALE).
 
-Unlike the other Atari folders this one does NOT use envpool: Go-Explore's
-exploration phase needs the emulator's save/restore API (ale.cloneState /
-restoreState), which envpool does not expose. Each (worker) process owns a
-single raw ALE env built by `make_restore_env`.
+Separate plumbing from this folder's `env.py` (the PPO/RND envpool stack):
+Go-Explore's exploration phase needs the emulator's save/restore API
+(ale.cloneState / restoreState), which envpool does not expose. Each
+(worker) process owns a single raw ALE env built by `make_restore_env`.
+The harness binds promotion markers to the script PLUS the sibling modules
+it actually imports, so 2-go-explore.py is hashed with THIS file, not env.py.
 
 Protocol (Ecoffet et al. 2019/2021, exploration phase): fully deterministic —
 frameskip 4, NO sticky actions, no no-ops, seed 0. Stochasticity only enters

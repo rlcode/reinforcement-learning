@@ -51,7 +51,7 @@ import time
 import cv2
 import numpy as np
 
-from env import ENV_IDS, RunLogger, make_restore_env, parse_args
+from env_go_explore import ENV_IDS, RunLogger, make_restore_env, parse_args
 
 
 TOTAL_FRAMES = 5_000_000       # agent steps executed (override with --total-frames)
