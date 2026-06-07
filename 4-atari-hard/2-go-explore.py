@@ -215,7 +215,15 @@ class Archive:
         return max(c.score for k, c in self.cells.items() if k != DONE_KEY)
 
     def sample(self, n, rng):
-        """n cells with replacement, p ∝ 1/sqrt(seen+1); DONE excluded."""
+        """n cells with replacement, p ∝ 1/sqrt(seen+1); DONE excluded.
+
+        Returns (key, CAPTURE) pairs that freeze the cell's snapshot/score/
+        trajectory AT SAMPLING TIME. The trajectory walk must use the capture,
+        never the live cell: an earlier result in the same batch may replace
+        the cell, and stitching actions executed from the OLD state onto the
+        NEW prefix fabricates scores no single playthrough achieved
+        (2026-06-08 incident — caught by publish-time replay verification;
+        the official code ships these values inside the task for this reason)."""
         keys = [k for k in self.cells if k != DONE_KEY]
         w = np.array([1.0 / np.sqrt(self.cells[k].seen + 1.0) for k in keys])
         csum = np.cumsum(w)
@@ -225,17 +233,18 @@ class Archive:
             c = self.cells[k]
             c.chosen += 1
             c.chosen_since_new += 1
-            picks.append((k, c))
+            picks.append((k, {"snapshot": c.snapshot, "lives": c.lives, "score": c.score,
+                              "traj_len": c.traj_len, "traj_last": c.traj_last}))
         return picks
 
-    def update_from_trajectory(self, chosen_key, res, explog):
+    def update_from_trajectory(self, chosen_key, capture, res, explog):
         """Walk one exploration episode (master-side, serial): append to the
-        experience log, accumulate raw score from the chosen cell's stored
-        score, and apply the accept rule (design note 4)."""
-        chosen = self.cells[chosen_key]
-        cur_score = chosen.score
-        cur_len = chosen.traj_len
-        prev_id = chosen.traj_last
+        experience log, accumulate raw score from the SAMPLING-TIME capture
+        (never the live cell — see sample()), apply the accept rule (note 4)."""
+        chosen = self.cells.get(chosen_key)
+        cur_score = capture["score"]
+        cur_len = capture["traj_len"]
+        prev_id = capture["traj_last"]
         found_new = False
         seen_this_episode = set()
 
@@ -267,7 +276,7 @@ class Archive:
                 self.done_scores.append(cur_score)
                 break
 
-        if found_new:
+        if found_new and chosen is not None:
             chosen.chosen_since_new = 0
         self.rooms.update(res["rooms"])
 
@@ -388,12 +397,12 @@ if __name__ == "__main__":
     t_start = time.time()
     with ctx.Pool(N_WORKERS, initializer=_worker_init, initargs=(args.env,)) as pool:
         while frames < TOTAL_FRAMES:
-            picks = archive.sample(BATCH_CELLS, rng)
-            tasks = [(c.snapshot, c.lives, EXPLORE_STEPS, int(rng.integers(2 ** 31)))
-                     for _, c in picks]
+            picks = archive.sample(BATCH_CELLS, rng)  # (key, sampling-time capture)
+            tasks = [(cap["snapshot"], cap["lives"], EXPLORE_STEPS, int(rng.integers(2 ** 31)))
+                     for _, cap in picks]
             results = pool.map(_explore_task, tasks, chunksize=2)  # ordered -> deterministic
-            for (key, _), res in zip(picks, results):
-                archive.update_from_trajectory(key, res, explog)
+            for (key, cap), res in zip(picks, results):
+                archive.update_from_trajectory(key, cap, res, explog)
                 frames += res["n_steps"]
             batch += 1
 
