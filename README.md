@@ -47,6 +47,17 @@ Trained on a **Mac Studio (Apple M4 Max, 64 GB)** — different hardware from th
 
 > Random Network Distillation (Burda et al. 2018) for hard exploration. With 512 envs the first key is found reliably (~327k steps) and the extrinsic value bootstraps around 10M steps; with 128 envs the same code never scored in 50M steps — parallel breadth is what cracks the first-key bottleneck. Stopped at ~65M agent steps after the score plateaued **above the paper's PPO baseline (2497)**; not run to a fixed budget. Still far below RND's headline 8152, which used 128–1024 envs × 1.97B frames (~30× more experience). `Params` = trainable weights (actor-critic 1.69M + RND predictor 2.20M; the frozen RND target adds 1.68M). Single seed, so no ± std — a 3-seed run is the next step for a defensible number.
 
+
+### Atari — Montezuma's Revenge (Go-Explore, exploration phase)
+
+Same hardware as the PPO + RND row above (Mac Studio, M4 Max, 64 GB). `ALE/MontezumaRevenge-v5` under the **deterministic protocol** (no sticky actions, frameskip 4, fixed seed) that restore-based exploration requires — these numbers are **not comparable** to the sticky-action RL rows above. 12 parallel explorer processes, no neural network.
+
+| Algorithm | Params | Train time | Best end-of-episode score | Frames | W&B |
+|-----------|--------|------------|---------------------------|--------|-----|
+| Go-Explore (exploration phase) | — (no NN) | ~5.5h | 31,000 (single seed) | 500M agent steps | [run](https://wandb.ai/rlcode/rl-atari-hard-go-explore/runs/m6ox4l3m) |
+
+> Go-Explore phase 1 (Ecoffet et al. 2019 / Nature 2021): an archive of downscaled-frame cells (11×8 pixels, 9 gray levels — no domain knowledge), emulator state save/restore to *return* to frontier cells, and repeated random actions to explore from them. The score is the best **end-of-episode** trajectory found by deterministic search, and it is **replay-verified**: re-executing the stored 5,336-action sequence from reset reproduces exactly 31,000. It is a trajectory-search result, **not an RL policy score** — the paper's robustification phase (distilling demos into a policy under sticky actions) is not run here. For reference, the Nature exploration-phase mean without domain knowledge is 24,758 at the same 2 B-frame budget (50+ seeds vs our single seed). Rooms found: 24.
+
 ## Setup
 
 Requires Python 3.11 and [uv](https://docs.astral.sh/uv/).
