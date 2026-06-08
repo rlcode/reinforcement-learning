@@ -168,9 +168,15 @@ def main():
     update = 0
 
     def _state():
+        # RNG: global numpy + CPU torch + per-env numpy Generators (sticky / start-point
+        # sampling streams). Restored on resume so the kill→resume contract is faithful
+        # for the deterministic streams (preflight S2). MPS policy-sampling has no bit
+        # determinism (mps-pitfalls) — these cover what is reproducible.
         return {"net": net.state_dict(), "opt": opt.state_dict(), "frames": frames,
                 "update": update, "max_starting_point": mgr.max_starting_point,
-                "success": mgr.success, "rng": np.random.get_state()}
+                "success": mgr.success, "rng": np.random.get_state(),
+                "torch_rng": torch.get_rng_state(),
+                "env_rng": [e.rng.bit_generator.state for e in envs]}
 
     resume_path = logger.resolve_resume(args.resume) if args.run_dir else None
     if resume_path:
@@ -179,6 +185,10 @@ def main():
         frames, update = ck["frames"], ck["update"]
         mgr.max_starting_point = ck["max_starting_point"]; mgr.success = ck["success"]
         np.random.set_state(ck["rng"]); mgr.assign(envs)
+        if ck.get("torch_rng") is not None:
+            torch.set_rng_state(ck["torch_rng"].cpu() if hasattr(ck["torch_rng"], "cpu") else ck["torch_rng"])
+        for e, st in zip(envs, ck.get("env_rng", [])):
+            e.rng.bit_generator.state = st
         print(f"resumed @ frames {frames} max_start {mgr.max_starting_point}", flush=True)
 
     n_updates = TOTAL_FRAMES // (ROLLOUT * N_ENVS)
@@ -323,6 +333,17 @@ def evaluate(net, demo, device, n_episodes, n_actions, seed):
     e = ReplayResetEnv(demo, seed=seed + 99, sticky=STICKY, noop_max=30)
     e.starting_point = 0  # always from reset
     e.frac_sample = 0.0
+    # Eval must honor targets montezuma_goexplore_robust.protocol.termination=game_over:
+    # turn OFF the training-curriculum kills so a from-reset episode runs to a real
+    # game_over, not a ~allowed_lag-step lag-kill window. Otherwise value_mean reports a
+    # key-but-slower-than-demo policy as ~0 and the canary's first-key/retreat signal is
+    # destroyed (preflight S1). lag-kill needs t>allowed_lag & t<n -> allowed_lag=n makes
+    # it unreachable; success-kill needs score>=total_return-deficit -> huge -deficit off.
+    e.allowed_lag = e.n
+    e.allowed_score_deficit = -1e18
+    e.max_steps = 4500  # standard Montezuma eval cap = 18000 frames / frameskip 4
+    #                     (atari-ale-protocol; same as RND montezuma episode_cap). Bounds
+    #                     a passive policy that would otherwise never reach game_over.
     scores = []
     for _ in range(n_episodes):
         frame = e.reset()
