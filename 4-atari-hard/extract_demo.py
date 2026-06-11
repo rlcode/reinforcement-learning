@@ -51,6 +51,10 @@ def main():
     p.add_argument("--out", required=True, help="output demo.pkl path")
     p.add_argument("--ckpt-every", type=int, default=512,
                    help="snapshot an ALE restore point every N actions")
+    p.add_argument("--max-rewards", type=int, default=0,
+                   help="truncate just after the Kth nonzero reward instead of the last "
+                        "(0 = last, default). Use 1 for a first-key-only easy demo — a much "
+                        "shorter horizon for robustification to bootstrap on.")
     args = p.parse_args()
 
     ge = _load_ge()
@@ -98,8 +102,12 @@ def main():
         sys.exit(f"[extract] REPLAY MISMATCH {score} != {archived_score} — "
                  f"demo is not replayable, refusing to write")
 
-    # truncate just after the last reward (papers: start right before a reward;
-    # nothing after the final reward helps robustification)
+    # truncate just after a reward (papers: start right before a reward; nothing
+    # after it helps robustification). --max-rewards K cuts after the Kth reward
+    # for a shorter, easier-to-bootstrap demo; default cuts after the last.
+    reward_idxs = [i for i, r in enumerate(rewards) if r != 0.0]
+    if args.max_rewards > 0 and len(reward_idxs) >= args.max_rewards:
+        last_reward_idx = reward_idxs[args.max_rewards - 1]
     cut = last_reward_idx + 1
     actions, rewards = actions[:cut], rewards[:cut]
     checkpoints = [c for c, n in zip(checkpoints, ckpt_nr) if n < cut]
