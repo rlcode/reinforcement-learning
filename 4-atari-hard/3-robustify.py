@@ -137,6 +137,10 @@ def main():
     # stretch flags (off by default — see SPEC)
     p.add_argument("--sil", action="store_true")
     p.add_argument("--autoscale", action="store_true")
+    p.add_argument("--ent-coef", type=float, default=ENT_COEF,
+                   help="entropy bonus coefficient (default keeps the module constant). "
+                        "Raise to fight a competence plateau where the policy commits before "
+                        "mastering the demo suffix under sticky actions.")
     args = p.parse_args()
     global TOTAL_FRAMES, N_ENVS
     if args.total_frames:
@@ -149,7 +153,7 @@ def main():
     device = pick_device(args.device)
     demo = load_demo(args.demo)
     print(f"device {device}  demo {len(demo['actions'])} actions score {demo['score']:.0f}  "
-          f"n_envs {N_ENVS}  total_frames {TOTAL_FRAMES:,}", flush=True)
+          f"n_envs {N_ENVS}  total_frames {TOTAL_FRAMES:,}  ent_coef {args.ent_coef:g}", flush=True)
 
     envs = [ReplayResetEnv(demo, seed=args.seed * 1000 + i, sticky=STICKY) for i in range(N_ENVS)]
     mgr = ResetManager(demo, N_ENVS, move_threshold=MOVE_THRESHOLD)
@@ -289,7 +293,7 @@ def main():
                 policy_loss = (pg * m).sum() / msum
                 value_loss = (vloss * m).sum() / msum
                 entropy = (ent * m).sum() / msum
-                loss = policy_loss + VF_COEF * value_loss - ENT_COEF * entropy
+                loss = policy_loss + VF_COEF * value_loss - args.ent_coef * entropy
                 opt.zero_grad(); loss.backward()
                 nn.utils.clip_grad_norm_(net.parameters(), MAX_GRAD_NORM)
                 opt.step()
