@@ -37,24 +37,17 @@ Trained on a **MacBook Pro 14" (Apple M3, 8 GB unified memory)**, macOS 26.2, Py
 
 > Single seed per row, mean ± std over the final 20 logged episodes. `Params` counts only trainable network weights. `CPU%` is the single-process value reported by Activity Monitor (sum across cores, so >100% means multi-core use); `GPU%` is the same column for the Apple GPU. Sticky actions (`repeat_action_probability=0.25`) make absolute scores lower than the deterministic `*-v4` environments often cited in older papers.
 
-### Atari — Montezuma's Revenge (hard exploration, PPO + RND)
+### Atari — Montezuma's Revenge
 
-Trained on a **Mac Studio (Apple M4 Max, 64 GB)** — different hardware from the Breakout rows above. `ALE/MontezumaRevenge-v5` with sticky actions, **512 parallel environments** (envpool), single seed. Score = mean per-game return over the last 100 training episodes.
+Mac Studio (Apple M4 Max, 64 GB), `ALE/MontezumaRevenge-v5`, single seed. **Two protocols, not cross-comparable:** sticky-action RL vs deterministic restore-based search.
 
-| Algorithm  | Params | Train time | Final mean (per-game) | Frames          | W&B |
-|------------|--------|------------|-----------------------|-----------------|-----|
-| PPO + RND  | 3.90M  | ~3.4h      | ~3120 (single seed)   | 65M agent steps | [report](https://api.wandb.ai/links/rlcode/3j0nfk9s) |
+| Method | Protocol | Score (single seed) | Frames | Link |
+|--------|----------|---------------------|--------|------|
+| PPO + RND ([`1-ppo-rnd.py`](./4-atari-hard/1-ppo-rnd.py)) | sticky, RL policy | ~3,120 | 65M | [report](https://api.wandb.ai/links/rlcode/3j0nfk9s) |
+| Go-Explore — exploration ([`2-go-explore.py`](./4-atari-hard/2-go-explore.py)) | deterministic search | 31,000 (replay-verified) | 500M | [run](https://wandb.ai/rlcode/rl-atari-hard-go-explore/runs/m6ox4l3m) |
+| Go-Explore — robustification ([`3-robustify.py`](./4-atari-hard/3-robustify.py)) | sticky, RL policy | — (no from-reset score) | 5M | — |
 
-> Random Network Distillation (Burda et al. 2018) for hard exploration. With 512 envs the first key is found reliably (~327k steps) and the extrinsic value bootstraps around 10M steps; with 128 envs the same code never scored in 50M steps — parallel breadth is what cracks the first-key bottleneck. Stopped at ~65M agent steps after the score plateaued **above the paper's PPO baseline (2497)**; not run to a fixed budget. Still far below RND's headline 8152, which used 128–1024 envs × 1.97B frames (~30× more experience). `Params` = trainable weights (actor-critic 1.69M + RND predictor 2.20M; the frozen RND target adds 1.68M). Single seed, so no ± std — a 3-seed run is the next step for a defensible number.
-
-### Atari — Montezuma's Revenge (Go-Explore robustification — a single-machine negative result)
-
-Go-Explore's exploration phase ([`2-go-explore.py`](./4-atari-hard/2-go-explore.py)) finds a high-scoring **deterministic** demo by restoring to archived cells (a trajectory-search score, not an RL-policy score). Robustification ([`3-robustify.py`](./4-atari-hard/3-robustify.py)) is the second phase: distil that demo into a recurrent policy that plays under **sticky actions** via the backward algorithm (Salimans & Chen 2018; Ecoffet et al. 2021) — episodes restore to a point along the demo and the start point marches backward as the policy succeeds, until it plays the whole game from reset.
-
-We report this honestly as a **negative result on a single machine.** Two findings, single seed throughout:
-
-- **Bootstrap works.** With the full ~5,300-action demo and 16 envs the curriculum never moves (entropy collapses). Truncating the demo to the **first key only** (~250 actions) and scaling to **128 envs** makes the curriculum retreat immediately (`as_good_as_demo` reaches 1.0). Short horizon + parallel breadth is the recipe.
-- **But it plateaus.** The start point retreats only ~22% of the way before stalling — the policy masters the last ~55 actions but not the earlier platforming under sticky actions. The wall is unchanged by 10× more frames (5M) or 100× more entropy bonus, so it is a scale ceiling, not a tuning miss. **No from-reset score** (the policy never reaches reset), so there is no benchmark row to cite. The original backward-algorithm results used hundreds–thousands of parallel envs; one Mac is not enough to close the gap here.
+> **RND** (Burda et al. 2018): first key ~327k steps with 512 envs (128 never scored in 50M — parallel breadth is the lever); plateaued above the PPO baseline 2497, below RND's 8152 (~30× more experience). **Exploration** (Ecoffet et al. 2019/2021): best end-of-episode trajectory from a knowledge-free cell archive, no NN — a search result, not an RL score (Nature ref 24,758). **Robustification** (backward algorithm, Salimans & Chen 2018): bootstraps with a first-key demo + 128 envs but the curriculum plateaus ~22% on one machine — no from-reset score, a scale ceiling vs the original hundreds–thousands of envs.
 
 ## Setup
 
